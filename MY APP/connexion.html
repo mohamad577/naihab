@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Connexion</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a0b5a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header-title {
+            margin-top: 70px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 0;
+            color: #ffcc00;
+        }
+
+        .input-group {
+            width: 85%;
+            max-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .field-box {
+            position: relative;
+            width: 100%;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 20px;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #ffcc00;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 18px;
+            border-radius: 30px;
+            border: none;
+            background-color: #ffcc00;
+            color: #1a0b5a;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .link-text {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #ffcc00;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            position: absolute;
+            bottom: 40px;
+            width: 85%;
+            max-width: 350px;
+            padding: 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: transparent;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-title">
+        <h1>Bon retour !</h1>
+    </div>
+
+    <div class="input-group">
+        <div class="field-box">
+            <input type="text" placeholder="Pseudo ou Numéro">
+        </div>
+        
+        <div class="field-box">
+            <input type="password" placeholder="Mot de passe">
+        </div>
+
+        <button class="btn-main" onclick="window.location.href='chats.html'">SE CONNECTER</button>
+    </div>
+
+    <div class="link-text" onclick="window.location.href='recuperation.html'">Mot de passe oublié ?</div>
+
+    <button class="btn-secondary" onclick="window.location.href='inscription.html'">Créer un compte</button>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Aide & Support</title>
+    <style>
+        body { 
+            margin: 0; 
+            background-color: #1a0b5a; 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header { 
+            padding: 20px; 
+            background: rgba(0,0,0,0.2); 
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Le fameux bouton retour intelligent */
+        .back-btn { 
+            cursor: pointer; 
+            color: #ffcc00; 
+            font-size: 24px; 
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .content { 
+            padding: 30px 20px; 
+            text-align: center; 
+            flex-grow: 1;
+        }
+
+        .icon-help {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+
+        h3 { font-size: 22px; margin-bottom: 10px; }
+        p { opacity: 0.7; line-height: 1.6; margin-bottom: 30px; }
+
+        .contact-box { 
+            background: #ffcc00; 
+            color: #1a0b5a; 
+            padding: 20px; 
+            border-radius: 20px; 
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: 0.2s;
+        }
+
+        .contact-box:active { transform: scale(0.95); }
+
+        .faq-section {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .faq-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            border-left: 3px solid #ffcc00;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">⬅️</button>
+        <span style="font-weight: bold;">Centre d'assistance</span>
+    </div>
+
+    <div class="content">
+        <div class="icon-help">🤝</div>
+        
+        <h3 id="user-greeting">Besoin d'aide ?</h3>
+        
+        <p>Un bug ? Une question sur ton compte ? Notre équipe est là pour t'aider à profiter de l'expérience Naïhab.</p>
+        
+        <div class="contact-box" onclick="contacterSupport()">
+            CONTACTER LE SUPPORT
+        </div>
+
+        <div class="faq-section">
+            <span style="color: #ffcc00; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Questions fréquentes</span>
+            <div class="faq-item">Comment sécuriser mon compte ?</div>
+            <div class="faq-item">Pourquoi mon profil n'est pas vérifié ?</div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'parametres.html';
+            }
+        }
+
+        // ✅ Clé corrigée : user_name au lieu de nom_utilisateur
+        const savedName = localStorage.getItem('user_name') || 'Naïfan';
+        document.getElementById('user-greeting').innerText = `Besoin d'aide, ${savedName} ?`;
+
+        // ✅ Bouton support — ouvre un email
+        function contacterSupport() {
+            const email = localStorage.getItem('user_email') || '';
+            window.location.href = `mailto:support@naihab.com?subject=Aide Naïhab&body=Bonjour, je m'appelle ${savedName} et j'ai besoin d'aide.`;
+        }
+    </script>
+
+</body>
+</html>

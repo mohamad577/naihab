@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Vidéos</title>
+    <style>
+        :root {
+            --gold: #ffcc00;
+            --heart: #ff4757;
+            --bg-nav: rgba(13, 18, 74, 0.95);
+        }
+
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            background: #000; overflow: hidden; 
+            font-family: 'Segoe UI', sans-serif; 
+        }
+        
+        /* Container avec Scroll Snap (Style TikTok) */
+        .video-container { 
+            height: 100vh; 
+            scroll-snap-type: y mandatory; 
+            overflow-y: scroll; 
+            width: 100%; 
+            scrollbar-width: none; 
+        }
+        .video-container::-webkit-scrollbar { display: none; } 
+
+        .video-card { 
+            height: 100vh; 
+            width: 100%; 
+            scroll-snap-align: start; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: #000;
+        }
+
+        video { 
+            height: 100%; 
+            width: 100%; 
+            object-fit: cover; 
+        }
+
+        .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .actions { 
+            position: absolute; 
+            right: 12px; 
+            bottom: 100px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            align-items: center; 
+            z-index: 10; 
+        }
+
+        .action-btn { 
+            text-align: center; 
+            color: white; 
+            cursor: pointer; 
+        }
+        
+        .icon-bg {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 5px;
+            transition: 0.3s;
+        }
+
+        .action-btn p { font-size: 12px; margin: 0; font-weight: bold; }
+
+        .crown-active { 
+            background: rgba(255, 204, 0, 0.3) !important;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+
+        .video-info { 
+            position: absolute; 
+            bottom: 100px; 
+            left: 15px; 
+            color: white; 
+            z-index: 10; 
+        }
+        
+        .user-name { 
+            font-weight: 800; 
+            font-size: 18px; 
+            color: var(--gold); 
+            margin-bottom: 5px;
+        }
+        
+        .description { 
+            font-size: 14px; 
+            max-width: 80%; 
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .nav-bas { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            height: 75px; 
+            background: var(--bg-nav); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-link { text-decoration: none; font-size: 26px; color: white; opacity: 0.4; transition: 0.3s; }
+        .nav-link.active { color: var(--gold); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="video-container" id="mainVideoContainer">
+        
+        <div id="mes-videos-dynamiques"></div>
+
+        <div class="video-card">
+            <video loop onclick="gererLecture(this)" autoplay muted playsinline>
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+            <div class="actions">
+                <div class="action-btn" onclick="toggleLike(this)">
+                    <div class="icon-bg heart-icon">🤍</div><p class="count">1.2k</p>
+                </div>
+                <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                    <div class="icon-bg">💬</div><p>45</p>
+                </div>
+                <div class="action-btn" onclick="voter(this)">
+                    <div class="icon-bg crown-box">👑</div><p class="vote-count">128</p>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="user-name">@Julie_Naïfan 👑</div>
+                <div class="description">Test de la couronne Naïhab ! 🇨🇲 #NaïhabChallenge</div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="nav-bas">
+        <a href="chats.html" class="nav-link">🏠</a>
+        <a href="recherche.html" class="nav-link">🔍</a>
+        <a href="videos.html" class="nav-link active">▶️</a>
+        <a href="notifications.html" class="nav-link">🔔</a>
+        <a href="profil.html" class="nav-link">👤</a>
+    </nav>
+
+    <script>
+        // ✅ ID unique pour cet utilisateur (simulé)
+        const monId = localStorage.getItem('naihab_user_id') || 'user_' + Date.now();
+        localStorage.setItem('naihab_user_id', monId);
+
+        window.onload = function() {
+            const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+            const zoneDynamique = document.getElementById('mes-videos-dynamiques');
+
+            if (mesVideos.length > 0) {
+                mesVideos.forEach((vid, index) => {
+                    const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
+                    const dejaVote = votes.includes(monId);
+                    const nbVotes = votes.length;
+
+                    const videoHTML = `
+                        <div class="video-card" id="video-card-${index}">
+                            <video loop onclick="gererLecture(this)" muted playsinline>
+                                <source src="${vid.url}" type="video/mp4">
+                            </video>
+                            <div class="overlay"></div>
+                            <div class="actions">
+                                <div class="action-btn" onclick="toggleLike(this)">
+                                    <div class="icon-bg heart-icon">🤍</div><p class="count">0</p>
+                                </div>
+                                <div class="action-btn" onclick="voter(this, ${index})">
+                                    <div class="icon-bg crown-box ${dejaVote ? 'crown-active' : ''}">👑</div>
+                                    <p class="vote-count">${nbVotes}</p>
+                                </div>
+                            </div>
+                            <div class="video-info">
+                                <div class="user-name">@${vid.auteur}</div>
+                                <div class="description">${vid.titre}</div>
+                            </div>
+                        </div>
+                    `;
+                    zoneDynamique.innerHTML += videoHTML;
+                });
+            }
+
+            // ✅ Défiler automatiquement vers la vidéo gagnante si on vient de la bannière
+            const urlParams = new URLSearchParams(window.location.search);
+            const indexGagnant = urlParams.get('gagnant');
+            if (indexGagnant !== null) {
+                setTimeout(() => {
+                    const container = document.getElementById('mainVideoContainer');
+                    // Chaque vidéo = 100vh, donc on multiplie l'index par la hauteur de l'écran
+                    const position = parseInt(indexGagnant) * window.innerHeight;
+                    container.scrollTo({ top: position, behavior: 'smooth' });
+                }, 400);
+            }
+
+            // Votes vidéo démo
+            const votesDemo = JSON.parse(localStorage.getItem('naihab_votes_demo')) || [];
+            const dejaVoteDemo = votesDemo.includes(monId);
+            const crownDemo = document.querySelector('.crown-box');
+            const countDemo = document.querySelector('.vote-count');
+            if (crownDemo && dejaVoteDemo) crownDemo.classList.add('crown-active');
+            if (countDemo) countDemo.innerText = votesDemo.length || 128;
+        };
+
+        function gererLecture(video) {
+            if (video.paused) { video.play(); } else { video.pause(); }
+        }
+
+        function toggleLike(btn) {
+            let icon = btn.querySelector('.heart-icon');
+            if (icon.innerText === "🤍") {
+                icon.innerText = "❤️";
+                icon.style.color = "#ff4757";
+            } else {
+                icon.innerText = "🤍";
+                icon.style.color = "white";
+            }
+        }
+
+        // ✅ Voter pour la couronne — 1 seul vote par personne par vidéo
+        function voter(btn, videoIndex) {
+            const box = btn.querySelector('.crown-box');
+            const countElement = btn.querySelector('.vote-count');
+            const cleVotes = 'naihab_votes_' + (videoIndex !== undefined ? videoIndex : 'demo');
+            let votes = JSON.parse(localStorage.getItem(cleVotes)) || [];
+
+            if (!votes.includes(monId)) {
+                // Premier vote — on ajoute
+                votes.push(monId);
+                localStorage.setItem(cleVotes, JSON.stringify(votes));
+                box.classList.add('crown-active');
+                countElement.innerText = votes.length;
+
+                // ✅ Calculer et sauvegarder le gagnant actuel
+                calculerGagnant();
+
+                // Message feedback
+                afficherToast("Vote enregistré ! 👑");
+            } else {
+                // Déjà voté — on annule
+                votes = votes.filter(id => id !== monId);
+                localStorage.setItem(cleVotes, JSON.stringify(votes));
+                box.classList.remove('crown-active');
+                countElement.innerText = votes.length;
+                calculerGagnant();
+                afficherToast("Vote retiré");
+            }
+        }
+
+        // ✅ Trouver la vidéo avec le plus de votes et la sauvegarder
+        function calculerGagnant() {
+            const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+            let maxVotes = 0;
+            let gagnant = null;
+
+            mesVideos.forEach((vid, index) => {
+                const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
+                if (votes.length > maxVotes) {
+                    maxVotes = votes.length;
+                    gagnant = { ...vid, nbVotes: votes.length, index };
+                }
+            });
+
+            if (gagnant) {
+                localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
+            }
+        }
+
+        // ✅ Petit message qui apparaît et disparaît
+        function afficherToast(message) {
+            const toast = document.createElement('div');
+            toast.innerText = message;
+            toast.style.cssText = `
+                position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+                background: rgba(255,204,0,0.9); color: #1a0b5a; padding: 10px 20px;
+                border-radius: 25px; font-weight: bold; font-size: 13px;
+                z-index: 9999; animation: fadeIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+    </script>
+</body>
+</html>

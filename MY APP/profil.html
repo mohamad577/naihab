@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Mon Profil</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            padding-bottom: 90px; 
+        }
+        
+        /* Header minimaliste */
+        .header-top { 
+            display: flex; 
+            justify-content: flex-end; 
+            padding: 20px; 
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .icon-settings { 
+            text-decoration: none; 
+            font-size: 22px; 
+            background: var(--glass);
+            padding: 10px;
+            border-radius: 12px;
+            transition: 0.3s; 
+        }
+        .icon-settings:active { transform: rotate(45deg) scale(0.9); }
+
+        .profile-content { text-align: center; padding: 0 25px; }
+
+        /* Avatar avec aura dorée */
+        .photo-container {
+            width: 115px; height: 115px;
+            border-radius: 50%; 
+            border: 3px solid var(--gold);
+            margin: 0 auto 15px; 
+            overflow: hidden; 
+            background: #0d124a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #photo-profil { width: 100%; height: 100%; object-fit: cover; }
+
+        .nom-affichage { font-size: 24px; font-weight: 900; margin: 5px 0; letter-spacing: -0.5px; }
+        .nom-affichage span { color: var(--gold); }
+        
+        /* Stats Box */
+        .stats { 
+            display: flex; 
+            justify-content: space-around; 
+            margin: 25px 0; 
+            background: var(--glass); 
+            padding: 15px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .stat-item { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+        .stat-item b { font-size: 18px; display: block; color: white; margin-bottom: 2px; }
+
+        .btn-modifier {
+            background: white; 
+            color: var(--bg-deep); 
+            border: none; 
+            padding: 14px 0;
+            width: 100%;
+            border-radius: 15px; 
+            font-weight: 800; 
+            text-decoration: none; 
+            display: inline-block; 
+            margin-bottom: 30px; 
+            font-size: 14px;
+            transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.1);
+        }
+        .btn-modifier:active { transform: scale(0.97); }
+
+        /* Tabs System */
+        .profile-tabs { 
+            display: flex; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            background: rgba(0,0,0,0.1); 
+        }
+        .tab { 
+            flex: 1; 
+            padding: 15px; 
+            text-align: center; 
+            opacity: 0.4; 
+            cursor: pointer; 
+            border-bottom: 2px solid transparent; 
+            font-size: 12px; 
+            font-weight: 800;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .tab.active { opacity: 1; border-bottom: 2px solid var(--gold); color: var(--gold); }
+
+        /* Grid System */
+        .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
+        .grid-item { position: relative; width: 100%; padding-top: 100%; overflow: hidden; background: #0d124a; }
+        .grid-item img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .btn-suppr-post {
+            position: absolute; top: 5px; right: 5px;
+            background: rgba(0,0,0,0.6); color: white;
+            border: none; border-radius: 50%;
+            width: 26px; height: 26px;
+            font-size: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10;
+        }
+
+        /* Nav Basse */
+        .nav-bas { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: #0d124a; display: flex; justify-content: space-around; align-items: center; z-index: 100; border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-link { text-decoration: none; font-size: 24px; color: white; opacity: 0.4; }
+        .nav-link.active { opacity: 1; color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="header-top">
+        <a href="parametres.html" class="icon-settings">⚙️</a>
+    </div>
+
+    <div class="profile-content">
+        <div class="photo-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="photo-profil">
+        </div>
+        
+        <div class="nom-affichage"><span id="nom-user">Utilisateur</span> <span id="couronne-user" style="display:none;">👑</span></div>
+        <p id="bio-user" style="opacity: 0.6; font-size: 13px; margin: 8px 0 20px; line-height: 1.4;">Ajoute ta biographie</p>
+
+        <div class="stats">
+            <div class="stat-item"><b id="nb-posts">0</b>Posts</div>
+            <div class="stat-item"><b id="nb-naifans">0</b>Naïfans</div>
+            <div class="stat-item"><b id="nb-couronnes">0</b>👑</div>
+        </div>
+
+        <a href="modifier-profil.html" class="btn-modifier">Modifier le profil</a>
+    </div>
+
+    <div class="profile-tabs">
+        <div class="tab active" id="tab-posts" onclick="changerOnglet('posts')">📱 MES POSTS</div>
+        <div class="tab" id="tab-likes" onclick="changerOnglet('likes')">❤️ AIMÉS</div>
+    </div>
+
+    <div class="profile-grid" id="grid-posts">
+        <!-- Rempli dynamiquement par JavaScript -->
+    </div>
+
+    <div class="profile-grid" id="grid-likes" style="display: none;">
+        <div style="grid-column: span 3; text-align: center; padding: 60px 20px; opacity: 0.3;">
+            <span style="font-size: 40px; display: block; margin-bottom: 10px;">🎬</span>
+            <p style="font-size: 13px;">Vos vidéos préférées apparaîtront ici.</p>
+        </div>
+    </div>
+
+    <nav class="nav-bas">
+
+<a href="chats.html" class="nav-link">🏠</a>
+
+<a href="recherche.html" class="nav-link">🔍</a>
+
+<a href="videos.html" class="nav-link">▶️</a>
+
+<a href="notifications.html" class="nav-link">🔔</a>
+
+<a href="profil.html" class="nav-link active">👤</a>
+
+</nav>
+
+<script>
+    window.onload = function() {
+        // --- 1. Tes infos sauvegardées ---
+        const nomSauve = localStorage.getItem("user_name");
+        const bioSauve = localStorage.getItem("user_bio");
+        const photoSauve = localStorage.getItem("user_photo");
+
+        if (nomSauve) document.getElementById("nom-user").innerText = nomSauve;
+        if (bioSauve) document.getElementById("bio-user").innerText = bioSauve;
+        if (photoSauve) document.getElementById("photo-profil").src = photoSauve;
+
+        // ✅ Naïfans depuis localStorage
+        const nbNaifans = parseInt(localStorage.getItem('naihab_nb_naifans') || '0');
+        document.getElementById('nb-naifans').innerText = nbNaifans >= 1000 
+            ? (nbNaifans / 1000).toFixed(1) + 'k' 
+            : nbNaifans;
+
+        // ✅ Compteur de couronnes gagnées
+        const nbCouronnes = parseInt(localStorage.getItem('naihab_nb_couronnes') || '0');
+        document.getElementById('nb-couronnes').innerText = nbCouronnes;
+
+        // ✅ Couronne SEULEMENT si l'utilisateur a déjà gagné
+        const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
+        const nomUser = localStorage.getItem("user_name") || "";
+        if (nbCouronnes > 0 || (gagnant && gagnant.auteur === nomUser)) {
+            document.getElementById('couronne-user').style.display = 'inline';
+        }
+
+        // --- 2. Chargement des nouveaux posts (SANS CHANGER LA GRILLE) ---
+        const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+        const gridPosts = document.getElementById('grid-posts');
+        
+        if (mesPosts.length > 0) {
+            gridPosts.innerHTML = ""; 
+            document.getElementById('nb-posts').innerText = mesPosts.length;
+
+            mesPosts.forEach((post, index) => {
+                const item = document.createElement('div');
+                item.className = "grid-item";
+                item.id = "grid-post-" + index;
+                item.innerHTML = `
+                    <img src="${post.image}">
+                    <button class="btn-suppr-post" onclick="supprimerPost(${index})">🗑️</button>
+                `;
+                gridPosts.appendChild(item);
+            });
+        } else {
+            // ✅ Message quand il n'y a pas encore de posts
+            gridPosts.innerHTML = `
+                <div style="grid-column: span 3; text-align: center; padding: 60px 20px; opacity: 0.4;">
+                    <div style="font-size: 45px; margin-bottom: 15px;">📸</div>
+                    <p style="font-size: 13px; line-height: 1.6;">Tu n'as pas encore de publications.<br>Partage ta première photo !</p>
+                </div>
+            `;
+        }
+    };
+
+    function supprimerPost(index) {
+        if (confirm("Supprimer cette publication ?")) {
+            let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+            mesPosts.splice(index, 1);
+            localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
+            location.reload();
+        }
+    }
+
+    function changerOnglet(type) {
+        const tabPosts = document.getElementById('tab-posts');
+        const tabLikes = document.getElementById('tab-likes');
+        const gridPosts = document.getElementById('grid-posts');
+        const gridLikes = document.getElementById('grid-likes');
+
+        if (type === 'posts') {
+            tabPosts.classList.add('active');
+            tabLikes.classList.remove('active');
+            gridPosts.style.display = 'grid';
+            gridLikes.style.display = 'none';
+        } else {
+            tabLikes.classList.add('active');
+            tabPosts.classList.remove('active');
+            gridLikes.style.display = 'grid';
+            gridPosts.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

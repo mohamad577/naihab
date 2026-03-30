@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Paramètres</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.05);
+            --text-dim: rgba(255, 255, 255, 0.6);
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            padding-bottom: 50px;
+        }
+        
+        /* En-tête Premium */
+        .header { 
+            padding: 25px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn { 
+            font-size: 22px; 
+            cursor: pointer; 
+            color: var(--gold);
+        }
+
+        .section-title { 
+            padding: 25px 20px 10px; 
+            font-size: 12px; 
+            color: var(--gold); 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px;
+        }
+        
+        /* Liste des options */
+        .settings-list { padding: 0 15px; }
+
+        .setting-item { 
+            display: flex; 
+            align-items: center; 
+            padding: 18px; 
+            background: var(--glass); 
+            margin-bottom: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .setting-item:active { 
+            background: rgba(255,255,255,0.1);
+            transform: scale(0.98);
+        }
+
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 204, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            color: var(--gold);
+            font-size: 18px;
+        }
+
+        .label { flex-grow: 1; font-size: 16px; font-weight: 500; }
+        
+        .arrow { 
+            color: var(--text-dim); 
+            font-size: 14px; 
+        }
+
+        /* Bouton déconnexion spécial */
+        .logout-box {
+            margin: 30px 15px;
+            padding: 18px;
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ff5252;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .footer-info {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 11px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="back-btn" onclick="window.location.href='profil.html'">✕</span>
+        <span style="font-size: 20px; font-weight: 900;">Réglages</span>
+    </div>
+
+    <div class="settings-list">
+        
+        <div class="section-title">Compte & Sécurité</div>
+        
+        <div class="setting-item" onclick="window.location.href='modifier-profil.html'">
+            <div class="icon-circle">👤</div>
+            <span class="label">Modifier le profil</span>
+            <span class="arrow">❯</span>
+        </div>
+
+        <div class="setting-item" onclick="window.location.href='nouveau-mdp.html'">
+            <div class="icon-circle">🔐</div>
+            <span class="label">Changer le mot de passe</span>
+            <span class="arrow">❯</span>
+        </div>
+
+        <div class="section-title">Expérience</div>
+
+        <div class="setting-item" onclick="window.location.href='notifications.html'">
+            <div class="icon-circle">🔔</div>
+            <span class="label">Notifications</span>
+            <span class="arrow">❯</span>
+        </div>
+
+        <div class="setting-item"  onclick="window.location.href='langue.html'">
+            <div class="icon-circle">🌍</div>
+            <span class="label">Langue de l'appli</span>
+            <span class="arrow">Français ▾</span>
+        </div>
+
+        <div class="section-title">Aide & Légal</div>
+
+<div class="setting-item" onclick="window.location.href='aide.html'">
+    <div class="icon-circle">❓</div>
+    <span class="label">Centre d'aide</span>
+    <span class="arrow">❯</span>
+</div>
+
+        <div class="setting-item"  onclick="window.location.href='legal.html'">
+            <div class="icon-circle">📄</div>
+            <span class="label">Conditions d'utilisation</span>
+            <span class="arrow">❯</span>
+        </div>
+
+        <div class="logout-box" onclick="deconnexion()">
+            <span>🚪 Déconnexion de Naïhab</span>
+        </div>
+
+        <div class="footer-info">
+            Naïhab Version 3.0.1 (Cycle 3)<br>
+            Fait avec ❤️ pour les Naïfans
+        </div>
+    </div>
+
+    <script>
+        function deconnexion() {
+            if(confirm("Es-tu sûr de vouloir te déconnecter ?")) {
+                // On repart au tout début du globe
+                window.location.href = 'index.html'; 
+            }
+        }
+    </script>
+
+</body>
+</html>

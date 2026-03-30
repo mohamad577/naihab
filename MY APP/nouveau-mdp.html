@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Nouveau mot de passe</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a0b5a; /* Bleu nuit Naïhab */
+            color: white;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container { width: 100%; max-width: 350px; }
+
+        .icon-key {
+            font-size: 50px;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+
+        h1 { 
+            font-size: 28px; 
+            font-weight: 900; 
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        p { 
+            opacity: 0.7; 
+            font-size: 14px; 
+            margin-bottom: 35px; 
+            line-height: 1.5;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 25px;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: white;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #ffcc00;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-reset {
+            width: 100%;
+            padding: 18px;
+            background-color: #ffcc00;
+            color: #1a0b5a;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        .btn-reset:active {
+            transform: scale(0.96);
+        }
+
+        .security-note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="icon-key">🔑</div>
+        <h1>Nouveau secret</h1>
+        <p>Crée un mot de passe solide pour protéger tes données sur Naïhab.</p>
+        
+        <input type="password" id="mdp1" placeholder="Nouveau mot de passe">
+        <input type="password" id="mdp2" placeholder="Confirmer le mot de passe">
+
+        <button class="btn-reset" onclick="validerMdp()">CHANGER LE MOT DE PASSE</button>
+        
+        <p class="security-note">Utilise au moins 8 caractères avec des chiffres.</p>
+    </div>
+
+    <script>
+        function validerMdp() {
+            const m1 = document.getElementById('mdp1').value;
+            const m2 = document.getElementById('mdp2').value;
+
+            if (m1 === "" || m2 === "") {
+                alert("Veuillez remplir les deux champs.");
+                return;
+            }
+            if (m1.length < 8) {
+                alert("Ton mot de passe doit avoir au moins 8 caractères !");
+                return;
+            }
+            if (m1 !== m2) {
+                alert("Les mots de passe ne sont pas identiques !");
+                return;
+            }
+
+            // ✅ Sauvegarder le mot de passe
+            localStorage.setItem("user_mdp", m1);
+            alert("Mot de passe modifié avec succès ! 🎉");
+            window.location.href = 'connexion.html';
+        }
+    </script>
+
+</body>
+</html>

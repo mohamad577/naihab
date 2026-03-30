@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Profil Naïfan</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            padding-bottom: 90px; 
+            overflow-x: hidden;
+        }
+        
+        /* Header avec bouton retour */
+        .header-top { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px; 
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(26, 11, 90, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn { text-decoration: none; font-size: 24px; color: var(--gold); font-weight: bold; cursor: pointer; }
+
+        .profile-content { text-align: center; padding: 0 25px; }
+
+        .photo-container {
+            width: 115px; height: 115px;
+            border-radius: 50%; 
+            border: 3px solid var(--gold);
+            margin: 10px auto 15px; 
+            overflow: hidden; 
+            background: #0d124a;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #photo-naifan { width: 100%; height: 100%; object-fit: cover; }
+
+        .nom-affichage { font-size: 24px; font-weight: 900; margin: 5px 0; letter-spacing: -0.5px; }
+        
+        .stats { 
+            display: flex; 
+            justify-content: space-around; 
+            margin: 25px 0; 
+            background: var(--glass); 
+            padding: 15px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .stat-item { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+        .stat-item b { font-size: 18px; display: block; color: white; margin-bottom: 2px; }
+
+        .actions-naifan { display: flex; gap: 10px; margin-bottom: 30px; }
+
+        .btn-suivre {
+            flex: 2; background: var(--gold); color: var(--bg-deep); border: none; 
+            padding: 14px 0; border-radius: 15px; font-weight: 800; font-size: 14px; cursor: pointer;
+        }
+        .btn-suivre.active { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+        .btn-message {
+            flex: 1; background: var(--glass); color: white; border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 0; border-radius: 15px; font-weight: 800; font-size: 18px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .profile-tabs { display: flex; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.1); }
+        .tab { flex: 1; padding: 15px; text-align: center; opacity: 0.4; border-bottom: 2px solid transparent; font-size: 12px; font-weight: 800; }
+        .tab.active { opacity: 1; border-bottom: 2px solid var(--gold); color: var(--gold); }
+
+        .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
+        .grid-item { position: relative; width: 100%; padding-top: 100%; background: #0d124a; }
+        .grid-item img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+
+        /* Menu Options (Trois points) */
+        #menuOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; }
+        #menuOptions { position:absolute; bottom:0; width:100%; background:#0d124a; border-radius:25px 25px 0 0; padding:20px; box-sizing:border-box; transform: translateY(100%); transition: 0.3s; }
+        .menu-item { padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; }
+
+        .nav-bas { position: fixed; bottom: 0; left: 0; width: 100%; height: 75px; background: #0d124a; display: flex; justify-content: space-around; align-items: center; z-index: 100; border-top: 1px solid rgba(255,255,255,0.05); }
+        .nav-link { text-decoration: none; font-size: 24px; color: white; opacity: 0.4; }
+    </style>
+</head>
+<body>
+
+    <div class="header-top">
+        <span onclick="window.history.back()" class="back-btn">⇠</span>
+        <b id="username-title" style="font-size: 15px; opacity: 0.9;">Profil</b>
+        <span style="font-size: 24px; cursor:pointer;" onclick="ouvrirMenu()">⋮</span>
+    </div>
+
+    <div class="profile-content">
+        <div class="photo-container">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400" id="photo-naifan">
+        </div>
+        
+        <div class="nom-affichage" id="nom-naifan">Utilisateur 👑</div>
+        <p style="opacity: 0.6; font-size: 13px; margin: 8px 0 20px; line-height: 1.4;">
+            Vainqueur de session 👑 <br> Fier Naïfan de la communauté.
+        </p>
+
+        <div class="stats">
+            <div class="stat-item"><b>45</b>Posts</div>
+            <div class="stat-item"><b>1.2k</b>Naïfans</div>
+            <div class="stat-item"><b>1</b>👑</div>
+        </div>
+
+        <div class="actions-naifan">
+            <button class="btn-suivre" onclick="toggleSuivre(this)">SUIVRE</button>
+            <button class="btn-message" onclick="envoyerVersMessage()">✉️</button>
+        </div>
+    </div>
+
+    <div class="profile-tabs">
+        <div class="tab active">📱 POSTS</div>
+        <div class="tab">❤️ AIMÉS</div>
+    </div>
+
+    <div class="profile-grid">
+        <div class="grid-item"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400"></div>
+        <div class="grid-item"><img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400"></div>
+        <div class="grid-item"><img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400"></div>
+    </div>
+
+    <div id="menuOverlay" onclick="fermerMenu()">
+        <div id="menuOptions">
+            <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
+            <div class="menu-item" onclick="alert('Lien copié !')">Partager le profil</div>
+            <div class="menu-item" onclick="alert('Utilisateur bloqué')">Bloquer l'utilisateur</div>
+            <div class="menu-item" onclick="alert('Signalement envoyé')" style="color:#ff4757;">Signaler ce compte</div>
+            <button onclick="fermerMenu()" style="width:100%; margin-top:15px; padding:15px; border-radius:15px; border:none; background:rgba(255,255,255,0.1); color:white; font-weight:bold;">Annuler</button>
+        </div>
+    </div>
+
+    <nav class="nav-bas">
+        <a href="chats.html" class="nav-link">🏠</a>
+        <a href="recherche.html" class="nav-link">🔍</a>
+        <a href="videos.html" class="nav-link">▶️</a>
+        <a href="notifications.html" class="nav-link">🔔</a>
+        <a href="profil.html" class="nav-link">👤</a>
+    </nav>
+
+<script>
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const nomRecu = urlParams.get('name');
+        const imgRecue = urlParams.get('img');
+
+        if (nomRecu) {
+            const nomPropre = nomRecu.replace('_', ' ');
+            document.getElementById('nom-naifan').innerText = nomPropre + " 👑";
+            document.getElementById('username-title').innerText = "Profil de " + nomPropre;
+        }
+        if (imgRecue) {
+            document.getElementById('photo-naifan').src = imgRecue;
+        }
+    };
+
+    function envoyerVersMessage() {
+        const nom = document.getElementById('nom-naifan').innerText.replace(' 👑', '');
+        const photo = document.getElementById('photo-naifan').src;
+        window.location.href = `message-prive.html?name=${nom}&img=${photo}`;
+    }
+
+    function toggleSuivre(btn) {
+        if(btn.innerText === "SUIVRE") {
+            btn.innerText = "SUIVI ✓";
+            btn.classList.add('active');
+        } else {
+            btn.innerText = "SUIVRE";
+            btn.classList.remove('active');
+        }
+    }
+
+    function ouvrirMenu() {
+        const overlay = document.getElementById('menuOverlay');
+        const menu = document.getElementById('menuOptions');
+        overlay.style.display = "block";
+        setTimeout(() => { menu.style.transform = "translateY(0)"; }, 10);
+    }
+
+    function fermerMenu() {
+        const menu = document.getElementById('menuOptions');
+        const overlay = document.getElementById('menuOverlay');
+        menu.style.transform = "translateY(100%)";
+        setTimeout(() => { overlay.style.display = "none"; }, 300);
+    }
+</script>
+</body>
+</html>

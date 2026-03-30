@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Vérification</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a0b5a; /* Violet profond de Naïhab */
+            color: white;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon-box {
+            font-size: 60px;
+            margin-bottom: 20px;
+            background: rgba(255, 204, 0, 0.1);
+            width: 100px;
+            height: 100px;
+            line-height: 100px;
+            border-radius: 50%;
+            color: #ffcc00; /* Jaune couronne */
+        }
+
+        h2 { 
+            margin-bottom: 10px; 
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        p {
+            opacity: 0.8;
+            font-size: 15px;
+            margin-bottom: 30px;
+            max-width: 280px;
+            line-height: 1.5;
+        }
+
+        .code-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .code-inputs input {
+            width: 55px;
+            height: 70px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #ffcc00;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .code-inputs input:focus {
+            border-color: #ffcc00;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.2);
+        }
+
+        .btn-verify {
+            width: 100%;
+            max-width: 300px;
+            padding: 18px;
+            background: #ffcc00; /* Bouton Jaune */
+            color: #1a0b5a;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        .btn-verify:active {
+            transform: scale(0.95);
+        }
+
+        .resend {
+            margin-top: 25px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .resend b {
+            color: #ffcc00;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="icon-box">📩</div>
+    <h2>Vérification</h2>
+    <p>Entre le code de sécurité envoyé sur ton contact pour protéger ton compte <b>Naïhab</b>.</p>
+
+    <div class="code-inputs" id="otp-inputs">
+        <input type="number" maxlength="1" oninput="moveNext(this, 1)">
+        <input type="number" maxlength="1" oninput="moveNext(this, 2)">
+        <input type="number" maxlength="1" oninput="moveNext(this, 3)">
+        <input type="number" maxlength="1" oninput="moveNext(this, 4)">
+    </div>
+
+    <button class="btn-verify" onclick="verifierCode()">VÉRIFIER LE CODE</button>
+
+    <p class="resend">Vous n'avez rien reçu ? <b id="resend-btn" onclick="renvoyerCode()" style="cursor:pointer;">Renvoyer (<span id="timer">00:59</span>)</b></p>
+
+    <script>
+        // Code simulé stocké en localStorage
+        let codeAttendu = localStorage.getItem('naihab_otp') || '1234';
+
+        // ✅ Passer automatiquement au champ suivant
+        function moveNext(current, nextIndex) {
+            if (current.value.length >= 1) {
+                const inputs = document.querySelectorAll('#otp-inputs input');
+                if (inputs[nextIndex]) {
+                    inputs[nextIndex].focus();
+                }
+            }
+        }
+
+        // ✅ Vérifier le code saisi
+        function verifierCode() {
+            const inputs = document.querySelectorAll('#otp-inputs input');
+            let codeSaisi = '';
+            inputs.forEach(i => codeSaisi += i.value);
+
+            if (codeSaisi.length < 4) {
+                alert("Entre les 4 chiffres du code !");
+                return;
+            }
+            if (codeSaisi === codeAttendu) {
+                window.location.href = 'motdepasse.html';
+            } else {
+                alert("Code incorrect ! Réessaie.");
+                inputs.forEach(i => i.value = '');
+                inputs[0].focus();
+            }
+        }
+
+        // ✅ Minuteur 59 secondes
+        let secondes = 59;
+        const timerEl = document.getElementById('timer');
+        const interval = setInterval(() => {
+            secondes--;
+            timerEl.innerText = '00:' + (secondes < 10 ? '0' + secondes : secondes);
+            if (secondes <= 0) {
+                clearInterval(interval);
+                timerEl.parentElement.innerHTML = '<b onclick="renvoyerCode()" style="cursor:pointer; color:#ffcc00;">Renvoyer le code</b>';
+            }
+        }, 1000);
+
+        // ✅ Renvoyer le code
+        function renvoyerCode() {
+            // En simulation on remet le code à 1234
+            localStorage.setItem('naihab_otp', '1234');
+            alert("Code renvoyé ! (Code de test : 1234)");
+        }
+    </script>
+
+</body>
+</html>

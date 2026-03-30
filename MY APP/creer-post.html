@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Créer un Post</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Header avec bouton Annuler et Publier */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+        }
+
+        .annuler { 
+            cursor: pointer; 
+            opacity: 0.7; 
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .publier-btn { 
+            background: var(--gold); 
+            border: none; 
+            padding: 10px 25px; 
+            border-radius: 25px; 
+            color: var(--bg-deep); 
+            font-weight: 800; 
+            cursor: pointer; 
+            opacity: 0.3; 
+            transition: 0.3s;
+            pointer-events: none; /* Désactivé par défaut */
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        .active-btn { 
+            opacity: 1 !important; 
+            pointer-events: auto;
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3); 
+        }
+
+        /* Zone de saisie */
+        .post-input { 
+            width: 100%; 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            font-size: 18px; 
+            outline: none; 
+            resize: none; 
+            margin-top: 10px; 
+            flex-grow: 1;
+            min-height: 100px;
+        }
+
+        /* Zone d'aperçu du média sélectionné */
+        #preview-container { 
+            width: 100%; 
+            margin: 20px 0; 
+            display: none; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            background: black; 
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #preview-img, #preview-video { 
+            width: 100%; 
+            max-height: 350px; 
+            object-fit: contain; 
+            display: block;
+        }
+
+        /* Barre d'options en bas */
+        .options { 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            padding: 20px 0; 
+            display: flex; 
+            gap: 15px; 
+        }
+
+        .opt-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            background: var(--glass); 
+            padding: 12px 20px; 
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: 0.2s;
+        }
+
+        .opt-item:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+        
+        .opt-item span { font-size: 18px; }
+
+        /* Masquage des inputs natifs */
+        #input-photo, #input-video { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span class="annuler" onclick="window.history.back()">Annuler</span>
+        <button class="publier-btn" id="btnPublier" onclick="publierMedia()">Publier</button>
+    </div>
+
+    <textarea class="post-input" id="postText" placeholder="Partagez quelque chose avec vos Naïfans..." oninput="verifierContenu()"></textarea>
+
+    <div id="preview-container">
+        <img id="preview-img" style="display:none">
+        <video id="preview-video" controls style="display:none"></video>
+    </div>
+
+    <div class="options">
+        <label for="input-photo" class="opt-item"><span>📷</span> Photo</label>
+        <input type="file" id="input-photo" accept="image/*" onchange="aperçuMedia(this, 'image')">
+
+        <label for="input-video" class="opt-item"><span>🎥</span> Vidéo</label>
+        <input type="file" id="input-video" accept="video/*" onchange="aperçuMedia(this, 'video')">
+    </div>
+
+    <script>
+        let mediaSelectionne = false;
+        let fichierData = ""; 
+        let typeFichier = "";
+
+        function aperçuMedia(input, type) {
+            const container = document.getElementById('preview-container');
+            const img = document.getElementById('preview-img');
+            const video = document.getElementById('preview-video');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    container.style.display = 'block';
+                    fichierData = e.target.result;
+                    typeFichier = type;
+
+                    if (type === 'image') {
+                        img.src = fichierData;
+                        img.style.display = 'block';
+                        video.style.display = 'none';
+                    } else {
+                        video.src = fichierData;
+                        video.style.display = 'block';
+                        img.style.display = 'none';
+                    }
+                    mediaSelectionne = true;
+                    verifierContenu();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function verifierContenu() {
+            const text = document.getElementById('postText').value.trim();
+            const btn = document.getElementById('btnPublier');
+            
+            if (text.length > 0 || mediaSelectionne) {
+                btn.classList.add('active-btn');
+            } else {
+                btn.classList.remove('active-btn');
+            }
+        }
+
+        function publierMedia() {
+            const text = document.getElementById('postText').value.trim();
+            const userName = localStorage.getItem("user_name") || "Naïfan";
+
+            if (typeFichier === 'video') {
+                // LOGIQUE VIDÉO -> Section Vidéos
+                let mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+                mesVideos.unshift({
+                    id: Date.now(),
+                    url: fichierData,
+                    titre: text,
+                    auteur: userName
+                });
+                localStorage.setItem('naihab_videos', JSON.stringify(mesVideos));
+                alert(`Félicitations ${userName} ! Ta vidéo est en Session.`);
+                window.location.href = 'videos.html';
+            } else {
+                // LOGIQUE PHOTO -> Accueil et Profil
+                let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+                mesPosts.unshift({
+                    id: Date.now(),
+                    image: fichierData,
+                    texte: text,
+                    date: new Date().toLocaleDateString()
+                });
+                localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
+                alert(`Félicitations ${userName} ! Ton post est en ligne.`);
+                window.location.href = 'chats.html';
+            }
+        }
+    </script>
+</body>
+</html>

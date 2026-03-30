@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Langue</title>
+    <style>
+        body { margin: 0; background-color: #1a0b5a; font-family: 'Segoe UI', sans-serif; color: white; }
+        .header { padding: 20px; display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .back-btn { color: #ffcc00; font-size: 20px; cursor: pointer; text-decoration: none; }
+        
+        .lang-list { padding: 20px; }
+        .lang-item { 
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px; background: rgba(255,255,255,0.05); border-radius: 15px;
+            margin-bottom: 10px; cursor: pointer; border: 1px solid transparent;
+        }
+        .lang-item.active { border-color: #ffcc00; background: rgba(255,204,0,0.1); }
+        .check { color: #ffcc00; font-weight: bold; display: none; }
+        .lang-item.active .check { display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="parametres.html" class="back-btn">⬅️</a>
+        <span style="font-weight: bold;">Choisir la langue</span>
+    </div>
+
+    <div class="lang-list">
+        <div class="lang-item active" data-lang="fr" onclick="selectLang(this)">
+            <span>🇫🇷 Français</span>
+            <span class="check">✓</span>
+        </div>
+        <div class="lang-item" data-lang="en" onclick="selectLang(this)">
+            <span>🇬🇧 English</span>
+            <span class="check">✓</span>
+        </div>
+        <div class="lang-item" data-lang="ar" onclick="selectLang(this)">
+            <span>🇦🇪 العربية</span>
+            <span class="check">✓</span>
+        </div>
+    </div>
+
+    <script>
+        // ✅ Charger la langue sauvegardée
+        window.onload = function() {
+            const langSauve = localStorage.getItem('naihab_langue') || 'fr';
+            document.querySelectorAll('.lang-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-lang') === langSauve) {
+                    item.classList.add('active');
+                }
+            });
+        };
+
+        function selectLang(el) {
+            document.querySelectorAll('.lang-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+            // ✅ Sauvegarder la langue choisie
+            localStorage.setItem('naihab_langue', el.getAttribute('data-lang'));
+            setTimeout(() => { window.location.href = 'parametres.html'; }, 500);
+        }
+    </script>
+</body>
+</html>

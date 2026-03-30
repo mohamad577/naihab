@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Sécurité</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a0b5a; /* Bleu nuit Naïhab */
+            color: white;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container { width: 100%; max-width: 350px; }
+
+        h1 { 
+            font-size: 28px; 
+            font-weight: 900; 
+            margin-bottom: 10px;
+            color: #ffcc00; /* Jaune Naïhab */
+        }
+
+        p { 
+            opacity: 0.7; 
+            font-size: 14px; 
+            margin-bottom: 40px; 
+            line-height: 1.5;
+        }
+
+        .input-group { text-align: left; margin-bottom: 25px; width: 100%; }
+
+        label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-weight: bold; 
+            font-size: 12px; 
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: #ffcc00; }
+
+        /* Barre de sécurité améliorée */
+        .strength-container {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .strength-bar {
+            height: 6px;
+            width: 70%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 85%; /* Simule un mot de passe fort */
+            background: #00ff88; /* Vert fluo pour la sécurité */
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .strength-text {
+            font-size: 11px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .btn-finish {
+            width: 100%;
+            padding: 18px;
+            background: #ffcc00;
+            color: #1a0b5a;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+
+        .btn-finish:active { transform: scale(0.96); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Dernière étape</h1>
+        <p>Crée ton secret pour verrouiller l'accès à ton univers Naïhab.</p>
+        
+        <div class="input-group">
+            <label>Nouveau mot de passe</label>
+            <input type="password" placeholder="Minimum 8 caractères">
+            <div class="strength-container">
+                <div class="strength-bar"><div class="strength-fill"></div></div>
+                <span class="strength-text">TRÈS FORT ✅</span>
+            </div>
+        </div>
+
+        <div class="input-group" style="margin-top: 10px;">
+            <label>Confirmer le secret</label>
+            <input type="password" placeholder="Répète ton mot de passe">
+        </div>
+
+        <button class="btn-finish" onclick="window.location.href='chats.html'">FINALISER MON COMPTE</button>
+    </div>
+
+</body>
+</html>

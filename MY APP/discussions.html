@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Messages</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.05);
+            --msg-bg: rgba(255, 255, 255, 0.03);
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            padding-bottom: 90px; 
+        }
+        
+        /* Header */
+        .header { 
+            padding: 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .back-btn { 
+            font-size: 24px; 
+            cursor: pointer; 
+            color: var(--gold); 
+            text-decoration: none; 
+            font-weight: bold; 
+        }
+
+        .logo-cercle { 
+            width: 40px; 
+            height: 40px; 
+            background: linear-gradient(45deg, var(--gold), #ff8c00); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 900; 
+            color: var(--bg-deep); 
+            font-size: 14px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .app-name { font-size: 20px; font-weight: 800; flex-grow: 1; letter-spacing: 0.5px; }
+
+        /* Suggestions (Histoires/Amis actifs) */
+        .favorites-label { 
+            padding: 0 20px; 
+            font-size: 12px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        .favorites { 
+            padding: 15px 20px; 
+            display: flex; 
+            gap: 18px; 
+            overflow-x: auto; 
+            scrollbar-width: none; 
+        }
+        .favorites::-webkit-scrollbar { display: none; }
+
+        .fav-item { text-align: center; min-width: 65px; cursor: pointer; }
+        .fav-avatar { 
+            width: 62px; 
+            height: 62px; 
+            border-radius: 50%; 
+            border: 2px solid var(--gold); 
+            padding: 2px;
+            margin-bottom: 6px; 
+            object-fit: cover; 
+            transition: 0.3s;
+        }
+        .fav-item:active .fav-avatar { transform: scale(0.9); }
+        .fav-name { font-size: 11px; font-weight: 500; opacity: 0.9; }
+
+        /* Liste des Messages */
+        .messages-section { 
+            background: rgba(0,0,0,0.2); 
+            border-radius: 35px 35px 0 0; 
+            padding: 25px 20px; 
+            min-height: 500px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .section-title { margin-bottom: 20px; font-weight: 800; font-size: 18px; }
+
+        .msg-item { 
+            display: flex; 
+            align-items: center; 
+            background: var(--msg-bg); 
+            padding: 15px; 
+            border-radius: 20px; 
+            margin-bottom: 12px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+        .msg-item:active { transform: scale(0.97); background: rgba(255,255,255,0.08); }
+        
+        .msg-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
+        
+        .msg-content { flex-grow: 1; overflow: hidden; }
+        .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .msg-name { font-weight: 700; font-size: 15px; }
+        .msg-time { font-size: 11px; opacity: 0.5; }
+        .msg-text { font-size: 13px; opacity: 0.6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Badge de message non lu */
+        .unread-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; margin-left: 5px; }
+
+        .nav-bas { 
+            position: fixed; bottom: 0; width: 100%; height: 75px; 
+            background: #0d124a; 
+            display: flex; justify-content: space-around; align-items: center; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            z-index: 100;
+        }
+        .nav-icon { font-size: 24px; opacity: 0.4; color: white; transition: 0.3s; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" onclick="window.history.back(); return false;" class="back-btn">←</a>
+        <div class="logo-cercle">ИН</div>
+        <div class="app-name">Naïhab</div>
+    </div>
+
+    <div class="favorites-label">Suggestions</div>
+    <div class="favorites">
+        <div class="fav-item"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="fav-avatar"><div class="fav-name">Angela</div></div>
+        <div class="fav-item"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" class="fav-avatar"><div class="fav-name">David</div></div>
+        <div class="fav-item"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" class="fav-avatar"><div class="fav-name">Sara</div></div>
+        <div class="fav-item"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="fav-avatar"><div class="fav-name">Cameron</div></div>
+        <div class="fav-item"><img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" class="fav-avatar"><div class="fav-name">Jackson</div></div>
+    </div>
+
+    <div class="messages-section">
+        <div class="section-title">Messages</div>
+        
+        <div class="msg-item" onclick="window.location.href='message-prive.html'">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="msg-avatar">
+            <div class="msg-content">
+                <div class="msg-header">
+                    <span class="msg-name">Angela</span> 
+                    <span class="msg-time">1 min</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="msg-text">Tu as vu ma nouvelle photo ? 😍</div>
+                    <div class="unread-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="msg-item" onclick="window.location.href='message-prive.html'">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" class="msg-avatar">
+            <div class="msg-content">
+                <div class="msg-header">
+                    <span class="msg-name">Sara</span> 
+                    <span class="msg-time">11:20</span>
+                </div>
+                <div class="msg-text">Tu m'as appelé ?</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bas">
+        <a href="chats.html" class="nav-icon">🏠</a>
+        <a href="recherche.html" class="nav-icon">🔍</a>
+        <a href="videos.html" class="nav-icon">▶️</a>
+        <a href="notifications.html" class="nav-icon">🔔</a>
+        <a href="profil.html" class="nav-icon">👤</a>
+    </div>
+
+</body>
+</html>

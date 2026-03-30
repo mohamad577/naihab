@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Inscription</title>
+    <style>
+        body {
+            margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif;
+            background-color: #1a0b5a; color: white;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        /* Photo de profil cliquable */
+        .profile-pic-container { position: relative; margin: 20px 0 30px 0; cursor: pointer; }
+        .profile-pic {
+            width: 110px; height: 110px; background-color: rgba(255, 255, 255, 0.1);
+            border: 3px solid #ffcc00; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden; box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+        #preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .camera-icon {
+            position: absolute; bottom: 5px; right: 5px; background: #ffcc00;
+            padding: 8px; border-radius: 50%; width: 20px; height: 20px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .form-group { width: 100%; max-width: 350px; margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 12px; color: #ffcc00; text-transform: uppercase; }
+
+        input, select {
+            width: 100%; padding: 15px; border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px; background-color: rgba(255, 255, 255, 0.05);
+            color: white; font-size: 16px; box-sizing: border-box; outline: none;
+        }
+
+        /* Style spécifique pour le groupe Téléphone */
+        .phone-container { display: flex; gap: 10px; }
+        .country-select { width: 100px; font-size: 14px; cursor: pointer; }
+
+        .btn-register {
+            width: 100%; max-width: 350px; padding: 18px; background-color: #ffcc00;
+            color: #1a0b5a; border: none; border-radius: 30px; font-weight: bold;
+            margin-top: 20px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="font-weight: 900;">Rejoindre Naïhab</h2>
+
+    <div class="profile-pic-container" onclick="document.getElementById('file-input').click()">
+        <div class="profile-pic" id="profile-display">
+            <img id="preview-img" src="" alt="Aperçu">
+            <svg id="default-icon" width="50" height="50" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+        </div>
+        <div class="camera-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#1a0b5a"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        </div>
+        <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="loadPhoto(event)">
+    </div>
+
+    <div class="form-group">
+        <label>Nom complet</label>
+        <input type="text" placeholder="Ex: Jackson Junior">
+    </div>
+
+    <div class="form-group">
+        <label>Numéro de téléphone</label>
+        <div class="phone-container">
+            <select class="country-select">
+                <option value="+237">🇨🇲 +237</option>
+                <option value="+33">🇫🇷 +33</option>
+                <option value="+225">🇨🇮 +225</option>
+                <option value="+221">🇸🇳 +221</option>
+                <option value="+1">🇺🇸 +1</option>
+            </select>
+            <input type="tel" placeholder="6..." style="flex: 1;">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Email (Optionnel)</label>
+        <input type="email" placeholder="email@exemple.com">
+    </div>
+
+    <button class="btn-register" onclick="sInscrire()">S'INSCRIRE</button>
+
+    <script>
+        function loadPhoto(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                const output = document.getElementById('preview-img');
+                const defaultIcon = document.getElementById('default-icon');
+                output.src = reader.result;
+                output.style.display = 'block';
+                defaultIcon.style.display = 'none';
+                localStorage.setItem("user_photo", reader.result);
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // ✅ Sauvegarder les infos avant de passer à la vérification
+        function sInscrire() {
+            const nom = document.querySelector('input[type="text"]').value.trim();
+            const indicatif = document.querySelector('.country-select').value;
+            const tel = document.querySelector('input[type="tel"]').value.trim();
+            const email = document.querySelector('input[type="email"]').value.trim();
+
+            if (nom === "") {
+                alert("Entre ton nom complet !");
+                return;
+            }
+            if (tel === "") {
+                alert("Entre ton numéro de téléphone !");
+                return;
+            }
+
+            // Sauvegarde dans localStorage
+            localStorage.setItem("user_name", nom);
+            localStorage.setItem("user_tel", indicatif + tel);
+            if (email) localStorage.setItem("user_email", email);
+
+            window.location.href = 'verification.html';
+        }
+    </script>
+
+</body>
+</html>

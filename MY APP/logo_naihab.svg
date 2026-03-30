@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  
+  <!-- Fond violet foncé -->
+  <rect width="400" height="400" fill="#1a0b5a" rx="80"/>
+  
+  <!-- Bulle de message dorée -->
+  <path d="
+    M 80 80
+    Q 80 60 100 60
+    L 300 60
+    Q 320 60 320 80
+    L 320 240
+    Q 320 260 300 260
+    L 180 260
+    L 140 320
+    L 150 260
+    L 100 260
+    Q 80 260 80 240
+    Z
+  " fill="#ffcc00"/>
+
+  <!-- N seul -->
+  <text x="105" y="215" 
+    font-family="'Segoe UI', Arial, sans-serif" 
+    font-size="145" 
+    font-weight="900" 
+    fill="#1a0b5a">N</text>
+
+  <!-- ï séparé du N -->
+  <text x="235" y="215" 
+    font-family="'Segoe UI', Arial, sans-serif" 
+    font-size="145" 
+    font-weight="900" 
+    fill="#1a0b5a">ï</text>
+
+</svg>
