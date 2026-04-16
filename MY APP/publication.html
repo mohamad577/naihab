@@ -115,10 +115,20 @@
     <div class="container">
         <div class="author-box">
             <div class="author-info">
-                <img id="author-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="author-img">
-                <div class="author-name" id="author-name">Julie</div>
+                <img id="author-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="author-img">
+                <div class="author-name" id="author-name">Naïfan</div>
             </div>
-            <div class="more-options">•••</div>
+            <div class="more-options" onclick="ouvrirMenu()">•••</div>
+        </div>
+
+        <!-- Menu ••• -->
+        <div id="menu-overlay" onclick="fermerMenu()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+            <div id="menu-options" style="position:absolute; bottom:0; width:100%; background:#0d124a; border-radius:25px 25px 0 0; padding:20px; box-sizing:border-box; transform:translateY(0);">
+                <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
+                <div onclick="partagerPublication()" style="padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">✈️ Partager cette publication</div>
+                <div onclick="copierLien()" style="padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">🔗 Copier le lien</div>
+                <button onclick="fermerMenu()" style="width:100%; margin-top:15px; padding:15px; border-radius:15px; border:none; background:rgba(255,255,255,0.1); color:white; font-weight:bold; cursor:pointer;">Annuler</button>
+            </div>
         </div>
 
         <div class="main-img-container">
@@ -133,42 +143,45 @@
                 <div class="btn-item" onclick="window.location.href='commentaires.html'">
                     <span>💬</span>
                 </div>
-                <div class="btn-item">
+                <div class="btn-item" onclick="partagerPublication()">
                     <span>✈️</span>
                 </div>
             </div>
 
-            <div class="stats"><span id="nb-likes">124</span> J'aime • 23 Commentaires</div>
+            <div class="stats"><span id="nb-likes">0</span> J'aime • <span id="nb-commentaires">0</span> Commentaires</div>
             
             <div class="caption">
-                <b id="caption-nom">Julie</b> <span id="caption-texte">Quel magnifique paysage ! Naïhab est vraiment incroyable. 🌿✨</span>
+                <b id="caption-nom">Naïfan</b> <span id="caption-texte"></span>
             </div>
 
-            <div class="date-post" id="date-post">Publié il y a 2 heures • Naïhab</div>
+            <div class="date-post" id="date-post">Naïhab</div>
         </div>
     </div>
 
 <script>
-    // ✅ Charger les vraies données du post depuis localStorage
     window.onload = function() {
-        const nomSauve = localStorage.getItem("user_name") || "Julie";
+        const nomSauve = localStorage.getItem("user_name") || "Naïfan";
         const photoSauve = localStorage.getItem("user_photo");
         const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
 
-        // On prend le post le plus récent (index 0) si il existe
+        // ✅ Charger le bon post
         if (mesPosts.length > 0) {
             const post = mesPosts[0];
             document.getElementById('main-img').src = post.image;
             document.getElementById('caption-texte').innerText = post.texte || "";
-            document.getElementById('date-post').innerText = "Publié le " + (post.date || "aujourd'hui");
+            document.getElementById('date-post').innerText = "Publié le " + (post.date || "aujourd'hui") + " • Naïhab";
         }
 
-        // Infos de l'auteur
+        // ✅ Infos auteur correctes
         document.getElementById('author-name').innerText = nomSauve;
         document.getElementById('caption-nom').innerText = nomSauve;
         if (photoSauve) {
             document.getElementById('author-img').src = photoSauve;
         }
+
+        // ✅ Charger le vrai nombre de commentaires
+        const commentaires = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+        document.getElementById('nb-commentaires').innerText = commentaires.length;
     };
 
     function toggleLike(element) {
@@ -180,7 +193,6 @@
             heart.innerText = '❤️';
             element.style.color = "#ff4757";
             affichageLikes.innerText = nombreActuel + 1;
-            heart.style.display = "inline-block";
             heart.animate([
                 { transform: 'scale(1)' },
                 { transform: 'scale(1.5)' },
@@ -191,6 +203,32 @@
             element.style.color = "white";
             affichageLikes.innerText = nombreActuel - 1;
         }
+    }
+
+    // ✅ Menu ••• 
+    function ouvrirMenu() {
+        document.getElementById('menu-overlay').style.display = 'block';
+    }
+
+    function fermerMenu() {
+        document.getElementById('menu-overlay').style.display = 'none';
+    }
+
+    // ✅ Partager via WhatsApp
+    function partagerPublication() {
+        const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
+        const message = "Regarde cette publication sur Naïhab ! 👑 " + lien;
+        window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
+        fermerMenu();
+    }
+
+    // ✅ Copier le lien
+    function copierLien() {
+        const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
+        navigator.clipboard.writeText(lien).then(() => {
+            alert("Lien copié ! 🔗");
+        });
+        fermerMenu();
     }
 </script>
 </body>

@@ -149,7 +149,7 @@
             <div class="action-btn" onclick="window.location.href='commentaires.html'">
                 <span>💬</span> <small>23</small>
             </div>
-            <div class="action-btn">
+            <div class="action-btn" onclick="partager()">
                 <span>✈️</span>
             </div>
         </div>
@@ -210,7 +210,7 @@
                                 <div class="action-btn" onclick="window.location.href='commentaires.html'">
                                     <span>💬</span> <small>0</small>
                                 </div>
-                                <div class="action-btn">
+                                <div class="action-btn" onclick="partager()">
                                     <span>✈️</span>
                                 </div>
                             </div>
@@ -222,6 +222,13 @@
         };
 
         // ✅ Supprimer un post
+        // ✅ Partager via WhatsApp
+        function partager() {
+            const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
+            const message = "Regarde cette publication sur Naïhab ! 👑 " + lien;
+            window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
+        }
+
         function supprimerPost(index) {
             if (confirm("Supprimer cette publication ?")) {
                 let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];

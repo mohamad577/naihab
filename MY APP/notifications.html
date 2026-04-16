@@ -120,38 +120,12 @@
         <span style="font-size: 12px; color: var(--gold); font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;" onclick="ToutLire()">Tout lire</span>
     </header>
 
-    <div id="liste-notifs">
-        <div class="notif-item">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="avatar-notif" alt="Julie">
-            <div class="content">
-                <div class="message"><b>Julie</b> a aimé votre vidéo.</div>
-                <div class="temps">Il y a 2 min</div>
-            </div>
-            <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
-        </div>
+    <div id="liste-notifs"></div>
 
-        <div class="notif-item">
-            <div class="icon-cercle" style="background: linear-gradient(135deg, #ffcc00, #ff9900); color: #1a0b5a;">🏆</div>
-            <div class="content">
-                <div class="message"><b>Système</b> : Vous avez gagné la couronne !</div>
-                <div class="temps">Il y a 1 heure</div>
-            </div>
-            <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
-        </div>
-
-        <div class="notif-item">
-            <div class="icon-cercle" style="background: rgba(255,255,255,0.1);">💬</div>
-            <div class="content">
-                <div class="message"><b>Jackson_Dev</b> a commenté votre post.</div>
-                <div class="temps">Il y a 3 heures</div>
-            </div>
-            <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
-        </div>
-    </div>
-
-    <div id="empty-msg">
-        <div style="font-size: 50px; margin-bottom: 15px;">✨</div>
-        <p style="font-weight: 600;">Tout est à jour !</p>
+    <div id="empty-msg" style="text-align: center; padding: 80px 20px; opacity: 0.5;">
+        <div style="font-size: 50px; margin-bottom: 15px;">🔔</div>
+        <p style="font-weight: 600;">Pas encore de notifications</p>
+        <p style="font-size: 13px;">Tes notifications apparaîtront ici</p>
     </div>
 
     <nav class="nav-bas">
@@ -165,6 +139,66 @@
     </nav>
 
     <script>
+        // ✅ Charger les notifications depuis localStorage
+        window.onload = function() {
+            const notifs = JSON.parse(localStorage.getItem('naihab_notifs')) || [];
+            const liste = document.getElementById('liste-notifs');
+            const badge = document.getElementById('badge-notif');
+            const emptyMsg = document.getElementById('empty-msg');
+
+            if (notifs.length > 0) {
+                emptyMsg.style.display = 'none';
+                notifs.forEach((notif, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'notif-item';
+                    div.innerHTML = `
+                        <div class="icon-cercle" style="background: rgba(255,255,255,0.1);">${notif.icone}</div>
+                        <div class="content">
+                            <div class="message">${notif.message}</div>
+                            <div class="temps">${notif.temps}</div>
+                        </div>
+                        <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
+                    `;
+                    liste.appendChild(div);
+                });
+                if (badge) badge.innerText = notifs.length;
+            } else {
+                emptyMsg.style.display = 'block';
+                if (badge) badge.style.display = 'none';
+            }
+
+            // ✅ Vérifier si tu as gagné la couronne
+            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
+            const nomUser = localStorage.getItem('user_name') || '';
+            if (gagnant && gagnant.auteur === nomUser) {
+                ajouterNotif('🏆', '<b>Système</b> : Tu as gagné la couronne cette session ! 👑', 'Maintenant');
+            }
+        };
+
+        // ✅ Ajouter une notification
+        function ajouterNotif(icone, message, temps) {
+            const liste = document.getElementById('liste-notifs');
+            const emptyMsg = document.getElementById('empty-msg');
+            const badge = document.getElementById('badge-notif');
+
+            emptyMsg.style.display = 'none';
+            const div = document.createElement('div');
+            div.className = 'notif-item';
+            div.innerHTML = `
+                <div class="icon-cercle" style="background: linear-gradient(135deg, #ffcc00, #ff9900); color: #1a0b5a;">${icone}</div>
+                <div class="content">
+                    <div class="message">${message}</div>
+                    <div class="temps">${temps}</div>
+                </div>
+                <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
+            `;
+            liste.prepend(div);
+            if (badge) {
+                badge.style.display = 'block';
+                badge.innerText = document.querySelectorAll('.notif-item').length;
+            }
+        }
+
         function ToutLire() {
             const badge = document.getElementById('badge-notif');
             if (badge) {
@@ -177,21 +211,16 @@
             const item = element.parentElement;
             const badge = document.getElementById('badge-notif');
             
-            // Animation de sortie élégante
             item.style.opacity = "0";
             item.style.transform = "translateX(100px)";
             
             setTimeout(() => {
                 item.remove();
-                
-                // Mise à jour du badge
                 let count = document.querySelectorAll('.notif-item').length;
                 if (badge) {
                     badge.innerText = count;
                     if (count === 0) badge.style.display = 'none';
                 }
-
-                // Si plus de notifs, afficher l'état vide
                 if (count === 0) {
                     document.getElementById('empty-msg').style.display = 'block';
                 }

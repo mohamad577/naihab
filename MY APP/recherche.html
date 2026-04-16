@@ -119,6 +119,30 @@
     </nav>
 
     <script>
+        // ✅ Charger le profil de l'utilisateur connecté dans la recherche
+        window.onload = function() {
+            const nomSauve = localStorage.getItem("user_name");
+            const photoSauve = localStorage.getItem("user_photo") || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+            if (nomSauve) {
+                const container = document.getElementById('resultsContainer');
+                const monProfil = document.createElement('div');
+                monProfil.className = 'user-item-result';
+                monProfil.setAttribute('data-name', nomSauve.toLowerCase());
+                monProfil.style.display = 'none';
+                monProfil.style.cursor = 'pointer';
+                monProfil.onclick = () => window.location.href = `profil.html`;
+                monProfil.innerHTML = `
+                    <div style="padding:15px; display:flex; justify-content:space-between; width:100%; align-items:center; gap:12px;">
+                        <img src="${photoSauve}" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--gold); object-fit:cover;">
+                        <b style="flex:1;">${nomSauve} <span style="color:var(--gold); font-size:11px;">• Moi</span></b>
+                        <span style="color:var(--gold)">VOIR ❯</span>
+                    </div>
+                `;
+                container.insertBefore(monProfil, container.firstChild);
+            }
+        };
+
         function filtrerTout() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let profiles = document.getElementsByClassName('user-item-result');
@@ -126,9 +150,8 @@
             let noResults = document.getElementById('noResults');
             let hasVisibleProfile = false;
 
-            // Si on commence à taper (2 lettres ou plus)
             if (input.length >= 2) {
-                grid.style.display = "none"; // On cache les photos de découverte
+                grid.style.display = "none";
                 
                 for (let i = 0; i < profiles.length; i++) {
                     let name = profiles[i].getAttribute('data-name').toLowerCase();
@@ -140,15 +163,13 @@
                     }
                 }
                 
-                // Afficher "Aucun résultat" si besoin
                 noResults.style.display = hasVisibleProfile ? "none" : "block";
 
             } else {
-                // Si la barre est vide ou < 2 lettres
-                grid.style.display = "grid"; // On remet les photos
+                grid.style.display = "grid";
                 noResults.style.display = "none";
                 for (let i = 0; i < profiles.length; i++) {
-                    profiles[i].style.display = "none"; // On cache les profils
+                    profiles[i].style.display = "none";
                 }
             }
         }
