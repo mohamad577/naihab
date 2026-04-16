@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Accueil</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            padding-bottom: 90px;
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header { 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            background: rgba(26, 11, 90, 0.95); 
+            z-index: 1000; 
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h2 {
+            font-size: 24px;
+            margin: 0;
+            color: var(--gold);
+            font-weight: 900;
+        }
+
+        .header-icons { display: flex; gap: 18px; align-items: center; }
+        
+        /* Status Box */
+        .status-box { 
+            padding: 12px 18px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            background: var(--glass); 
+            margin: 15px; 
+            border-radius: 25px; 
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-mini-img { 
+            width: 35px; height: 35px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid var(--gold); 
+        }
+
+        /* Winner Banner */
+        .winner-box {
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            margin: 0 15px 20px 15px;
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #1a0b5a;
+            position: relative;
+        }
+
+        .close-winner {
+            position: absolute; top: 10px; right: 15px;
+            font-size: 22px; cursor: pointer; line-height: 1;
+        }
+
+        .winner-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; }
+
+        /* Post Structure */
+        .post { 
+            background: rgba(255,255,255,0.02); 
+            margin-bottom: 25px; 
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .post-header { padding: 12px 15px; display: flex; align-items: center; gap: 12px; }
+        .post-img { width: 100%; height: auto; display: block; cursor: pointer; }
+        .post-actions { padding: 15px; display: flex; gap: 25px; align-items: center; }
+        .action-btn { cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+
+        /* Navigation */
+        .nav-bas { 
+            position: fixed; bottom: 0; width: 100%; height: 70px; 
+            background: #0d124a; 
+            display: flex; justify-content: space-around; align-items: center; 
+            z-index: 9999; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-link { text-decoration: none; font-size: 24px; opacity: 0.5; transition: 0.3s; color: white; }
+        .nav-link.active { opacity: 1; color: var(--gold); transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h2>Naïhab</h2>
+        <div class="header-icons">
+            <span style="font-size: 28px; cursor: pointer; color: var(--gold);" onclick="window.location.href='creer-post.html'">⊕</span>
+            <span onclick="window.location.href='discussions.html'" style="font-size: 22px; cursor: pointer;">📩</span>
+        </div>
+    </header>
+
+    <div class="status-box" onclick="window.location.href='creer-post.html'">
+        <img src="logo_naihab.svg" id="ma-photo-accueil" class="user-mini-img" alt="Profil">
+        <span style="opacity:0.6; font-size: 14px;">Quoi de neuf ?</span>
+    </div>
+
+    <div class="winner-box" id="banner-winner" style="display:none;">
+        <span class="close-winner" onclick="fermerBanniere(event)">×</span>
+        <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="allerVersGagnant()">
+            <img id="winner-img" src="" class="winner-img" alt="Gagnant">
+            <div>
+                <span style="font-size: 10px; font-weight: 800; text-transform: uppercase;">🏆 Star de la session</span>
+                <b id="winner-nom" style="display: block; font-size: 15px;">👑</b>
+                <span id="winner-votes" style="font-size: 11px; opacity: 0.7;"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="flux-posts"></div>
+
+    <article class="post">
+        <div class="post-header">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="User">
+            <b style="font-size: 14px;">Julie <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• 2h</span></b>
+        </div>
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800" class="post-img" onclick="window.location.href='publication.html'" alt="Post">
+        <div class="post-actions">
+            <div class="action-btn" onclick="toggleLike(this)">
+                <span class="heart">🤍</span> <small>124</small>
+            </div>
+            <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                <span>💬</span> <small>23</small>
+            </div>
+            <div class="action-btn" onclick="partager()">
+                <span>✈️</span>
+            </div>
+        </div>
+    </article>
+
+    <nav class="nav-bas">
+        <a href="chats.html" class="nav-link active">🏠</a>
+        <a href="recherche.html" class="nav-link">🔍</a>
+        <a href="videos.html" class="nav-link">▶️</a>
+        <a href="notifications.html" class="nav-link">🔔</a>
+        <a href="profil.html" class="nav-link">👤</a>
+    </nav>
+
+    <script>
+        window.onload = function() {
+            const photoSauve = localStorage.getItem("user_photo");
+            const nomSauve = localStorage.getItem("user_name") || "Moi";
+            if (photoSauve) {
+                document.getElementById("ma-photo-accueil").src = photoSauve;
+            }
+
+            // ✅ Bannière gagnant dynamique
+            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
+            const banniere = document.getElementById('banner-winner');
+            const banniereCache = localStorage.getItem('naihab_banniere_fermee');
+
+            if (gagnant && gagnant.nbVotes > 0 && !banniereCache) {
+                document.getElementById('winner-nom').innerText = '@' + gagnant.auteur + ' 👑';
+                document.getElementById('winner-votes').innerText = gagnant.nbVotes + ' votes cette session';
+                // Photo de profil du gagnant si disponible
+                const photoGagnant = localStorage.getItem('naihab_photo_' + gagnant.auteur) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100';
+                document.getElementById('winner-img').src = photoGagnant;
+                banniere.style.display = 'flex';
+            }
+
+            // --- POSTS ---
+            const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+            const zoneFlux = document.getElementById('flux-posts');
+            const photoActuelle = localStorage.getItem("user_photo") || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+            if (mesPosts.length > 0) {
+                mesPosts.forEach((post, index) => {
+                    const postHTML = `
+                        <article class="post" id="post-${index}">
+                            <div class="post-header">
+                                <img src="${photoActuelle}" style="width:36px; height:36px; border-radius:50%; border:1px solid var(--gold); object-fit:cover;">
+                                <b style="font-size: 14px; flex:1;">${nomSauve} <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• Nouveau</span></b>
+                                <span onclick="supprimerPost(${index})" style="font-size:20px; opacity:0.4; cursor:pointer; padding: 5px;">🗑️</span>
+                            </div>
+                            <img src="${post.image}" class="post-img">
+                            <div style="padding: 0 15px 10px 15px; font-size: 13px; opacity: 0.9;">
+                                ${post.texte}
+                            </div>
+                            <div class="post-actions">
+                                <div class="action-btn" onclick="toggleLike(this)">
+                                    <span class="heart">🤍</span> <small>0</small>
+                                </div>
+                                <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                                    <span>💬</span> <small>0</small>
+                                </div>
+                                <div class="action-btn" onclick="partager()">
+                                    <span>✈️</span>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                    zoneFlux.innerHTML += postHTML;
+                });
+            }
+        };
+
+        // ✅ Supprimer un post
+        // ✅ Partager via WhatsApp
+        function partager() {
+            const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
+            const message = "Regarde cette publication sur Naïhab ! 👑 " + lien;
+            window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
+        }
+
+        function supprimerPost(index) {
+            if (confirm("Supprimer cette publication ?")) {
+                let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+                mesPosts.splice(index, 1);
+                localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
+                document.getElementById('post-' + index).remove();
+            }
+        }
+
+        function allerVersGagnant() {
+            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
+            if (gagnant && gagnant.index !== undefined) {
+                window.location.href = 'videos.html?gagnant=' + gagnant.index;
+            } else {
+                window.location.href = 'videos.html';
+            }
+        }
+
+        function fermerBanniere(e) {
+            e.stopPropagation();
+            document.getElementById('banner-winner').style.display = 'none';
+            localStorage.setItem('naihab_banniere_fermee', 'oui');
+        }
+
+        function toggleLike(el) {
+            const heart = el.querySelector('.heart');
+            const count = el.querySelector('small');
+            let num = parseInt(count.innerText);
+            
+            if (heart.innerText === '🤍') {
+                heart.innerText = '❤️';
+                count.innerText = num + 1;
+                el.style.color = "#ff4757";
+            } else {
+                heart.innerText = '🤍';
+                count.innerText = num - 1;
+                el.style.color = "white";
+            }
+        }
+    </script>
+</body>
+</html>

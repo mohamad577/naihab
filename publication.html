@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab - Publication</title>
+    <style>
+        :root {
+            --bg-deep: #1a0b5a;
+            --gold: #ffcc00;
+            --heart: #ff4757;
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-deep); 
+            font-family: 'Segoe UI', sans-serif; 
+            color: white; 
+            overflow-x: hidden;
+        }
+        
+        /* Header Flottant */
+        .header { 
+            padding: 15px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            background: rgba(26, 11, 90, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .back-btn { text-decoration: none; font-size: 20px; color: var(--gold); font-weight: bold; }
+        .header h3 { font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+        .container { max-width: 500px; margin: 0 auto; background: rgba(0,0,0,0.2); min-height: 100vh; }
+
+        /* Infos de l'auteur stylisées */
+        .author-box { 
+            padding: 15px 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+        }
+        .author-info { display: flex; align-items: center; gap: 12px; }
+        .author-img { 
+            width: 40px; height: 40px; 
+            border-radius: 50%; 
+            border: 2px solid var(--gold); 
+            object-fit: cover; 
+        }
+        .author-name { font-weight: 700; font-size: 15px; }
+        .more-options { opacity: 0.5; font-size: 20px; cursor: pointer; }
+
+        /* Image plein écran */
+        .main-img-container {
+            width: 100%;
+            background: #000;
+            line-height: 0;
+        }
+        .main-img { 
+            width: 100%; 
+            height: auto;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        /* Zone d'interaction */
+        .actions { padding: 20px; }
+        
+        .btns { 
+            display: flex; 
+            gap: 20px; 
+            margin-bottom: 15px; 
+        }
+        .btn-item { 
+            cursor: pointer; 
+            font-size: 26px; 
+            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .btn-item:active { transform: scale(1.3); }
+        
+        .stats { 
+            font-size: 14px; 
+            font-weight: 800; 
+            margin-bottom: 8px; 
+            color: white;
+        }
+        
+        .caption { 
+            font-size: 14px; 
+            line-height: 1.5; 
+            opacity: 0.9; 
+        }
+        .caption b { color: var(--gold); margin-right: 5px; }
+
+        .date-post { 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            opacity: 0.4; 
+            margin-top: 15px; 
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" onclick="window.history.back();" class="back-btn">←</a>
+        <h3 style="margin:0">Publication</h3>
+    </div>
+
+    <div class="container">
+        <div class="author-box">
+            <div class="author-info">
+                <img id="author-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="author-img">
+                <div class="author-name" id="author-name">Naïfan</div>
+            </div>
+            <div class="more-options" onclick="ouvrirMenu()">•••</div>
+        </div>
+
+        <!-- Menu ••• -->
+        <div id="menu-overlay" onclick="fermerMenu()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+            <div id="menu-options" style="position:absolute; bottom:0; width:100%; background:#0d124a; border-radius:25px 25px 0 0; padding:20px; box-sizing:border-box; transform:translateY(0);">
+                <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
+                <div onclick="partagerPublication()" style="padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">✈️ Partager cette publication</div>
+                <div onclick="copierLien()" style="padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">🔗 Copier le lien</div>
+                <button onclick="fermerMenu()" style="width:100%; margin-top:15px; padding:15px; border-radius:15px; border:none; background:rgba(255,255,255,0.1); color:white; font-weight:bold; cursor:pointer;">Annuler</button>
+            </div>
+        </div>
+
+        <div class="main-img-container">
+            <img id="main-img" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800" class="main-img">
+        </div>
+
+        <div class="actions">
+            <div class="btns">
+                <div class="btn-item" onclick="toggleLike(this)">
+                    <span class="heart">🤍</span>
+                </div>
+                <div class="btn-item" onclick="window.location.href='commentaires.html'">
+                    <span>💬</span>
+                </div>
+                <div class="btn-item" onclick="partagerPublication()">
+                    <span>✈️</span>
+                </div>
+            </div>
+
+            <div class="stats"><span id="nb-likes">0</span> J'aime • <span id="nb-commentaires">0</span> Commentaires</div>
+            
+            <div class="caption">
+                <b id="caption-nom">Naïfan</b> <span id="caption-texte"></span>
+            </div>
+
+            <div class="date-post" id="date-post">Naïhab</div>
+        </div>
+    </div>
+
+<script>
+    window.onload = function() {
+        const nomSauve = localStorage.getItem("user_name") || "Naïfan";
+        const photoSauve = localStorage.getItem("user_photo");
+        const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+
+        // ✅ Charger le bon post
+        if (mesPosts.length > 0) {
+            const post = mesPosts[0];
+            document.getElementById('main-img').src = post.image;
+            document.getElementById('caption-texte').innerText = post.texte || "";
+            document.getElementById('date-post').innerText = "Publié le " + (post.date || "aujourd'hui") + " • Naïhab";
+        }
+
+        // ✅ Infos auteur correctes
+        document.getElementById('author-name').innerText = nomSauve;
+        document.getElementById('caption-nom').innerText = nomSauve;
+        if (photoSauve) {
+            document.getElementById('author-img').src = photoSauve;
+        }
+
+        // ✅ Charger le vrai nombre de commentaires
+        const commentaires = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+        document.getElementById('nb-commentaires').innerText = commentaires.length;
+    };
+
+    function toggleLike(element) {
+        const heart = element.querySelector('.heart');
+        const affichageLikes = document.getElementById('nb-likes');
+        let nombreActuel = parseInt(affichageLikes.innerText);
+
+        if (heart.innerText === '🤍') {
+            heart.innerText = '❤️';
+            element.style.color = "#ff4757";
+            affichageLikes.innerText = nombreActuel + 1;
+            heart.animate([
+                { transform: 'scale(1)' },
+                { transform: 'scale(1.5)' },
+                { transform: 'scale(1)' }
+            ], { duration: 300 });
+        } else {
+            heart.innerText = '🤍';
+            element.style.color = "white";
+            affichageLikes.innerText = nombreActuel - 1;
+        }
+    }
+
+    // ✅ Menu ••• 
+    function ouvrirMenu() {
+        document.getElementById('menu-overlay').style.display = 'block';
+    }
+
+    function fermerMenu() {
+        document.getElementById('menu-overlay').style.display = 'none';
+    }
+
+    // ✅ Partager via WhatsApp
+    function partagerPublication() {
+        const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
+        const message = "Regarde cette publication sur Naïhab ! 👑 " + lien;
+        window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
+        fermerMenu();
+    }
+
+    // ✅ Copier le lien
+    function copierLien() {
+        const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
+        navigator.clipboard.writeText(lien).then(() => {
+            alert("Lien copié ! 🔗");
+        });
+        fermerMenu();
+    }
+</script>
+</body>
+</html>
