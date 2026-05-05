@@ -58,7 +58,7 @@
         .actions { 
             position: absolute; 
             right: 12px; 
-            bottom: 90px; 
+            bottom: 85px; 
             display: flex; 
             flex-direction: column; 
             gap: 20px; 
@@ -97,11 +97,10 @@
 
         .video-info { 
             position: absolute; 
-            bottom: 85px; 
+            bottom: 160px; 
             left: 15px; 
             color: white; 
-            z-index: 10;
-            padding-bottom: 10px;
+            z-index: 10; 
         }
         
         .user-name { 
@@ -138,8 +137,6 @@
 <body>
 
     <div class="video-container" id="mainVideoContainer">
-        
-        <div id="mes-videos-dynamiques"></div>
 
         <div class="video-card">
             <video loop onclick="gererLecture(this)" autoplay muted playsinline>
@@ -155,6 +152,9 @@
                 </div>
                 <div class="action-btn" onclick="voter(this)">
                     <div class="icon-bg crown-box">👑</div><p class="vote-count">128</p>
+                </div>
+                <div class="action-btn" onclick="partagerWhatsApp()">
+                    <div class="icon-bg">📤</div><p>Partager</p>
                 </div>
             </div>
             <div class="video-info">
@@ -180,7 +180,7 @@
 
         window.onload = function() {
             const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
-            const zoneDynamique = document.getElementById('mes-videos-dynamiques');
+            const container = document.getElementById('mainVideoContainer');
 
             if (mesVideos.length > 0) {
                 mesVideos.forEach((vid, index) => {
@@ -188,28 +188,36 @@
                     const dejaVote = votes.includes(monId);
                     const nbVotes = votes.length;
 
-                    const videoHTML = `
-                        <div class="video-card" id="video-card-${index}">
-                            <video loop onclick="gererLecture(this)" muted playsinline>
-                                <source src="${vid.url}" type="video/mp4">
-                            </video>
-                            <div class="overlay"></div>
-                            <div class="actions">
-                                <div class="action-btn" onclick="toggleLike(this)">
-                                    <div class="icon-bg heart-icon">🤍</div><p class="count">0</p>
-                                </div>
-                                <div class="action-btn" onclick="voter(this, ${index})">
-                                    <div class="icon-bg crown-box ${dejaVote ? 'crown-active' : ''}">👑</div>
-                                    <p class="vote-count">${nbVotes}</p>
-                                </div>
+                    const carte = document.createElement('div');
+                    carte.className = 'video-card';
+                    carte.id = 'video-card-' + index;
+                    carte.innerHTML = `
+                        <video loop onclick="gererLecture(this)" muted playsinline style="height:100%; width:100%; object-fit:cover;">
+                            <source src="${vid.url}" type="video/mp4">
+                        </video>
+                        <div class="overlay"></div>
+                        <div class="actions">
+                            <div class="action-btn" onclick="toggleLike(this)">
+                                <div class="icon-bg heart-icon">🤍</div><p class="count">0</p>
                             </div>
-                            <div class="video-info">
-                                <div class="user-name">@${vid.auteur}</div>
-                                <div class="description">${vid.titre}</div>
+                            <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                                <div class="icon-bg">💬</div><p>0</p>
+                            </div>
+                            <div class="action-btn" onclick="voter(this, ${index})">
+                                <div class="icon-bg crown-box ${dejaVote ? 'crown-active' : ''}">👑</div>
+                                <p class="vote-count">${nbVotes}</p>
+                            </div>
+                            <div class="action-btn" onclick="partagerWhatsApp()">
+                                <div class="icon-bg">📤</div><p>Partager</p>
                             </div>
                         </div>
+                        <div class="video-info">
+                            <div class="user-name">@${vid.auteur} 🎬</div>
+                            <div class="description">${vid.titre || ''}</div>
+                        </div>
                     `;
-                    zoneDynamique.innerHTML += videoHTML;
+                    // ✅ Insérer AVANT la vidéo démo
+                    container.insertBefore(carte, container.firstChild);
                 });
             }
 
@@ -310,6 +318,12 @@
             `;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
+        }
+        // ✅ Partager sur WhatsApp
+        function partagerWhatsApp() {
+            const lien = window.location.href;
+            const message = encodeURIComponent("Regarde cette vidéo sur Naïhab ! 🎥👑\n" + lien);
+            window.open("https://wa.me/?text=" + message, "_blank");
         }
     </script>
 </body>

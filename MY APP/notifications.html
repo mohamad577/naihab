@@ -141,7 +141,17 @@
     <script>
         // ✅ Charger les notifications depuis localStorage
         window.onload = function() {
-            const notifs = JSON.parse(localStorage.getItem('naihab_notifs')) || [];
+            // Notifs de base si vide
+            let notifs = JSON.parse(localStorage.getItem('naihab_notifs'));
+            if (!notifs) {
+                notifs = [
+                    { icone: '❤️', message: '<b>Marc_King</b> a aimé ta publication', temps: 'Il y a 2 min' },
+                    { icone: '👤', message: '<b>Angela_Queen</b> a commencé à te suivre', temps: 'Il y a 10 min' },
+                    { icone: '💬', message: '<b>Julie_Naïfan</b> a commenté ta vidéo', temps: 'Il y a 1h' }
+                ];
+                localStorage.setItem('naihab_notifs', JSON.stringify(notifs));
+            }
+
             const liste = document.getElementById('liste-notifs');
             const badge = document.getElementById('badge-notif');
             const emptyMsg = document.getElementById('empty-msg');
@@ -157,7 +167,7 @@
                             <div class="message">${notif.message}</div>
                             <div class="temps">${notif.temps}</div>
                         </div>
-                        <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
+                        <span class="btn-delete" onclick="supprimerNotif(this, ${index})">×</span>
                     `;
                     liste.appendChild(div);
                 });
@@ -207,7 +217,7 @@
             }
         }
 
-        function supprimerNotif(element) {
+        function supprimerNotif(element, index) {
             const item = element.parentElement;
             const badge = document.getElementById('badge-notif');
             
@@ -216,6 +226,11 @@
             
             setTimeout(() => {
                 item.remove();
+                // ✅ Mettre à jour localStorage
+                let notifs = JSON.parse(localStorage.getItem('naihab_notifs')) || [];
+                notifs.splice(index, 1);
+                localStorage.setItem('naihab_notifs', JSON.stringify(notifs));
+
                 let count = document.querySelectorAll('.notif-item').length;
                 if (badge) {
                     badge.innerText = count;

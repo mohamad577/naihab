@@ -77,12 +77,7 @@
             overflow: hidden;
         }
 
-        .strength-fill {
-            height: 100%;
-            width: 85%; /* Simule un mot de passe fort */
-            background: #00ff88; /* Vert fluo pour la sécurité */
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
+        .strength-fill { height: 100%; width: 0%; background: #ff5252; transition: 0.4s; }
 
         .strength-text {
             font-size: 11px;
@@ -116,20 +111,55 @@
         
         <div class="input-group">
             <label>Nouveau mot de passe</label>
-            <input type="password" placeholder="Minimum 8 caractères">
+            <input type="password" id="mdp1" placeholder="Minimum 8 caractères" oninput="verifierForce(this.value)">
             <div class="strength-container">
-                <div class="strength-bar"><div class="strength-fill"></div></div>
-                <span class="strength-text">TRÈS FORT ✅</span>
+                <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                <span class="strength-text" id="strength-text">EN ATTENTE</span>
             </div>
         </div>
 
         <div class="input-group" style="margin-top: 10px;">
             <label>Confirmer le secret</label>
-            <input type="password" placeholder="Répète ton mot de passe">
+            <input type="password" id="mdp2" placeholder="Répète ton mot de passe">
         </div>
 
-        <button class="btn-finish" onclick="window.location.href='chats.html'">FINALISER MON COMPTE</button>
+        <button class="btn-finish" onclick="finaliser()">FINALISER MON COMPTE</button>
     </div>
 
+<script>
+    function verifierForce(mdp) {
+        const fill = document.getElementById('strength-fill');
+        const text = document.getElementById('strength-text');
+        let score = 0;
+        if (mdp.length >= 8) score++;
+        if (/[A-Z]/.test(mdp)) score++;
+        if (/[0-9]/.test(mdp)) score++;
+        if (/[^A-Za-z0-9]/.test(mdp)) score++;
+
+        const niveaux = [
+            { w: '0%',   color: '#ff5252', label: 'EN ATTENTE' },
+            { w: '25%',  color: '#ff5252', label: 'FAIBLE ❌' },
+            { w: '50%',  color: '#ffcc00', label: 'MOYEN ⚠️' },
+            { w: '75%',  color: '#00ccff', label: 'BON 👍' },
+            { w: '100%', color: '#00ff88', label: 'TRÈS FORT ✅' }
+        ];
+
+        const n = mdp.length === 0 ? niveaux[0] : niveaux[score];
+        fill.style.width = n.w;
+        fill.style.background = n.color;
+        fill.style.boxShadow = `0 0 8px ${n.color}55`;
+        text.style.color = n.color;
+        text.innerText = n.label;
+    }
+
+    function finaliser() {
+        const m1 = document.getElementById('mdp1').value;
+        const m2 = document.getElementById('mdp2').value;
+        if (m1.length < 8) { alert("Ton mot de passe doit avoir au moins 8 caractères !"); return; }
+        if (m1 !== m2) { alert("Les deux mots de passe ne sont pas identiques !"); return; }
+        localStorage.setItem('user_mdp', m1);
+        window.location.href = 'chats.html';
+    }
+</script>
 </body>
 </html>

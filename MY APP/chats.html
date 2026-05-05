@@ -199,7 +199,7 @@
                                 <b style="font-size: 14px; flex:1;">${nomSauve} <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• Nouveau</span></b>
                                 <span onclick="supprimerPost(${index})" style="font-size:20px; opacity:0.4; cursor:pointer; padding: 5px;">🗑️</span>
                             </div>
-                            <img src="${post.image}" class="post-img">
+                            <img src="${post.image}" class="post-img" onclick="window.location.href='publication.html?index=${index}'">
                             <div style="padding: 0 15px 10px 15px; font-size: 13px; opacity: 0.9;">
                                 ${post.texte}
                             </div>

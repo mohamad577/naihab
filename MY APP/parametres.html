@@ -176,7 +176,13 @@
     <script>
         function deconnexion() {
             if(confirm("Es-tu sûr de vouloir te déconnecter ?")) {
-                // On repart au tout début du globe
+                // ✅ Effacer les données de session
+                localStorage.removeItem('user_name');
+                localStorage.removeItem('user_photo');
+                localStorage.removeItem('user_bio');
+                localStorage.removeItem('user_mdp');
+                localStorage.removeItem('user_email');
+                localStorage.removeItem('user_tel');
                 window.location.href = 'index.html'; 
             }
         }

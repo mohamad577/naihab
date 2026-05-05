@@ -164,9 +164,12 @@
         const photoSauve = localStorage.getItem("user_photo");
         const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
 
-        // ✅ Charger le bon post
-        if (mesPosts.length > 0) {
-            const post = mesPosts[0];
+        // ✅ Charger le bon post via paramètre URL ?index=
+        const urlParams = new URLSearchParams(window.location.search);
+        const postIndex = parseInt(urlParams.get('index')) || 0;
+
+        if (mesPosts.length > 0 && mesPosts[postIndex]) {
+            const post = mesPosts[postIndex];
             document.getElementById('main-img').src = post.image;
             document.getElementById('caption-texte').innerText = post.texte || "";
             document.getElementById('date-post').innerText = "Publié le " + (post.date || "aujourd'hui") + " • Naïhab";
