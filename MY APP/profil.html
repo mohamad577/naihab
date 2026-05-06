@@ -219,14 +219,36 @@
                 const item = document.createElement('div');
                 item.className = "grid-item";
                 item.id = "grid-post-" + index;
+                item.style.cursor = "pointer";
                 item.innerHTML = `
-                    <img src="${post.image}">
+                    <img src="${post.image}" onclick="window.location.href='publication.html?index=${index}'">
                     <button class="btn-suppr-post" onclick="supprimerPost(${index})">🗑️</button>
                 `;
                 gridPosts.appendChild(item);
             });
-        } else {
-            // ✅ Message quand il n'y a pas encore de posts
+        }
+
+        // ✅ Ajouter les vidéos publiées dans la grille avec icône 🎬
+        const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+        if (mesVideos.length > 0) {
+            if (mesPosts.length === 0) gridPosts.innerHTML = "";
+            document.getElementById('nb-posts').innerText = mesPosts.length + mesVideos.length;
+
+            mesVideos.forEach((vid, index) => {
+                const item = document.createElement('div');
+                item.className = "grid-item";
+                item.style.cursor = "pointer";
+                item.onclick = () => window.location.href = 'videos.html';
+                item.innerHTML = `
+                    <video src="${vid.url}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" muted></video>
+                    <div style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,0.6);border-radius:8px;padding:2px 6px;font-size:12px;">🎬</div>
+                    <button class="btn-suppr-post" onclick="supprimerVideo(event, ${index})">🗑️</button>
+                `;
+                gridPosts.appendChild(item);
+            });
+        }
+        
+        if (mesPosts.length === 0 && mesVideos.length === 0) {
             gridPosts.innerHTML = `
                 <div style="grid-column: span 3; text-align: center; padding: 60px 20px; opacity: 0.4;">
                     <div style="font-size: 45px; margin-bottom: 15px;">📸</div>
@@ -235,6 +257,16 @@
             `;
         }
     };
+
+    function supprimerVideo(event, index) {
+        event.stopPropagation();
+        if (confirm("Supprimer cette vidéo ?")) {
+            let mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+            mesVideos.splice(index, 1);
+            localStorage.setItem('naihab_videos', JSON.stringify(mesVideos));
+            location.reload();
+        }
+    }
 
     function supprimerPost(index) {
         if (confirm("Supprimer cette publication ?")) {
