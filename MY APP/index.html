@@ -19,24 +19,33 @@
             overflow: hidden;
         }
 
-        /* Animation du globe */
+        /* Globe qui tourne correctement */
         .globe-container {
             position: absolute;
-            top: 20%;
+            top: 10%;
             z-index: -1;
-            width: 300px;
-            height: 300px;
-            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Earth_Western_Hemisphere_transparent_background.png/1200px-Earth_Western_Hemisphere_transparent_background.png');
-            background-size: cover;
+            width: 280px;
+            height: 280px;
             border-radius: 50%;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 0 30px rgba(103, 58, 183, 0.5);
-            animation: rotationGlobe 20s linear infinite;
-            opacity: 0.6;
+            overflow: hidden;
+            box-shadow: inset -20px 0 40px rgba(0,0,0,0.6), 
+                        inset 10px 0 30px rgba(103,58,183,0.3),
+                        0 0 60px rgba(103, 58, 183, 0.4);
+            opacity: 0.75;
         }
 
-        @keyframes rotationGlobe {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .globe-surface {
+            width: 200%;
+            height: 100%;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Whole_world_-_land_and_oceans_12000.jpg/2560px-Whole_world_-_land_and_oceans_12000.jpg');
+            background-size: 50% 100%;
+            background-repeat: repeat-x;
+            animation: globeTourne 18s linear infinite;
+        }
+
+        @keyframes globeTourne {
+            from { background-position: 0% 30%; }
+            to { background-position: 100% 30%; }
         }
 
         .top-bar {
@@ -126,7 +135,9 @@
 </head>
 <body>
 
-    <div class="globe-container"></div>
+    <div class="globe-container">
+        <div class="globe-surface"></div>
+    </div>
 
     <div class="top-bar">
         <img id="flag" class="flag-img" src="https://flagcdn.com/w80/fr.png" alt="Drapeau">
