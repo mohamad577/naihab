@@ -141,6 +141,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        // ✅ Redirection vers splash si première visite
+        if (!sessionStorage.getItem('splash_done')) {
+            sessionStorage.setItem('splash_done', 'oui');
+            window.location.href = 'splash.html';
+        }
+
         // ✅ Globe Three.js 3D
         const canvas = document.getElementById('globe-canvas');
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
