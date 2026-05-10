@@ -204,11 +204,11 @@
                                 ${post.texte}
                             </div>
                             <div class="post-actions">
-                                <div class="action-btn" onclick="toggleLike(this)">
-                                    <span class="heart">🤍</span> <small>0</small>
+                                <div class="action-btn" onclick="toggleLike(this, ${index})">
+                                    <span class="heart">${post.liked ? '❤️' : '🤍'}</span> <small>${post.likes || 0}</small>
                                 </div>
-                                <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                                    <span>💬</span> <small>0</small>
+                                <div class="action-btn" onclick="window.location.href='commentaires.html?index=${index}'">
+                                    <span>💬</span> <small id="nb-comm-${index}">${post.commentaires || 0}</small>
                                 </div>
                                 <div class="action-btn" onclick="partager()">
                                     <span>✈️</span>
@@ -253,20 +253,27 @@
             localStorage.setItem('naihab_banniere_fermee', 'oui');
         }
 
-        function toggleLike(el) {
+        function toggleLike(el, index) {
             const heart = el.querySelector('.heart');
             const count = el.querySelector('small');
-            let num = parseInt(count.innerText);
-            
+            let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+            let post = mesPosts[index];
+            if (!post) return;
+
             if (heart.innerText === '🤍') {
                 heart.innerText = '❤️';
-                count.innerText = num + 1;
+                post.likes = (post.likes || 0) + 1;
+                post.liked = true;
                 el.style.color = "#ff4757";
             } else {
                 heart.innerText = '🤍';
-                count.innerText = num - 1;
+                post.likes = Math.max(0, (post.likes || 1) - 1);
+                post.liked = false;
                 el.style.color = "white";
             }
+            count.innerText = post.likes;
+            mesPosts[index] = post;
+            localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
         }
     </script>
 </body>

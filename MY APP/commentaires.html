@@ -182,13 +182,28 @@
     const monNom = localStorage.getItem("user_name") || "Moi";
     const maPhoto = localStorage.getItem("user_photo");
 
-    // ✅ Charger les commentaires sauvegardés
+    // ✅ Récupérer l'index du post depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const postIndex = urlParams.get('index') || '0';
+    const cleCommentaires = 'naihab_commentaires_' + postIndex;
+
     window.onload = function() {
-        const commentairesSauvegardes = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+        const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
         commentairesSauvegardes.forEach((c, index) => afficherCommentaire(c, index, false));
+
+        // ✅ Mettre à jour le compteur dans le post
+        mettreAJourCompteur(commentairesSauvegardes.length);
     };
 
-    // ✅ Afficher un commentaire
+    function mettreAJourCompteur(nb) {
+        // Mettre à jour le post correspondant dans localStorage
+        let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+        if (mesPosts[postIndex]) {
+            mesPosts[postIndex].commentaires = nb;
+            localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
+        }
+    }
+
     function afficherCommentaire(c, index, sauvegarder = true) {
         const zone = document.getElementById('zone-commentaires');
         const estMoi = c.nom === monNom;
@@ -213,31 +228,30 @@
         zone.scrollTo({ top: zone.scrollHeight, behavior: 'smooth' });
 
         if (sauvegarder) {
-            const commentairesSauvegardes = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+            const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
             commentairesSauvegardes.push(c);
-            localStorage.setItem('naihab_commentaires', JSON.stringify(commentairesSauvegardes));
+            localStorage.setItem(cleCommentaires, JSON.stringify(commentairesSauvegardes));
+            mettreAJourCompteur(commentairesSauvegardes.length);
         }
     }
 
-    // ✅ Publier un commentaire
     function publier() {
         const input = document.getElementById('mon-commentaire');
         const texte = input.value.trim();
         if (texte !== "") {
-            const commentairesSauvegardes = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+            const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
             const index = commentairesSauvegardes.length;
             afficherCommentaire({ nom: monNom, photo: maPhoto, texte: texte }, index, true);
             input.value = "";
         }
     }
 
-    // ✅ Supprimer un commentaire
     function supprimerCommentaire(index) {
         if (confirm("Supprimer ce commentaire ?")) {
-            let commentaires = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+            let commentaires = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
             commentaires.splice(index, 1);
-            localStorage.setItem('naihab_commentaires', JSON.stringify(commentaires));
-            // Recharger la page pour mettre à jour les index
+            localStorage.setItem(cleCommentaires, JSON.stringify(commentaires));
+            mettreAJourCompteur(commentaires.length);
             location.reload();
         }
     }

@@ -142,11 +142,26 @@
 
     <div class="favorites-label">Suggestions</div>
     <div class="favorites">
-        <div class="fav-item"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="fav-avatar"><div class="fav-name">Angela</div></div>
-        <div class="fav-item"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" class="fav-avatar"><div class="fav-name">David</div></div>
-        <div class="fav-item"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" class="fav-avatar"><div class="fav-name">Sara</div></div>
-        <div class="fav-item"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="fav-avatar"><div class="fav-name">Cameron</div></div>
-        <div class="fav-item"><img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" class="fav-avatar"><div class="fav-name">Jackson</div></div>
+        <div class="fav-item" onclick="ouvrirChat('Angela', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100')">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="fav-avatar">
+            <div class="fav-name">Angela</div>
+        </div>
+        <div class="fav-item" onclick="ouvrirChat('David', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100')">
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" class="fav-avatar">
+            <div class="fav-name">David</div>
+        </div>
+        <div class="fav-item" onclick="ouvrirChat('Sara', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100')">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" class="fav-avatar">
+            <div class="fav-name">Sara</div>
+        </div>
+        <div class="fav-item" onclick="ouvrirChat('Cameron', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100')">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="fav-avatar">
+            <div class="fav-name">Cameron</div>
+        </div>
+        <div class="fav-item" onclick="ouvrirChat('Jackson', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100')">
+            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" class="fav-avatar">
+            <div class="fav-name">Jackson</div>
+        </div>
     </div>
 
     <div class="messages-section">
@@ -172,6 +187,12 @@
             nonLu: false
         }
     ];
+
+    function ouvrirChat(nom, avatar) {
+        localStorage.setItem('naihab_contact_actif', nom);
+        localStorage.setItem('naihab_contact_avatar', avatar);
+        window.location.href = 'message-prive.html';
+    }
 
     window.onload = function() {
         const liste = document.getElementById('liste-conversations');

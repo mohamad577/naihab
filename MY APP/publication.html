@@ -159,31 +159,39 @@
     </div>
 
 <script>
+    let postIndex = 0;
+
     window.onload = function() {
         const nomSauve = localStorage.getItem("user_name") || "Naïfan";
         const photoSauve = localStorage.getItem("user_photo");
         const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
 
-        // ✅ Charger le bon post via paramètre URL ?index=
         const urlParams = new URLSearchParams(window.location.search);
-        const postIndex = parseInt(urlParams.get('index')) || 0;
+        postIndex = parseInt(urlParams.get('index')) || 0;
 
         if (mesPosts.length > 0 && mesPosts[postIndex]) {
             const post = mesPosts[postIndex];
             document.getElementById('main-img').src = post.image;
             document.getElementById('caption-texte').innerText = post.texte || "";
             document.getElementById('date-post').innerText = "Publié le " + (post.date || "aujourd'hui") + " • Naïhab";
+
+            // ✅ Likes sauvegardés
+            const nbLikes = post.likes || 0;
+            document.getElementById('nb-likes').innerText = nbLikes;
+            if (post.liked) {
+                document.querySelector('.heart').innerText = '❤️';
+            }
         }
 
-        // ✅ Infos auteur correctes
+        // ✅ Nom et photo corrects
         document.getElementById('author-name').innerText = nomSauve;
         document.getElementById('caption-nom').innerText = nomSauve;
         if (photoSauve) {
             document.getElementById('author-img').src = photoSauve;
         }
 
-        // ✅ Charger le vrai nombre de commentaires
-        const commentaires = JSON.parse(localStorage.getItem('naihab_commentaires')) || [];
+        // ✅ Commentaires du bon post
+        const commentaires = JSON.parse(localStorage.getItem('naihab_commentaires_' + postIndex)) || [];
         document.getElementById('nb-commentaires').innerText = commentaires.length;
     };
 
@@ -191,21 +199,22 @@
         const heart = element.querySelector('.heart');
         const affichageLikes = document.getElementById('nb-likes');
         let nombreActuel = parseInt(affichageLikes.innerText);
+        let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
 
         if (heart.innerText === '🤍') {
             heart.innerText = '❤️';
             element.style.color = "#ff4757";
-            affichageLikes.innerText = nombreActuel + 1;
-            heart.animate([
-                { transform: 'scale(1)' },
-                { transform: 'scale(1.5)' },
-                { transform: 'scale(1)' }
-            ], { duration: 300 });
+            nombreActuel++;
+            if (mesPosts[postIndex]) { mesPosts[postIndex].likes = nombreActuel; mesPosts[postIndex].liked = true; }
+            heart.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.5)' }, { transform: 'scale(1)' }], { duration: 300 });
         } else {
             heart.innerText = '🤍';
             element.style.color = "white";
-            affichageLikes.innerText = nombreActuel - 1;
+            nombreActuel = Math.max(0, nombreActuel - 1);
+            if (mesPosts[postIndex]) { mesPosts[postIndex].likes = nombreActuel; mesPosts[postIndex].liked = false; }
         }
+        affichageLikes.innerText = nombreActuel;
+        localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
     }
 
     // ✅ Menu ••• 

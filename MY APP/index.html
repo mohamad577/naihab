@@ -19,33 +19,14 @@
             overflow: hidden;
         }
 
-        /* Globe qui tourne correctement */
-        .globe-container {
+        /* Globe Three.js */
+        #globe-canvas {
             position: absolute;
-            top: 10%;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: -1;
-            width: 280px;
-            height: 280px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: inset -20px 0 40px rgba(0,0,0,0.6), 
-                        inset 10px 0 30px rgba(103,58,183,0.3),
-                        0 0 60px rgba(103, 58, 183, 0.4);
-            opacity: 0.75;
-        }
-
-        .globe-surface {
-            width: 200%;
-            height: 100%;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Whole_world_-_land_and_oceans_12000.jpg/2560px-Whole_world_-_land_and_oceans_12000.jpg');
-            background-size: 50% 100%;
-            background-repeat: repeat-x;
-            animation: globeTourne 18s linear infinite;
-        }
-
-        @keyframes globeTourne {
-            from { background-position: 0% 30%; }
-            to { background-position: 100% 30%; }
+            opacity: 0.85;
         }
 
         .top-bar {
@@ -135,9 +116,7 @@
 </head>
 <body>
 
-    <div class="globe-container">
-        <div class="globe-surface"></div>
-    </div>
+    <canvas id="globe-canvas"></canvas>
 
     <div class="top-bar">
         <img id="flag" class="flag-img" src="https://flagcdn.com/w80/fr.png" alt="Drapeau">
@@ -160,7 +139,69 @@
         <div>© 2026 Naïhab - Français</div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        // ✅ Globe Three.js 3D
+        const canvas = document.getElementById('globe-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const size = Math.min(window.innerWidth, 320);
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.z = 2.5;
+
+        // Texture de la Terre
+        const loader = new THREE.TextureLoader();
+        const earthTexture = loader.load(
+            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
+            undefined, undefined,
+            () => {
+                // Si ça échoue, on met une couleur de secours
+                globeMesh.material.color.set(0x1a4a8a);
+            }
+        );
+
+        // Globe
+        const geometry = new THREE.SphereGeometry(1, 64, 64);
+        const material = new THREE.MeshPhongMaterial({
+            map: earthTexture,
+            shininess: 15,
+        });
+        const globeMesh = new THREE.Mesh(geometry, material);
+        scene.add(globeMesh);
+
+        // Atmosphère brillante autour du globe
+        const atmosGeo = new THREE.SphereGeometry(1.05, 64, 64);
+        const atmosMat = new THREE.MeshPhongMaterial({
+            color: 0x6644cc,
+            transparent: true,
+            opacity: 0.15,
+            side: THREE.FrontSide,
+        });
+        scene.add(new THREE.Mesh(atmosGeo, atmosMat));
+
+        // Lumières
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        sunLight.position.set(5, 3, 5);
+        scene.add(sunLight);
+
+        const purpleLight = new THREE.PointLight(0x6633cc, 0.8, 10);
+        purpleLight.position.set(-3, -2, 2);
+        scene.add(purpleLight);
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            globeMesh.rotation.y += 0.003;
+            renderer.render(scene, camera);
+        }
+        animate();
+
         // Détection auto du drapeau
         fetch('https://ipapi.co/json/')
             .then(res => res.json())
@@ -170,6 +211,5 @@
             })
             .catch(() => {});
     </script>
-
 </body>
 </html>

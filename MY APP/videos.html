@@ -58,12 +58,13 @@
         .actions { 
             position: absolute; 
             right: 12px; 
-            bottom: 85px; 
+            bottom: 100px; 
             display: flex; 
             flex-direction: column; 
-            gap: 20px; 
+            gap: 15px; 
             align-items: center; 
-            z-index: 10; 
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
 
         .action-btn { 

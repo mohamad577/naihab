@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naïhab</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Globe canvas */
+        #globe-canvas {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: apparaitreGlobe 1s ease forwards 0.3s;
+        }
+
+        @keyframes apparaitreGlobe {
+            from { opacity: 0; transform: translateX(-50%) scale(0.8); }
+            to { opacity: 0.7; transform: translateX(-50%) scale(1); }
+        }
+
+        /* Contenu central */
+        .splash-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        /* Texte Naïhab qui s'écrit lettre par lettre */
+        .logo-text {
+            font-size: 64px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #ffcc00 60%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .logo-text span {
+            opacity: 0;
+            transform: translateY(30px);
+            display: inline-block;
+            animation: ecrireLetter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Délais pour chaque lettre */
+        .logo-text span:nth-child(1) { animation-delay: 0.8s; }
+        .logo-text span:nth-child(2) { animation-delay: 1.0s; }
+        .logo-text span:nth-child(3) { animation-delay: 1.2s; }
+        .logo-text span:nth-child(4) { animation-delay: 1.4s; }
+        .logo-text span:nth-child(5) { animation-delay: 1.6s; }
+        .logo-text span:nth-child(6) { animation-delay: 1.8s; }
+
+        @keyframes ecrireLetter {
+            from { opacity: 0; transform: translateY(30px) scale(0.5); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Effet brillant sous le logo */
+        .logo-glow {
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffcc00, transparent);
+            margin: 10px auto 0;
+            opacity: 0;
+            animation: apparaitreGlow 0.6s ease forwards 2.2s;
+        }
+
+        @keyframes apparaitreGlow {
+            from { opacity: 0; width: 0; }
+            to { opacity: 1; width: 200px; }
+        }
+
+        /* Slogan */
+        .slogan {
+            color: rgba(255,255,255,0.6);
+            font-size: 15px;
+            margin-top: 15px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: apparaitre 0.8s ease forwards 2.5s;
+        }
+
+        @keyframes apparaitre {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Barre de chargement */
+        .loader-container {
+            position: absolute;
+            bottom: 80px;
+            width: 200px;
+            opacity: 0;
+            animation: apparaitre 0.5s ease forwards 2.8s;
+        }
+
+        .loader-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loader-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffcc00, #ff9900);
+            border-radius: 10px;
+            animation: charger 1.5s ease forwards 3s;
+            box-shadow: 0 0 10px rgba(255,204,0,0.5);
+        }
+
+        @keyframes charger {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* Texte chargement */
+        .loader-text {
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 8px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Particules dorées */
+        .particule {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffcc00;
+            border-radius: 50%;
+            animation: flotter linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes flotter {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.3; }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="globe-canvas"></canvas>
+
+    <div class="splash-content">
+        <div class="logo-text">
+            <span>N</span><span>a</span><span>ï</span><span>h</span><span>a</span><span>b</span>
+        </div>
+        <div class="logo-glow"></div>
+        <p class="slogan">Ta zone, ton style, ta liberté</p>
+    </div>
+
+    <div class="loader-container">
+        <div class="loader-bar">
+            <div class="loader-fill"></div>
+        </div>
+        <div class="loader-text">Chargement...</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ✅ Globe 3D Three.js
+        const canvas = document.getElementById('globe-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        const size = Math.min(window.innerWidth, 380);
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.z = 2.5;
+
+        const loader = new THREE.TextureLoader();
+        const earthTexture = loader.load(
+            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg'
+        );
+
+        const geometry = new THREE.SphereGeometry(1, 64, 64);
+        const material = new THREE.MeshPhongMaterial({ map: earthTexture, shininess: 15 });
+        const globe = new THREE.Mesh(geometry, material);
+        scene.add(globe);
+
+        // Atmosphère
+        const atmosMat = new THREE.MeshPhongMaterial({
+            color: 0x6633cc, transparent: true, opacity: 0.12, side: THREE.FrontSide
+        });
+        scene.add(new THREE.Mesh(new THREE.SphereGeometry(1.06, 64, 64), atmosMat));
+
+        // Lumières
+        scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+        sun.position.set(5, 3, 5);
+        scene.add(sun);
+        const purp = new THREE.PointLight(0x6633cc, 0.8, 10);
+        purp.position.set(-3, -2, 2);
+        scene.add(purp);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            globe.rotation.y += 0.004;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ✅ Particules dorées
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.className = 'particule';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.animationDuration = (4 + Math.random() * 6) + 's';
+            p.style.animationDelay = (Math.random() * 4) + 's';
+            p.style.width = (2 + Math.random() * 4) + 'px';
+            p.style.height = p.style.width;
+            document.body.appendChild(p);
+        }
+
+        // ✅ Redirection vers index.html après 4.8 secondes
+        setTimeout(() => {
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 500);
+        }, 4800);
+    </script>
+
+</body>
+</html>
