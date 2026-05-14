@@ -104,7 +104,17 @@
             cursor: pointer;
         }
 
-        .footer-info {
+        .choix-item {
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .choix-item:active { background: rgba(255,204,0,0.15); }
+        .choix-item.actif { background: rgba(255,204,0,0.15); border: 1px solid #ffcc00; color: #ffcc00; }
             text-align: center;
             color: var(--text-dim);
             font-size: 11px;
@@ -143,10 +153,73 @@
             <span class="arrow">❯</span>
         </div>
 
-        <div class="setting-item"  onclick="window.location.href='langue.html'">
+        <div class="setting-item" onclick="window.location.href='langue.html'">
             <div class="icon-circle">🌍</div>
             <span class="label">Langue de l'appli</span>
             <span class="arrow">Français ▾</span>
+        </div>
+
+        <!-- ✅ CHOIX PAGE D'ACCUEIL -->
+        <div class="setting-item" onclick="ouvrirChoixAccueil()">
+            <div class="icon-circle">🏠</div>
+            <span class="label">Page d'accueil</span>
+            <span class="arrow" id="label-accueil">Chats ▾</span>
+        </div>
+
+        <!-- ✅ EXPLICATION COURONNE -->
+        <div class="setting-item" onclick="ouvrirCouronne()">
+            <div class="icon-circle">👑</div>
+            <span class="label">Comment fonctionne la Couronne ?</span>
+            <span class="arrow">❯</span>
+        </div>
+
+        <!-- MODAL CHOIX PAGE D'ACCUEIL -->
+        <div id="modal-accueil" onclick="fermerAccueil()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000;">
+            <div onclick="event.stopPropagation()" style="position:absolute; bottom:0; width:100%; background:#0d0840; border-radius:25px 25px 0 0; padding:25px; box-sizing:border-box;">
+                <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
+                <p style="font-weight:900; font-size:18px; margin-bottom:20px; color:#ffcc00;">🏠 Choisir ma page d'accueil</p>
+
+                <div class="choix-item" onclick="choisirAccueil('chats.html', 'Chats')">🏠 Chats (Accueil)</div>
+                <div class="choix-item" onclick="choisirAccueil('discussions.html', 'Discussions')">💬 Discussions</div>
+                <div class="choix-item" onclick="choisirAccueil('videos.html', 'Vidéos')">▶️ Vidéos</div>
+                <div class="choix-item" onclick="choisirAccueil('recherche.html', 'Recherche')">🔍 Recherche</div>
+                <div class="choix-item" onclick="choisirAccueil('notifications.html', 'Notifications')">🔔 Notifications</div>
+                <div class="choix-item" onclick="choisirAccueil('profil.html', 'Mon Profil')">👤 Mon Profil</div>
+
+                <button onclick="fermerAccueil()" style="width:100%; margin-top:15px; padding:15px; border-radius:15px; border:none; background:rgba(255,255,255,0.1); color:white; font-weight:bold; cursor:pointer;">Annuler</button>
+            </div>
+        </div>
+
+        <!-- MODAL EXPLICATION COURONNE -->
+        <div id="modal-couronne" onclick="fermerCouronne()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; overflow-y:auto;">
+            <div onclick="event.stopPropagation()" style="position:absolute; bottom:0; width:100%; background:#0d0840; border-radius:25px 25px 0 0; padding:25px; box-sizing:border-box; max-height:85vh; overflow-y:auto;">
+                <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
+                
+                <p style="font-size:40px; text-align:center; margin-bottom:5px;">👑</p>
+                <p style="font-weight:900; font-size:22px; text-align:center; color:#ffcc00; margin-bottom:20px;">La Couronne Naïhab</p>
+
+                <div style="background:rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.2); border-radius:15px; padding:18px; margin-bottom:15px;">
+                    <p style="font-weight:800; color:#ffcc00; margin-bottom:8px;">🎯 C'est quoi la Couronne ?</p>
+                    <p style="font-size:14px; opacity:0.85; line-height:1.7;">La Couronne est le système de récompense unique de Naïhab. Chaque mois, la vidéo qui reçoit le plus de votes 👑 remporte la Couronne de la session !</p>
+                </div>
+
+                <div style="background:rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.2); border-radius:15px; padding:18px; margin-bottom:15px;">
+                    <p style="font-weight:800; color:#ffcc00; margin-bottom:8px;">🏆 Comment gagner ?</p>
+                    <p style="font-size:14px; opacity:0.85; line-height:1.7;">1. Publie une vidéo sur Naïhab<br>2. Demande à tes Naïfans de voter pour toi 👑<br>3. À la fin de la session, la vidéo avec le plus de votes gagne !<br>4. La vidéo gagnante s'affiche sur l'accueil de TOUS les Naïfans !</p>
+                </div>
+
+                <div style="background:rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.2); border-radius:15px; padding:18px; margin-bottom:15px;">
+                    <p style="font-weight:800; color:#ffcc00; margin-bottom:8px;">⭐ Les avantages du gagnant</p>
+                    <p style="font-size:14px; opacity:0.85; line-height:1.7;">✅ Couronne 👑 sur ton profil pendant toute la session<br>✅ Bannière "Star de la session" sur la page d'accueil<br>✅ Compteur 👑 sur ton profil qui compte tes victoires<br>✅ Ta vidéo visible par tous les Naïfans !</p>
+                </div>
+
+                <div style="background:rgba(255,204,0,0.08); border:1px solid rgba(255,204,0,0.2); border-radius:15px; padding:18px; margin-bottom:20px;">
+                    <p style="font-weight:800; color:#ffcc00; margin-bottom:8px;">📋 Les règles</p>
+                    <p style="font-size:14px; opacity:0.85; line-height:1.7;">• 1 vote par personne par session<br>• Seules les vidéos comptent pour la couronne<br>• La session dure 1 mois<br>• Tout le monde peut voter, même sans publier</p>
+                </div>
+
+                <button onclick="fermerCouronne()" style="width:100%; padding:15px; border-radius:15px; border:none; background:#ffcc00; color:#1a0b5a; font-weight:900; font-size:16px; cursor:pointer;">J'ai compris ! 👑</button>
+            </div>
         </div>
 
         <div class="section-title">Aide & Légal</div>
@@ -174,9 +247,41 @@
     </div>
 
     <script>
+        // ✅ Charger la page d'accueil choisie
+        window.onload = function() {
+            const pageChoisie = localStorage.getItem('naihab_page_accueil_label') || 'Chats';
+            document.getElementById('label-accueil').innerText = pageChoisie + ' ▾';
+
+            // Marquer le choix actif
+            document.querySelectorAll('.choix-item').forEach(item => {
+                if (item.innerText.includes(pageChoisie)) item.classList.add('actif');
+            });
+        };
+
+        function ouvrirChoixAccueil() { document.getElementById('modal-accueil').style.display = 'block'; }
+        function fermerAccueil() { document.getElementById('modal-accueil').style.display = 'none'; }
+        function ouvrirCouronne() { document.getElementById('modal-couronne').style.display = 'block'; }
+        function fermerCouronne() { document.getElementById('modal-couronne').style.display = 'none'; }
+
+        function choisirAccueil(page, label) {
+            localStorage.setItem('naihab_page_accueil', page);
+            localStorage.setItem('naihab_page_accueil_label', label);
+            document.getElementById('label-accueil').innerText = label + ' ▾';
+
+            document.querySelectorAll('.choix-item').forEach(item => item.classList.remove('actif'));
+            event.target.classList.add('actif');
+
+            fermerAccueil();
+            // Petit toast de confirmation
+            const toast = document.createElement('div');
+            toast.innerText = '✅ Page d\'accueil : ' + label;
+            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2ecc71;color:white;padding:12px 20px;border-radius:20px;font-weight:bold;z-index:9999;font-size:13px;';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
         function deconnexion() {
             if(confirm("Es-tu sûr de vouloir te déconnecter ?")) {
-                // ✅ Effacer les données de session
                 localStorage.removeItem('user_name');
                 localStorage.removeItem('user_photo');
                 localStorage.removeItem('user_bio');

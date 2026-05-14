@@ -90,6 +90,12 @@
     <button class="btn-register" onclick="sInscrire()">S'INSCRIRE</button>
 
     <script>
+        // ✅ Si déjà connecté → rediriger directement
+        if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
+            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+            window.location.href = pageAccueil;
+        }
+
         function loadPhoto(event) {
             const reader = new FileReader();
             reader.onload = function(){
@@ -123,6 +129,10 @@
             localStorage.setItem("user_name", nom);
             localStorage.setItem("user_tel", indicatif + tel);
             if (email) localStorage.setItem("user_email", email);
+
+            // ✅ Marquer comme nouveau compte pour afficher le conseil
+            localStorage.setItem('naihab_nouveau_compte', 'oui');
+            localStorage.setItem('naihab_connecte', 'oui');
 
             window.location.href = 'verification.html';
         }

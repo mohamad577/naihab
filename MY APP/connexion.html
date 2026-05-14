@@ -151,6 +151,12 @@
     <button class="btn-secondary" onclick="window.location.href='inscription.html'">Créer un compte</button>
 
     <script>
+        // ✅ Si déjà connecté → rediriger directement
+        if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
+            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+            window.location.href = pageAccueil;
+        }
+
         function seConnecter() {
             const pseudo = document.querySelector('input[type="text"]').value.trim();
             const mdp = document.querySelector('input[type="password"]').value.trim();
@@ -171,9 +177,13 @@
                 if (!localStorage.getItem('user_name')) {
                     localStorage.setItem('user_name', pseudo);
                 }
+                // ✅ Marquer comme connecté
+                localStorage.setItem('naihab_connecte', 'oui');
 
                 setTimeout(() => {
-                    window.location.href = 'chats.html';
+                    // ✅ Rediriger vers la page d'accueil choisie
+                    const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+                    window.location.href = pageAccueil;
                 }, 800);
             }, 1500);
         }

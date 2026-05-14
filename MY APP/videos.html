@@ -58,13 +58,17 @@
         .actions { 
             position: absolute; 
             right: 12px; 
-            bottom: 100px; 
+            bottom: 140px; 
             display: flex; 
             flex-direction: column; 
             gap: 15px; 
             align-items: center; 
             z-index: 10;
-            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .pin-active {
+            background: rgba(255, 100, 100, 0.3) !important;
+            border: 2px solid #ff4757;
         }
 
         .action-btn { 
@@ -157,10 +161,97 @@
                 <div class="action-btn" onclick="partagerWhatsApp()">
                     <div class="icon-bg">📤</div><p>Partager</p>
                 </div>
+                <div class="action-btn" onclick="epinglerVideo('demo')">
+                    <div class="icon-bg" id="pin-demo">📌</div><p>Épingler</p>
+                </div>
             </div>
             <div class="video-info">
                 <div class="user-name">@Julie_Naïfan 👑</div>
                 <div class="description">Test de la couronne Naïhab ! 🇨🇲 #NaïhabChallenge</div>
+            </div>
+        </div>
+
+        <div class="video-card">
+            <video loop onclick="gererLecture(this)" muted playsinline>
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+            <div class="actions">
+                <div class="action-btn" onclick="toggleLike(this)">
+                    <div class="icon-bg heart-icon">🤍</div><p class="count">856</p>
+                </div>
+                <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                    <div class="icon-bg">💬</div><p>32</p>
+                </div>
+                <div class="action-btn" onclick="voter(this, 'demo2')">
+                    <div class="icon-bg crown-box">👑</div><p class="vote-count">74</p>
+                </div>
+                <div class="action-btn" onclick="partagerWhatsApp()">
+                    <div class="icon-bg">📤</div><p>Partager</p>
+                </div>
+                <div class="action-btn" onclick="epinglerVideo('demo2')">
+                    <div class="icon-bg" id="pin-demo2">📌</div><p>Épingler</p>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="user-name">@Marc_King 🎬</div>
+                <div class="description">Ma journée au marché 😂🔥 #Cameroun #NaïhabVibe</div>
+            </div>
+        </div>
+
+        <div class="video-card">
+            <video loop onclick="gererLecture(this)" muted playsinline>
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+            <div class="actions">
+                <div class="action-btn" onclick="toggleLike(this)">
+                    <div class="icon-bg heart-icon">🤍</div><p class="count">2.4k</p>
+                </div>
+                <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                    <div class="icon-bg">💬</div><p>89</p>
+                </div>
+                <div class="action-btn" onclick="voter(this, 'demo3')">
+                    <div class="icon-bg crown-box">👑</div><p class="vote-count">201</p>
+                </div>
+                <div class="action-btn" onclick="partagerWhatsApp()">
+                    <div class="icon-bg">📤</div><p>Partager</p>
+                </div>
+                <div class="action-btn" onclick="epinglerVideo('demo3')">
+                    <div class="icon-bg" id="pin-demo3">📌</div><p>Épingler</p>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="user-name">@Angela_Queen ✨</div>
+                <div class="description">Regardez ce coucher de soleil 🌅❤️ #Beauté #NaïhabMoment</div>
+            </div>
+        </div>
+
+        <div class="video-card">
+            <video loop onclick="gererLecture(this)" muted playsinline>
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+            <div class="actions">
+                <div class="action-btn" onclick="toggleLike(this)">
+                    <div class="icon-bg heart-icon">🤍</div><p class="count">634</p>
+                </div>
+                <div class="action-btn" onclick="window.location.href='commentaires.html'">
+                    <div class="icon-bg">💬</div><p>21</p>
+                </div>
+                <div class="action-btn" onclick="voter(this, 'demo4')">
+                    <div class="icon-bg crown-box">👑</div><p class="vote-count">55</p>
+                </div>
+                <div class="action-btn" onclick="partagerWhatsApp()">
+                    <div class="icon-bg">📤</div><p>Partager</p>
+                </div>
+                <div class="action-btn" onclick="epinglerVideo('demo4')">
+                    <div class="icon-bg" id="pin-demo4">📌</div><p>Épingler</p>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="user-name">@Jackson_Naïfan 🎵</div>
+                <div class="description">Mon nouveau son 🎶🔥 Vous aimez ? #Music #Naïhab</div>
             </div>
         </div>
 
@@ -211,6 +302,9 @@
                             <div class="action-btn" onclick="partagerWhatsApp()">
                                 <div class="icon-bg">📤</div><p>Partager</p>
                             </div>
+                            <div class="action-btn" onclick="epinglerVideo(${index})">
+                                <div class="icon-bg" id="pin-${index}">📌</div><p>Épingler</p>
+                            </div>
                         </div>
                         <div class="video-info">
                             <div class="user-name">@${vid.auteur} 🎬</div>
@@ -222,8 +316,29 @@
                 });
             }
 
-            // ✅ Défiler automatiquement vers la vidéo gagnante si on vient de la bannière
-            const urlParams = new URLSearchParams(window.location.search);
+            // ✅ Vérifier si une vidéo est épinglée et défiler dessus
+            const videoEpinglee = localStorage.getItem('naihab_video_epinglee');
+            if (videoEpinglee !== null && !urlParams.get('gagnant')) {
+                setTimeout(() => {
+                    const container = document.getElementById('mainVideoContainer');
+                    const cards = container.querySelectorAll('.video-card');
+                    let indexCible = 0;
+
+                    if (videoEpinglee === 'demo') {
+                        // La démo est toujours en dernier
+                        indexCible = cards.length - 1;
+                    } else {
+                        indexCible = parseInt(videoEpinglee);
+                    }
+                    container.scrollTo({ top: indexCible * window.innerHeight, behavior: 'smooth' });
+
+                    // Mettre à jour l'icône pin
+                    const pinBtn = document.getElementById('pin-' + videoEpinglee);
+                    if (pinBtn) pinBtn.classList.add('pin-active');
+                    const pinDemo = document.getElementById('pin-demo');
+                    if (videoEpinglee === 'demo' && pinDemo) pinDemo.classList.add('pin-active');
+                }, 400);
+            }
             const indexGagnant = urlParams.get('gagnant');
             if (indexGagnant !== null) {
                 setTimeout(() => {
@@ -234,7 +349,8 @@
                 }, 400);
             }
 
-            // Votes vidéo démo
+            // ✅ Défiler automatiquement vers la vidéo gagnante si on vient de la bannière
+            const urlParams = new URLSearchParams(window.location.search);
             const votesDemo = JSON.parse(localStorage.getItem('naihab_votes_demo')) || [];
             const dejaVoteDemo = votesDemo.includes(monId);
             const crownDemo = document.querySelector('.crown-box');
@@ -320,6 +436,29 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
         }
+        // ✅ Épingler / désépingler une vidéo
+        function epinglerVideo(index) {
+            const cleIndex = index.toString();
+            const dejaEpinglee = localStorage.getItem('naihab_video_epinglee');
+            const pinBtn = document.getElementById('pin-' + index);
+
+            if (dejaEpinglee === cleIndex) {
+                // ✅ Désépingler
+                localStorage.removeItem('naihab_video_epinglee');
+                if (pinBtn) pinBtn.classList.remove('pin-active');
+                afficherToast("Vidéo désépinglée 📌");
+            } else {
+                // ✅ Épingler cette vidéo
+                // Retirer l'ancien pin visuel
+                const ancienPin = document.querySelector('.pin-active');
+                if (ancienPin) ancienPin.classList.remove('pin-active');
+
+                localStorage.setItem('naihab_video_epinglee', cleIndex);
+                if (pinBtn) pinBtn.classList.add('pin-active');
+                afficherToast("Vidéo épinglée ! Elle apparaîtra en premier 📌");
+            }
+        }
+
         // ✅ Partager sur WhatsApp
         function partagerWhatsApp() {
             const lien = window.location.href;

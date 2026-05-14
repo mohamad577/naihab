@@ -9,24 +9,35 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a0b5a; /* Fond bleu nuit profond */
+            background: radial-gradient(ellipse at top, #2a1570 0%, #1a0b5a 50%, #0d0535 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             align-items: center;
             color: white;
             overflow: hidden;
         }
 
-        /* Globe Three.js */
+        /* Globe Three.js — plus grand */
         #globe-canvas {
             position: absolute;
-            top: 0;
+            top: -30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: -1;
-            opacity: 0.85;
+            z-index: 1;
+        }
+
+        /* Halo violet sous le globe */
+        .globe-halo {
+            position: absolute;
+            top: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 80px;
+            background: radial-gradient(ellipse, rgba(100,60,255,0.35) 0%, transparent 70%);
+            z-index: 0;
+            filter: blur(15px);
         }
 
         .top-bar {
@@ -35,47 +46,57 @@
             display: flex;
             justify-content: flex-end;
             box-sizing: border-box;
+            z-index: 10;
         }
 
         .flag-img {
-            width: 35px;
-            border-radius: 4px;
+            width: 38px;
+            border-radius: 5px;
             border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
+        /* Contenu principal — en dessous du globe */
         .main-content {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
             text-align: center;
             z-index: 10;
-            margin-top: 50px;
+            padding: 0 25px 35px;
+            box-sizing: border-box;
+            background: linear-gradient(to top, #1a0b5a 60%, transparent 100%);
         }
 
         h1 {
-            font-size: 60px;
-            margin: 0;
+            font-size: 64px;
+            margin: 0 0 8px 0;
             font-weight: 900;
             letter-spacing: -2px;
-            background: linear-gradient(#fff, #ffcc00);
+            background: linear-gradient(180deg, #fff 0%, #ffcc00 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(255,204,0,0.3));
         }
 
         .slogan {
-            font-size: 18px;
-            margin: 10px 0 40px 0;
-            opacity: 0.9;
+            font-size: 16px;
+            margin: 0 0 30px 0;
+            opacity: 0.75;
             font-weight: 300;
+            letter-spacing: 0.5px;
         }
 
-        /* Boutons stylisés Naïhab */
         .btn-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
         .btn {
-            width: 280px;
-            padding: 16px;
+            width: 100%;
+            padding: 18px;
             border-radius: 30px;
             font-size: 15px;
             font-weight: bold;
@@ -87,36 +108,39 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            letter-spacing: 1px;
         }
 
         .btn-create {
-            background-color: #ffcc00;
-            color: #311b92;
-            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.3);
+            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            color: #1a0b5a;
+            box-shadow: 0 6px 25px rgba(255, 204, 0, 0.4);
         }
 
         .btn-login {
-            background-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
         }
 
-        .btn:active {
-            transform: scale(0.95);
-        }
+        .btn:active { transform: scale(0.97); }
 
         .footer {
-            padding-bottom: 30px;
-            font-size: 12px;
+            position: absolute;
+            bottom: 8px;
+            font-size: 11px;
             text-align: center;
-            opacity: 0.5;
+            opacity: 0.35;
+            z-index: 10;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
     <canvas id="globe-canvas"></canvas>
+    <div class="globe-halo"></div>
 
     <div class="top-bar">
         <img id="flag" class="flag-img" src="https://flagcdn.com/w80/fr.png" alt="Drapeau">
@@ -133,24 +157,27 @@
     </div>
 
     <div class="footer">
-        <div style="margin-bottom: 10px;">
-            <span>Conditions</span> • <span>Politique</span> • <span>Aide</span>
-        </div>
-        <div>© 2026 Naïhab - Français</div>
+        Conditions • Politique • Aide
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        // ✅ Si déjà connecté → rediriger directement
+        if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
+            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+            window.location.href = pageAccueil;
+        }
+
         // ✅ Redirection vers splash si première visite
         if (!sessionStorage.getItem('splash_done')) {
             sessionStorage.setItem('splash_done', 'oui');
             window.location.href = 'splash.html';
         }
 
-        // ✅ Globe Three.js 3D
+        // ✅ Globe Three.js 3D — plus grand
         const canvas = document.getElementById('globe-canvas');
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        const size = Math.min(window.innerWidth, 320);
+        const size = Math.min(window.innerWidth * 1.1, 420);
         renderer.setSize(size, size);
         renderer.setPixelRatio(window.devicePixelRatio);
 

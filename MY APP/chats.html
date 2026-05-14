@@ -171,6 +171,33 @@
                 document.getElementById("ma-photo-accueil").src = photoSauve;
             }
 
+            // ✅ Bannière conseil page d'accueil (une seule fois)
+            const dejuVu = localStorage.getItem('naihab_conseil_accueil_vu');
+            const estNouveauCompte = localStorage.getItem('naihab_nouveau_compte');
+            if (!dejuVu && estNouveauCompte) {
+                const banner = document.createElement('div');
+                banner.id = 'conseil-accueil';
+                banner.style.cssText = `
+                    margin: 10px 15px;
+                    padding: 14px 15px;
+                    background: linear-gradient(135deg, rgba(255,204,0,0.15), rgba(255,153,0,0.1));
+                    border: 1px solid rgba(255,204,0,0.3);
+                    border-radius: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 13px;
+                `;
+                banner.innerHTML = `
+                    <span style="font-size:22px;">🏠</span>
+                    <span style="flex:1; line-height:1.5;">Tu peux choisir ta <b style="color:#ffcc00;">page d'accueil</b> dans <b style="color:#ffcc00;">Paramètres</b> !</span>
+                    <span onclick="fermerConseil()" style="font-size:20px; opacity:0.5; cursor:pointer; padding:5px;">×</span>
+                `;
+                // Insérer après le status-box
+                const statusBox = document.querySelector('.status-box');
+                statusBox.after(banner);
+            }
+
             // ✅ Bannière gagnant dynamique
             const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
             const banniere = document.getElementById('banner-winner');
@@ -223,6 +250,12 @@
 
         // ✅ Supprimer un post
         // ✅ Partager via WhatsApp
+        function fermerConseil() {
+            document.getElementById('conseil-accueil')?.remove();
+            localStorage.setItem('naihab_conseil_accueil_vu', 'oui');
+            localStorage.removeItem('naihab_nouveau_compte');
+        }
+
         function partager() {
             const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
             const message = "Regarde cette publication sur Naïhab ! 👑 " + lien;
