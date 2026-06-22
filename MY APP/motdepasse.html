@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naïhab - Sécurité</title>
+    <title>Naïhab - Créer un mot de passe</title>
     <style>
         body {
             margin: 0;
@@ -157,7 +157,14 @@
         const m2 = document.getElementById('mdp2').value;
         if (m1.length < 8) { alert("Ton mot de passe doit avoir au moins 8 caractères !"); return; }
         if (m1 !== m2) { alert("Les deux mots de passe ne sont pas identiques !"); return; }
+        
+        // ✅ On sauvegarde le mot de passe
         localStorage.setItem('user_mdp', m1);
+        
+        // ✅ C'est ICI qu'on valide officiellement la connexion !
+        localStorage.setItem('naihab_connecte', 'oui');
+        
+        alert("Compte créé avec succès ! 🎉");
         window.location.href = 'chats.html';
     }
 </script>

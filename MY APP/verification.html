@@ -109,10 +109,10 @@
     <p>Entre le code de sécurité envoyé sur ton contact pour protéger ton compte <b>Naïhab</b>.</p>
 
     <div class="code-inputs" id="otp-inputs">
-        <input type="number" maxlength="1" oninput="moveNext(this, 1)">
-        <input type="number" maxlength="1" oninput="moveNext(this, 2)">
-        <input type="number" maxlength="1" oninput="moveNext(this, 3)">
-        <input type="number" maxlength="1" oninput="moveNext(this, 4)">
+        <input type="tel" maxlength="1" oninput="moveNext(this, 1)" onkeydown="moveBack(this, 0)">
+        <input type="tel" maxlength="1" oninput="moveNext(this, 2)" onkeydown="moveBack(this, 1)">
+        <input type="tel" maxlength="1" oninput="moveNext(this, 3)" onkeydown="moveBack(this, 2)">
+        <input type="tel" maxlength="1" oninput="moveNext(this, 4)" onkeydown="moveBack(this, 3)">
     </div>
 
     <button class="btn-verify" onclick="verifierCode()">VÉRIFIER LE CODE</button>
@@ -125,10 +125,24 @@
 
         // ✅ Passer automatiquement au champ suivant
         function moveNext(current, nextIndex) {
+            // Nettoyer la valeur pour ne garder qu'un seul chiffre au cas où
+            if (current.value.length > 1) {
+                current.value = current.value.slice(0, 1);
+            }
             if (current.value.length >= 1) {
                 const inputs = document.querySelectorAll('#otp-inputs input');
                 if (inputs[nextIndex]) {
                     inputs[nextIndex].focus();
+                }
+            }
+        }
+
+        // ✅ Reculer automatiquement au champ précédent si on fait "Retour"
+        function moveBack(current, prevIndex) {
+            if (event.key === "Backspace" && current.value.length === 0) {
+                const inputs = document.querySelectorAll('#otp-inputs input');
+                if (inputs[prevIndex]) {
+                    inputs[prevIndex].focus();
                 }
             }
         }
@@ -157,18 +171,23 @@
         const timerEl = document.getElementById('timer');
         const interval = setInterval(() => {
             secondes--;
-            timerEl.innerText = '00:' + (secondes < 10 ? '0' + secondes : secondes);
+            if (timerEl) {
+                timerEl.innerText = '00:' + (secondes < 10 ? '0' + secondes : secondes);
+            }
             if (secondes <= 0) {
                 clearInterval(interval);
-                timerEl.parentElement.innerHTML = '<b onclick="renvoyerCode()" style="cursor:pointer; color:#ffcc00;">Renvoyer le code</b>';
+                const resendBtn = document.getElementById('resend-btn');
+                if (resendBtn) {
+                    resendBtn.parentElement.innerHTML = '<b onclick=\"renvoyerCode()\" style=\"cursor:pointer; color:#ffcc00;\">Renvoyer le code</b>';
+                }
             }
         }, 1000);
 
         // ✅ Renvoyer le code
         function renvoyerCode() {
-            // En simulation on remet le code à 1234
             localStorage.setItem('naihab_otp', '1234');
             alert("Code renvoyé ! (Code de test : 1234)");
+            window.location.reload(); // Recharge la page pour relancer le compteur proprement
         }
     </script>
 

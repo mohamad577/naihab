@@ -136,11 +136,11 @@
 
     <div class="input-group">
         <div class="field-box">
-            <input type="text" placeholder="Pseudo ou Numéro">
+            <input type="text" id="login-identifiant" placeholder="Pseudo ou Numéro">
         </div>
         
         <div class="field-box">
-            <input type="password" placeholder="Mot de passe">
+            <input type="password" id="login-mdp" placeholder="Mot de passe">
         </div>
 
         <button class="btn-main" onclick="seConnecter()">SE CONNECTER</button>
@@ -151,41 +151,56 @@
     <button class="btn-secondary" onclick="window.location.href='inscription.html'">Créer un compte</button>
 
     <script>
-        // ✅ Si déjà connecté → rediriger directement
+        // ✅ Si déjà connecté → rediriger directement vers l'accueil
         if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
             const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
             window.location.href = pageAccueil;
         }
 
         function seConnecter() {
-            const pseudo = document.querySelector('input[type="text"]').value.trim();
-            const mdp = document.querySelector('input[type="password"]').value.trim();
+            const identifiant = document.getElementById('login-identifiant').value.trim();
+            const mdpSaisi = document.getElementById('login-mdp').value.trim();
             const btn = document.querySelector('.btn-main');
 
-            if (!pseudo) { alert("Entre ton pseudo ou numéro !"); return; }
-            if (!mdp) { alert("Entre ton mot de passe !"); return; }
+            if (!identifiant) { alert("Entre ton pseudo ou numéro !"); return; }
+            if (!mdpSaisi) { alert("Entre ton mot de passe !"); return; }
 
-            // ✅ Animation chargement
+            // Récupération des données du compte créé en local
+            const vraiMdp = localStorage.getItem('user_mdp');
+            const vraiNom = localStorage.getItem('user_name');
+            const vraiTel = localStorage.getItem('user_tel');
+
+            // ✅ Lancement de l'animation de chargement
             btn.classList.add('loading');
 
             setTimeout(() => {
-                // ✅ Animation succès
+                // ✅ Vérification stricte des identifiants existants
+                if (!vraiMdp) {
+                    btn.classList.remove('loading');
+                    alert("Aucun compte trouvé sur cet appareil. Inscris-toi d'abord !");
+                    return;
+                }
+
+                if (mdpSaisi !== vraiMdp) {
+                    btn.classList.remove('loading');
+                    alert("Mot de passe incorrect !");
+                    return;
+                }
+
+                // ✅ Animation succès si tout est bon
                 btn.classList.remove('loading');
                 btn.classList.add('success');
                 btn.innerText = "Connexion réussie ✓";
 
-                if (!localStorage.getItem('user_name')) {
-                    localStorage.setItem('user_name', pseudo);
-                }
-                // ✅ Marquer comme connecté
+                // Connecter l'utilisateur officiellement
                 localStorage.setItem('naihab_connecte', 'oui');
 
                 setTimeout(() => {
-                    // ✅ Rediriger vers la page d'accueil choisie
                     const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
                     window.location.href = pageAccueil;
                 }, 800);
-            }, 1500);
+
+            }, 1200);
         }
     </script>
 
