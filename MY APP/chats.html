@@ -105,6 +105,34 @@
 
         .nav-link { text-decoration: none; font-size: 24px; opacity: 0.5; transition: 0.3s; color: white; }
         .nav-link.active { opacity: 1; color: var(--gold); transform: translateY(-3px); }
+
+        /* 👁️ DESIGN DU SPLASH INJECTÉ DYNAMIQUEMENT */
+        #dynamic-splash {
+            position: fixed; inset: 0; background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100000; transition: opacity 0.8s ease;
+        }
+        .dynamic-eye-container { position: relative; width: 240px; height: 120px; }
+        .dynamic-eyelid-top {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: #000; z-index: 10;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; transform-origin: bottom center;
+            animation: ouvrirHaut 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.4s;
+        }
+        .dynamic-eyelid-bottom {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #000; z-index: 10;
+            border-radius: 0 0 50% 50% / 0 0 100% 100%; transform-origin: top center;
+            animation: ouvrirBas 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.4s;
+        }
+        .dynamic-eye-inner {
+            position: absolute; inset: 0; background: radial-gradient(ellipse, #1a0b5a 0%, #0a0530 100%);
+            border-radius: 50% / 40%; overflow: hidden; border: 2px solid rgba(255,204,0,0.3);
+        }
+        .dynamic-iris {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 85px; height: 85px; border-radius: 50%;
+            background: radial-gradient(circle, #ffcc00 0%, #ff9900 40%, #1a0b5a 70%); box-shadow: 0 0 30px rgba(255,204,0,0.7);
+        }
+        .dynamic-pupille { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 32px; height: 32px; border-radius: 50%; background: #000; }
+        .dynamic-reflet { position: absolute; top: 18%; right: 22%; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.85); }
     </style>
 </head>
 <body>
@@ -134,20 +162,22 @@
         </div>
     </div>
 
+    <!-- Les nouveaux posts s'affichent ici -->
     <div id="flux-posts"></div>
 
+    <!-- Post Démo (Julie) -->
     <article class="post">
         <div class="post-header">
             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="User">
             <b style="font-size: 14px;">Julie <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• 2h</span></b>
         </div>
-        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800" class="post-img" onclick="window.location.href='publication.html'" alt="Post">
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800" class="post-img" onclick="ouvrirPostDemo('publication.html')" alt="Post">
         <div class="post-actions">
             <div class="action-btn" onclick="toggleLike(this)">
                 <span class="heart">🤍</span> <small>124</small>
             </div>
-            <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                <span>💬</span> <small>23</small>
+            <div class="action-btn" onclick="ouvrirPostDemo('commentaires.html')">
+                <span>💬</span> <small id="nb-comm-demo">23</small>
             </div>
             <div class="action-btn" onclick="partager()">
                 <span>✈️</span>
@@ -165,149 +195,45 @@
 
     <script>
         window.onload = function() {
+            // ── GESTION DYNAMIQUE DU SPLASH SCREEN SUR L'ACCUEIL ──
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('splash') === '1') {
+                // Créer l'overlay noir et l'œil en JavaScript pur
+                const splashDiv = document.createElement('div');
+                splashDiv.id = 'dynamic-splash';
+                splashDiv.innerHTML = `
+                    <div class="dynamic-eye-container">
+                        <div class="dynamic-eye-inner">
+                            <div class="dynamic-iris"><div class="dynamic-pupille"><div class="dynamic-reflet"></div></div></div>
+                        </div>
+                        <div class="dynamic-eyelid-top"></div>
+                        <div class="dynamic-eyelid-bottom"></div>
+                    </div>
+                `;
+                document.body.appendChild(splashDiv);
+
+                // Retirer proprement le splash après l'animation (2.5 secondes suffisent pour un utilisateur déjà connecté)
+                setTimeout(() => {
+                    splashDiv.style.opacity = '0';
+                    setTimeout(() => { splashDiv.remove(); }, 800);
+                    // On nettoie l'URL pour enlever le ?splash=1
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 2500);
+            }
+
+            // Le reste de tes fonctions d'origine
             const photoSauve = localStorage.getItem("user_photo");
             const nomSauve = localStorage.getItem("user_name") || "Moi";
             if (photoSauve) {
                 document.getElementById("ma-photo-accueil").src = photoSauve;
             }
 
-            // ✅ Bannière conseil page d'accueil (une seule fois)
-            const dejuVu = localStorage.getItem('naihab_conseil_accueil_vu');
-            const estNouveauCompte = localStorage.getItem('naihab_nouveau_compte');
-            if (!dejuVu && estNouveauCompte) {
-                const banner = document.createElement('div');
-                banner.id = 'conseil-accueil';
-                banner.style.cssText = `
-                    margin: 10px 15px;
-                    padding: 14px 15px;
-                    background: linear-gradient(135deg, rgba(255,204,0,0.15), rgba(255,153,0,0.1));
-                    border: 1px solid rgba(255,204,0,0.3);
-                    border-radius: 15px;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    font-size: 13px;
-                `;
-                banner.innerHTML = `
-                    <span style="font-size:22px;">🏠</span>
-                    <span style="flex:1; line-height:1.5;">Tu peux choisir ta <b style="color:#ffcc00;">page d'accueil</b> dans <b style="color:#ffcc00;">Paramètres</b> !</span>
-                    <span onclick="fermerConseil()" style="font-size:20px; opacity:0.5; cursor:pointer; padding:5px;">×</span>
-                `;
-                // Insérer après le status-box
-                const statusBox = document.querySelector('.status-box');
-                statusBox.after(banner);
-            }
-
-            // ✅ Bannière gagnant dynamique
-            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
-            const banniere = document.getElementById('banner-winner');
-            const banniereCache = localStorage.getItem('naihab_banniere_fermee');
-
-            if (gagnant && gagnant.nbVotes > 0 && !banniereCache) {
-                document.getElementById('winner-nom').innerText = '@' + gagnant.auteur + ' 👑';
-                document.getElementById('winner-votes').innerText = gagnant.nbVotes + ' votes cette session';
-                // Photo de profil du gagnant si disponible
-                const photoGagnant = localStorage.getItem('naihab_photo_' + gagnant.auteur) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100';
-                document.getElementById('winner-img').src = photoGagnant;
-                banniere.style.display = 'flex';
-            }
-
-            // --- POSTS ---
-            const mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-            const zoneFlux = document.getElementById('flux-posts');
-            const photoActuelle = localStorage.getItem("user_photo") || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-
-            if (mesPosts.length > 0) {
-                mesPosts.forEach((post, index) => {
-                    const postHTML = `
-                        <article class="post" id="post-${index}">
-                            <div class="post-header">
-                                <img src="${photoActuelle}" style="width:36px; height:36px; border-radius:50%; border:1px solid var(--gold); object-fit:cover;">
-                                <b style="font-size: 14px; flex:1;">${nomSauve} <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• Nouveau</span></b>
-                                <span onclick="supprimerPost(${index})" style="font-size:20px; opacity:0.4; cursor:pointer; padding: 5px;">🗑️</span>
-                            </div>
-                            <img src="${post.image}" class="post-img" onclick="window.location.href='publication.html?index=${index}'">
-                            <div style="padding: 0 15px 10px 15px; font-size: 13px; opacity: 0.9;">
-                                ${post.texte}
-                            </div>
-                            <div class="post-actions">
-                                <div class="action-btn" onclick="toggleLike(this, ${index})">
-                                    <span class="heart">${post.liked ? '❤️' : '🤍'}</span> <small>${post.likes || 0}</small>
-                                </div>
-                                <div class="action-btn" onclick="window.location.href='commentaires.html?index=${index}'">
-                                    <span>💬</span> <small id="nb-comm-${index}">${post.commentaires || 0}</small>
-                                </div>
-                                <div class="action-btn" onclick="partager()">
-                                    <span>✈️</span>
-                                </div>
-                            </div>
-                        </article>
-                    `;
-                    zoneFlux.innerHTML += postHTML;
-                });
-            }
+            const commsDemo = JSON.parse(localStorage.getItem('naihab_commentaires_demo')) || [
+                { nom: "Jackson", texte: "Superbe application ! J'adore le design bleu nuit. 🔥", heure: "Il y a 2h" },
+                { nom: "Naïfan_99", texte: "Est-ce qu'on pourra bientôt envoyer des vidéos ? 🌍", heure: "Il y a 1h" }
+            ];
+            document.getElementById('nb-comm-demo').innerText = commsDemo.length;
         };
-
-        // ✅ Supprimer un post
-        // ✅ Partager via WhatsApp
-        function fermerConseil() {
-            document.getElementById('conseil-accueil')?.remove();
-            localStorage.setItem('naihab_conseil_accueil_vu', 'oui');
-            localStorage.removeItem('naihab_nouveau_compte');
-        }
-
-        function partager() {
-            const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
-            const message = "Regarde cette publication sur Naïhab ! 👑 " + lien;
-            window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
-        }
-
-        function supprimerPost(index) {
-            if (confirm("Supprimer cette publication ?")) {
-                let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-                mesPosts.splice(index, 1);
-                localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
-                document.getElementById('post-' + index).remove();
-            }
-        }
-
-        function allerVersGagnant() {
-            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
-            if (gagnant && gagnant.index !== undefined) {
-                window.location.href = 'videos.html?gagnant=' + gagnant.index;
-            } else {
-                window.location.href = 'videos.html';
-            }
-        }
-
-        function fermerBanniere(e) {
-            e.stopPropagation();
-            document.getElementById('banner-winner').style.display = 'none';
-            localStorage.setItem('naihab_banniere_fermee', 'oui');
-        }
-
-        function toggleLike(el, index) {
-            const heart = el.querySelector('.heart');
-            const count = el.querySelector('small');
-            let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-            let post = mesPosts[index];
-            if (!post) return;
-
-            if (heart.innerText === '🤍') {
-                heart.innerText = '❤️';
-                post.likes = (post.likes || 0) + 1;
-                post.liked = true;
-                el.style.color = "#ff4757";
-            } else {
-                heart.innerText = '🤍';
-                post.likes = Math.max(0, (post.likes || 1) - 1);
-                post.liked = false;
-                el.style.color = "white";
-            }
-            count.innerText = post.likes;
-            mesPosts[index] = post;
-            localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
-        }
     </script>
 </body>
 </html>

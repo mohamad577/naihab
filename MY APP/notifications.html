@@ -11,7 +11,6 @@
             --glass: rgba(255, 255, 255, 0.05);
             --danger: #ff5252;
         }
-
         body { 
             margin: 0; 
             background-color: var(--bg-deep); 
@@ -20,8 +19,6 @@
             padding-bottom: 90px;
             overflow-x: hidden;
         }
-        
-        /* Header Premium */
         .header { 
             padding: 20px; 
             border-bottom: 1px solid rgba(255,255,255,0.05); 
@@ -34,28 +31,17 @@
             z-index: 100;
             backdrop-filter: blur(10px);
         }
-
         .titre { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
-
-        /* Notifications Items */
         .notif-item { 
             display: flex; 
             align-items: center; 
             gap: 15px; 
             padding: 20px 15px; 
             border-bottom: 1px solid rgba(255,255,255,0.03); 
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.4s ease, transform 0.4s ease;
             position: relative;
             background: rgba(255,255,255,0.01);
         }
-        
-        .avatar-notif { 
-            width: 45px; height: 45px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            border: 1.5px solid var(--gold); 
-        }
-
         .icon-cercle { 
             width: 45px; height: 45px; 
             border-radius: 50%; 
@@ -66,43 +52,34 @@
             flex-shrink: 0;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        
         .content { flex: 1; }
         .message { font-size: 14px; line-height: 1.4; }
         .message b { color: var(--gold); font-weight: 700; }
         .temps { font-size: 11px; opacity: 0.4; margin-top: 4px; }
-
         .btn-delete { 
             color: rgba(255,255,255,0.15); 
             font-size: 22px; 
             cursor: pointer; 
             padding: 5px;
             transition: 0.2s;
+            background: none;
+            border: none;
         }
         .btn-delete:active { color: var(--danger); transform: scale(0.9); }
-
-        /* État vide stylé */
         #empty-msg { 
             text-align: center; 
             padding: 80px 20px; 
             opacity: 0.5; 
             display: none; 
-            animation: fadeIn 0.5s ease;
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 0.5; } }
-
-        /* Navigation Basse Harmonisée */
         .nav-bas { 
             position: fixed; bottom: 0; width: 100%; height: 75px; 
             background: #0d124a; 
             display: flex; justify-content: space-around; align-items: center; 
             z-index: 1000; border-top: 1px solid rgba(255,255,255,0.08); 
         }
-
         .nav-link { text-decoration: none; font-size: 24px; color: white; opacity: 0.4; position: relative; transition: 0.3s; }
         .nav-link.active { color: var(--gold); opacity: 1; transform: translateY(-3px); }
-        
         #badge-notif { 
             position: absolute; top: -5px; right: -10px; 
             background: var(--danger); color: white; 
@@ -117,12 +94,12 @@
 
     <header class="header">
         <span class="titre">Notifications</span>
-        <span style="font-size: 12px; color: var(--gold); font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;" onclick="ToutLire()">Tout lire</span>
+        <span style="font-size: 12px; color: var(--gold); font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;" onclick="toutLire()">Tout lire</span>
     </header>
 
     <div id="liste-notifs"></div>
 
-    <div id="empty-msg" style="text-align: center; padding: 80px 20px; opacity: 0.5;">
+    <div id="empty-msg">
         <div style="font-size: 50px; margin-bottom: 15px;">🔔</div>
         <p style="font-weight: 600;">Pas encore de notifications</p>
         <p style="font-size: 13px;">Tes notifications apparaîtront ici</p>
@@ -133,28 +110,48 @@
         <a href="recherche.html" class="nav-link">🔍</a>
         <a href="videos.html" class="nav-link">▶️</a>
         <a href="notifications.html" class="nav-link active">
-            🔔<span id="badge-notif">3</span>
+            🔔<span id="badge-notif"></span>
         </a>
         <a href="profil.html" class="nav-link">👤</a>
     </nav>
 
     <script>
-        // ✅ Charger les notifications depuis localStorage
+        // CORRECTION : tableau de notifications séparé pour ne pas mélanger les index
+        let notifs = [];
+
         window.onload = function() {
-            // Notifs de base si vide
-            let notifs = JSON.parse(localStorage.getItem('naihab_notifs'));
-            if (!notifs) {
+            const stockees = localStorage.getItem('naihab_notifs');
+            if (!stockees) {
                 notifs = [
                     { icone: '❤️', message: '<b>Marc_King</b> a aimé ta publication', temps: 'Il y a 2 min' },
                     { icone: '👤', message: '<b>Angela_Queen</b> a commencé à te suivre', temps: 'Il y a 10 min' },
                     { icone: '💬', message: '<b>Julie_Naïfan</b> a commenté ta vidéo', temps: 'Il y a 1h' }
                 ];
                 localStorage.setItem('naihab_notifs', JSON.stringify(notifs));
+            } else {
+                notifs = JSON.parse(stockees);
             }
 
+            // Vérifier si l'utilisateur a gagné la couronne
+            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
+            const nomUser = localStorage.getItem('user_name') || '';
+            if (gagnant && gagnant.auteur === nomUser) {
+                const dejaDans = notifs.some(n => n.message.includes('couronne'));
+                if (!dejaDans) {
+                    notifs.unshift({ icone: '🏆', message: '<b>Système</b> : Tu as gagné la couronne cette session ! 👑', temps: 'Maintenant' });
+                    localStorage.setItem('naihab_notifs', JSON.stringify(notifs));
+                }
+            }
+
+            afficherNotifs();
+        };
+
+        function afficherNotifs() {
             const liste = document.getElementById('liste-notifs');
             const badge = document.getElementById('badge-notif');
             const emptyMsg = document.getElementById('empty-msg');
+
+            liste.innerHTML = '';
 
             if (notifs.length > 0) {
                 emptyMsg.style.display = 'none';
@@ -167,78 +164,38 @@
                             <div class="message">${notif.message}</div>
                             <div class="temps">${notif.temps}</div>
                         </div>
-                        <span class="btn-delete" onclick="supprimerNotif(this, ${index})">×</span>
+                        <button class="btn-delete" onclick="supprimerNotif(${index})" aria-label="Supprimer">×</button>
                     `;
                     liste.appendChild(div);
                 });
-                if (badge) badge.innerText = notifs.length;
+                badge.innerText = notifs.length;
+                badge.style.display = 'inline';
             } else {
                 emptyMsg.style.display = 'block';
-                if (badge) badge.style.display = 'none';
-            }
-
-            // ✅ Vérifier si tu as gagné la couronne
-            const gagnant = JSON.parse(localStorage.getItem('naihab_gagnant_couronne'));
-            const nomUser = localStorage.getItem('user_name') || '';
-            if (gagnant && gagnant.auteur === nomUser) {
-                ajouterNotif('🏆', '<b>Système</b> : Tu as gagné la couronne cette session ! 👑', 'Maintenant');
-            }
-        };
-
-        // ✅ Ajouter une notification
-        function ajouterNotif(icone, message, temps) {
-            const liste = document.getElementById('liste-notifs');
-            const emptyMsg = document.getElementById('empty-msg');
-            const badge = document.getElementById('badge-notif');
-
-            emptyMsg.style.display = 'none';
-            const div = document.createElement('div');
-            div.className = 'notif-item';
-            div.innerHTML = `
-                <div class="icon-cercle" style="background: linear-gradient(135deg, #ffcc00, #ff9900); color: #1a0b5a;">${icone}</div>
-                <div class="content">
-                    <div class="message">${message}</div>
-                    <div class="temps">${temps}</div>
-                </div>
-                <span class="btn-delete" onclick="supprimerNotif(this)">×</span>
-            `;
-            liste.prepend(div);
-            if (badge) {
-                badge.style.display = 'block';
-                badge.innerText = document.querySelectorAll('.notif-item').length;
+                badge.style.display = 'none';
             }
         }
 
-        function ToutLire() {
+        // CORRECTION : "ToutLire" renommé en "toutLire" (convention camelCase)
+        function toutLire() {
             const badge = document.getElementById('badge-notif');
-            if (badge) {
-                badge.style.transform = "scale(0)";
-                setTimeout(() => badge.style.display = 'none', 300);
-            }
+            badge.style.transform = "scale(0)";
+            setTimeout(() => badge.style.display = 'none', 300);
         }
 
-        function supprimerNotif(element, index) {
-            const item = element.parentElement;
-            const badge = document.getElementById('badge-notif');
-            
+        // CORRECTION : supprimerNotif utilise maintenant l'index du tableau "notifs" directement
+        function supprimerNotif(index) {
+            const items = document.querySelectorAll('.notif-item');
+            const item = items[index];
+            if (!item) return;
+
             item.style.opacity = "0";
             item.style.transform = "translateX(100px)";
-            
+
             setTimeout(() => {
-                item.remove();
-                // ✅ Mettre à jour localStorage
-                let notifs = JSON.parse(localStorage.getItem('naihab_notifs')) || [];
                 notifs.splice(index, 1);
                 localStorage.setItem('naihab_notifs', JSON.stringify(notifs));
-
-                let count = document.querySelectorAll('.notif-item').length;
-                if (badge) {
-                    badge.innerText = count;
-                    if (count === 0) badge.style.display = 'none';
-                }
-                if (count === 0) {
-                    document.getElementById('empty-msg').style.display = 'block';
-                }
+                afficherNotifs();
             }, 400);
         }
     </script>

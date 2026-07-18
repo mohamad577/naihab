@@ -7,464 +7,712 @@
     <style>
         :root {
             --gold: #ffcc00;
-            --heart: #ff4757;
-            --bg-nav: rgba(13, 18, 74, 0.95);
+            --gold-glow: rgba(255,204,0,0.35);
+            --bg-dark: #0d0840;
+            --bg-nav: rgba(13,8,64,0.97);
+            --red: #ff4757;
+            --glass: rgba(255,255,255,0.12);
+            --glass-dark: rgba(0,0,0,0.4);
         }
 
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            background: #000; overflow: hidden; 
-            font-family: 'Segoe UI', sans-serif; 
-        }
-        
-        /* Container avec Scroll Snap (Style TikTok) */
-        .video-container { 
-            height: 100vh; 
-            scroll-snap-type: y mandatory; 
-            overflow-y: scroll; 
-            width: 100%; 
-            scrollbar-width: none; 
-        }
-        .video-container::-webkit-scrollbar { display: none; } 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .video-card { 
-            height: 100vh; 
-            width: 100%; 
-            scroll-snap-align: start; 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: #000;
+        body, html {
+            height: 100%; background: #000;
+            overflow: hidden; font-family: 'Segoe UI', sans-serif;
         }
 
-        video { 
-            height: 100%; 
-            width: 100%; 
-            object-fit: cover; 
-        }
-
-        .overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+        /* ── GRILLE DE DÉFILEMENT PRINCIPALE ── */
+        .video-container {
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
             width: 100%;
-            height: 50%;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            scrollbar-width: none;
+        }
+        .video-container::-webkit-scrollbar { display: none; }
+
+        .video-card {
+            height: 100vh; width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            background: #000; overflow: hidden;
+        }
+
+        video {
+            height: 100%; width: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Dégradé bas de vidéo */
+        .overlay {
+            position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 65%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            pointer-events: none; z-index: 5;
+        }
+
+        /* ── PAUSE INDICATOR ── */
+        .pause-indicator {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px; opacity: 0;
+            transition: opacity 0.3s; z-index: 20;
             pointer-events: none;
-            z-index: 5;
+        }
+        .pause-indicator.show { opacity: 1; }
+
+        /* ── BOUTONS ACTIONS (droite) ── */
+        .actions {
+            position: absolute; right: 15px; bottom: 130px;
+            display: flex; flex-direction: column;
+            gap: 18px; align-items: center; z-index: 10;
         }
 
-        .actions { 
-            position: absolute; 
-            right: 12px; 
-            bottom: 140px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            align-items: center; 
-            z-index: 10;
+        .action-btn {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            cursor: pointer; color: white;
         }
 
-        .pin-active {
-            background: rgba(255, 100, 100, 0.3) !important;
-            border: 2px solid #ff4757;
-        }
-
-        .action-btn { 
-            text-align: center; 
-            color: white; 
-            cursor: pointer; 
-        }
-        
         .icon-bg {
-            width: 50px;
-            height: 50px;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
+            width: 52px; height: 52px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 5px;
-            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+            transition: transform 0.25s cubic-bezier(0.175,0.885,0.32,1.275), background 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .action-btn:active .icon-bg { transform: scale(0.88); }
+
+        .action-btn span {
+            font-size: 11px; font-weight: 700;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
         }
 
-        .action-btn p { font-size: 12px; margin: 0; font-weight: bold; }
+        /* États actifs des boutons */
+        .like-active { background: rgba(255,71,87,0.35) !important; border-color: var(--red) !important; }
+        .crown-active { background: var(--gold-glow) !important; border-color: var(--gold) !important; box-shadow: 0 0 18px var(--gold-glow) !important; }
+        .pin-active { background: rgba(100,180,255,0.3) !important; border-color: #64b4ff !important; }
 
-        .crown-active { 
-            background: rgba(255, 204, 0, 0.3) !important;
-            border: 2px solid var(--gold);
+        /* ── INFOS VIDÉO (gauche bas) ── */
+        .video-info {
+            position: absolute; bottom: 140px; left: 15px;
+            color: white; z-index: 10; max-width: 62%;
+        }
+        .user-name {
+            font-weight: 800; font-size: 15px;
             color: var(--gold);
-            transform: scale(1.1);
+            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        .description {
+            font-size: 13px; line-height: 1.5;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+            opacity: 0.95;
         }
 
-        .video-info { 
-            position: absolute; 
-            bottom: 160px; 
-            left: 15px; 
-            color: white; 
-            z-index: 10; 
+        /* ── BARRE DE PROGRESSION ── */
+        .progress-bar-container {
+            position: absolute; bottom: 75px; left: 0; right: 0;
+            height: 3px; background: rgba(255,255,255,0.15); z-index: 10;
         }
-        
-        .user-name { 
-            font-weight: 800; 
-            font-size: 18px; 
-            color: var(--gold); 
-            margin-bottom: 5px;
-        }
-        
-        .description { 
-            font-size: 14px; 
-            max-width: 80%; 
-            line-height: 1.4;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        .progress-bar {
+            height: 100%; background: var(--gold);
+            width: 0%; transition: width 0.5s linear;
         }
 
-        .nav-bas { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            height: 75px; 
-            background: var(--bg-nav); 
-            display: flex; 
-            justify-content: space-around; 
-            align-items: center; 
-            z-index: 100;
-            border-top: 1px solid rgba(255,255,255,0.1);
+        /* ── TIROIR LATÉRAL ── */
+        #drawer-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0); z-index: 200;
+            pointer-events: none;
+            transition: background 0.3s;
         }
-        
-        .nav-link { text-decoration: none; font-size: 26px; color: white; opacity: 0.4; transition: 0.3s; }
+        #drawer-overlay.open {
+            background: rgba(0,0,0,0.6);
+            pointer-events: all;
+        }
+
+        #drawer {
+            position: fixed; top: 0; right: -82%;
+            width: 78%; height: 100%;
+            background: linear-gradient(160deg, #0d0840 0%, #1a0b5a 60%, #0d1855 100%);
+            z-index: 201; transition: right 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+            border-left: 1px solid rgba(255,204,0,0.15);
+            display: flex; flex-direction: column;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        #drawer.open { right: 0; }
+
+        .drawer-header {
+            padding: 55px 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(0,0,0,0.2);
+        }
+        .drawer-logo {
+            font-size: 22px; font-weight: 900;
+            color: var(--gold); letter-spacing: -0.5px;
+        }
+        .drawer-logo span { color: white; }
+        .drawer-subtitle { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; text-transform: uppercase; letter-spacing: 1.5px; }
+
+        .drawer-section-title {
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.5px; color: var(--gold); opacity: 0.7;
+            padding: 20px 20px 8px;
+        }
+
+        /* Vidéos publiées dans le tiroir */
+        .drawer-video-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 20px; cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .drawer-video-item:active { background: rgba(255,255,255,0.05); }
+        .drawer-thumb {
+            width: 54px; height: 54px; border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .drawer-thumb video { width: 100%; height: 100%; object-fit: cover; }
+        .drawer-video-info { flex: 1; overflow: hidden; }
+        .drawer-video-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .drawer-video-meta { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        .drawer-pin-icon { font-size: 14px; opacity: 0.4; }
+        .drawer-pin-icon.epinglee { opacity: 1; color: #64b4ff; }
+
+        /* Zone vide tiroir */
+        .drawer-empty {
+            padding: 30px 20px; text-align: center;
+            color: rgba(255,255,255,0.3); font-size: 13px; line-height: 1.6;
+        }
+
+        /* Flèche pour ouvrir le tiroir */
+        .drawer-arrow {
+            position: fixed; right: 0; top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-nav);
+            border-left: 1px solid rgba(255,204,0,0.2);
+            border-radius: 12px 0 0 12px;
+            padding: 14px 8px;
+            font-size: 14px; color: var(--gold);
+            z-index: 150; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            box-shadow: -4px 0 15px rgba(0,0,0,0.4);
+            transition: 0.2s;
+        }
+        .drawer-arrow:active { transform: translateY(-50%) scale(0.95); }
+        .drawer-arrow-text { font-size: 9px; font-weight: 800; writing-mode: vertical-rl; letter-spacing: 1px; opacity: 0.7; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 95px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(255,204,0,0.95); color: #0d0840;
+            padding: 10px 22px; border-radius: 25px;
+            font-weight: 800; font-size: 13px; z-index: 9999;
+            opacity: 0; transition: all 0.3s; pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ── NAV BAS ── */
+        .nav-bas {
+            position: fixed; bottom: 0; width: 100%; height: 72px;
+            background: var(--bg-nav);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100; border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .nav-link {
+            text-decoration: none; font-size: 24px;
+            color: white; opacity: 0.35; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
         .nav-link.active { color: var(--gold); opacity: 1; }
+        .nav-dot { width: 4px; height: 4px; background: var(--gold); border-radius: 50%; opacity: 0; transition: 0.3s; }
+        .nav-link.active .nav-dot { opacity: 1; }
+
+        /* ── INDICATEUR DÉFILEMENT ── */
+        .scroll-hint {
+            position: absolute; bottom: 85px; left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5); font-size: 11px;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            z-index: 10; animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-6px); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="video-container" id="mainVideoContainer">
+<!-- TOAST GLOBAL -->
+<div class="toast" id="toast-global"></div>
 
-        <div class="video-card">
-            <video loop onclick="gererLecture(this)" autoplay muted playsinline>
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-            </video>
-            <div class="overlay"></div>
-            <div class="actions">
-                <div class="action-btn" onclick="toggleLike(this)">
-                    <div class="icon-bg heart-icon">🤍</div><p class="count">1.2k</p>
-                </div>
-                <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                    <div class="icon-bg">💬</div><p>45</p>
-                </div>
-                <div class="action-btn" onclick="voter(this)">
-                    <div class="icon-bg crown-box">👑</div><p class="vote-count">128</p>
-                </div>
-                <div class="action-btn" onclick="partagerWhatsApp()">
-                    <div class="icon-bg">📤</div><p>Partager</p>
-                </div>
-                <div class="action-btn" onclick="epinglerVideo('demo')">
-                    <div class="icon-bg" id="pin-demo">📌</div><p>Épingler</p>
-                </div>
-            </div>
-            <div class="video-info">
-                <div class="user-name">@Julie_Naïfan 👑</div>
-                <div class="description">Test de la couronne Naïhab ! 🇨🇲 #NaïhabChallenge</div>
-            </div>
-        </div>
+<!-- FLÈCHE TIROIR -->
+<div class="drawer-arrow" onclick="ouvrirTiroir()" id="drawer-arrow">
+    <span>📋</span>
+    <span class="drawer-arrow-text">ENREGISTRÉS</span>
+</div>
 
-        <div class="video-card">
-            <video loop onclick="gererLecture(this)" muted playsinline>
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-            </video>
-            <div class="overlay"></div>
-            <div class="actions">
-                <div class="action-btn" onclick="toggleLike(this)">
-                    <div class="icon-bg heart-icon">🤍</div><p class="count">856</p>
-                </div>
-                <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                    <div class="icon-bg">💬</div><p>32</p>
-                </div>
-                <div class="action-btn" onclick="voter(this, 'demo2')">
-                    <div class="icon-bg crown-box">👑</div><p class="vote-count">74</p>
-                </div>
-                <div class="action-btn" onclick="partagerWhatsApp()">
-                    <div class="icon-bg">📤</div><p>Partager</p>
-                </div>
-                <div class="action-btn" onclick="epinglerVideo('demo2')">
-                    <div class="icon-bg" id="pin-demo2">📌</div><p>Épingler</p>
-                </div>
-            </div>
-            <div class="video-info">
-                <div class="user-name">@Marc_King 🎬</div>
-                <div class="description">Ma journée au marché 😂🔥 #Cameroun #NaïhabVibe</div>
-            </div>
-        </div>
+<!-- OVERLAY + TIROIR -->
+<div id="drawer-overlay" onclick="fermerTiroir()"></div>
+<div id="drawer">
+    <div class="drawer-header">
+        <div class="drawer-logo">Naï<span>hab</span> 👑</div>
+        <div class="drawer-subtitle">Vidéos enregistrées</div>
+    </div>
+    <div class="drawer-section-title">📌 Mes vidéos épinglées</div>
+    <div id="drawer-liste"></div>
+</div>
 
-        <div class="video-card">
-            <video loop onclick="gererLecture(this)" muted playsinline>
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
-            </video>
-            <div class="overlay"></div>
-            <div class="actions">
-                <div class="action-btn" onclick="toggleLike(this)">
-                    <div class="icon-bg heart-icon">🤍</div><p class="count">2.4k</p>
-                </div>
-                <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                    <div class="icon-bg">💬</div><p>89</p>
-                </div>
-                <div class="action-btn" onclick="voter(this, 'demo3')">
-                    <div class="icon-bg crown-box">👑</div><p class="vote-count">201</p>
-                </div>
-                <div class="action-btn" onclick="partagerWhatsApp()">
-                    <div class="icon-bg">📤</div><p>Partager</p>
-                </div>
-                <div class="action-btn" onclick="epinglerVideo('demo3')">
-                    <div class="icon-bg" id="pin-demo3">📌</div><p>Épingler</p>
-                </div>
-            </div>
-            <div class="video-info">
-                <div class="user-name">@Angela_Queen ✨</div>
-                <div class="description">Regardez ce coucher de soleil 🌅❤️ #Beauté #NaïhabMoment</div>
-            </div>
-        </div>
+<!-- GRILLE VIDÉOS -->
+<div class="video-container" id="mainVideoContainer">
 
-        <div class="video-card">
-            <video loop onclick="gererLecture(this)" muted playsinline>
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
-            </video>
-            <div class="overlay"></div>
-            <div class="actions">
-                <div class="action-btn" onclick="toggleLike(this)">
-                    <div class="icon-bg heart-icon">🤍</div><p class="count">634</p>
-                </div>
-                <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                    <div class="icon-bg">💬</div><p>21</p>
-                </div>
-                <div class="action-btn" onclick="voter(this, 'demo4')">
-                    <div class="icon-bg crown-box">👑</div><p class="vote-count">55</p>
-                </div>
-                <div class="action-btn" onclick="partagerWhatsApp()">
-                    <div class="icon-bg">📤</div><p>Partager</p>
-                </div>
-                <div class="action-btn" onclick="epinglerVideo('demo4')">
-                    <div class="icon-bg" id="pin-demo4">📌</div><p>Épingler</p>
-                </div>
-            </div>
-            <div class="video-info">
-                <div class="user-name">@Jackson_Naïfan 🎵</div>
-                <div class="description">Mon nouveau son 🎶🔥 Vous aimez ? #Music #Naïhab</div>
-            </div>
-        </div>
-
+    <!-- DÉMO 1 -->
+    <div class="video-card" data-id="demo" data-auteur="@Julie_Naïfan 👑" data-desc="Test de la couronne Naïhab ! 🇨🇲 #NaïhabChallenge" data-likes="1200">
+        <video loop muted playsinline autoplay>
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        <div class="pause-indicator">⏸</div>
+        <div class="progress-bar-container"><div class="progress-bar"></div></div>
+        <div class="scroll-hint">↓</div>
     </div>
 
-    <nav class="nav-bas">
-        <a href="chats.html" class="nav-link">🏠</a>
-        <a href="recherche.html" class="nav-link">🔍</a>
-        <a href="videos.html" class="nav-link active">▶️</a>
-        <a href="notifications.html" class="nav-link">🔔</a>
-        <a href="profil.html" class="nav-link">👤</a>
-    </nav>
+    <!-- DÉMO 2 -->
+    <div class="video-card" data-id="demo2" data-auteur="@Marc_King 🎬" data-desc="Ma journée au marché 😂🔥 #Cameroun #NaïhabVibe" data-likes="856">
+        <video loop muted playsinline>
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        <div class="pause-indicator">⏸</div>
+        <div class="progress-bar-container"><div class="progress-bar"></div></div>
+    </div>
 
-    <script>
-        // ✅ ID unique pour cet utilisateur (simulé)
-        const monId = localStorage.getItem('naihab_user_id') || 'user_' + Date.now();
-        localStorage.setItem('naihab_user_id', monId);
+    <!-- DÉMO 3 -->
+    <div class="video-card" data-id="demo3" data-auteur="@Angela_Queen ✨" data-desc="Regardez ce coucher de soleil 🌅❤️ #NaïhabMoment" data-likes="2400">
+        <video loop muted playsinline>
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        <div class="pause-indicator">⏸</div>
+        <div class="progress-bar-container"><div class="progress-bar"></div></div>
+    </div>
 
-        window.onload = function() {
-            const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
-            const container = document.getElementById('mainVideoContainer');
+    <!-- DÉMO 4 -->
+    <div class="video-card" data-id="demo4" data-auteur="@Jackson_Naïfan 🎵" data-desc="Mon nouveau son 🎶🔥 #Music #Naïhab" data-likes="634">
+        <video loop muted playsinline>
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        <div class="pause-indicator">⏸</div>
+        <div class="progress-bar-container"><div class="progress-bar"></div></div>
+    </div>
 
-            if (mesVideos.length > 0) {
-                mesVideos.forEach((vid, index) => {
-                    const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
-                    const dejaVote = votes.includes(monId);
-                    const nbVotes = votes.length;
+</div>
 
-                    const carte = document.createElement('div');
-                    carte.className = 'video-card';
-                    carte.id = 'video-card-' + index;
-                    carte.innerHTML = `
-                        <video loop onclick="gererLecture(this)" muted playsinline style="height:100%; width:100%; object-fit:cover;">
-                            <source src="${vid.url}" type="video/mp4">
-                        </video>
-                        <div class="overlay"></div>
-                        <div class="actions">
-                            <div class="action-btn" onclick="toggleLike(this)">
-                                <div class="icon-bg heart-icon">🤍</div><p class="count">0</p>
-                            </div>
-                            <div class="action-btn" onclick="window.location.href='commentaires.html'">
-                                <div class="icon-bg">💬</div><p>0</p>
-                            </div>
-                            <div class="action-btn" onclick="voter(this, ${index})">
-                                <div class="icon-bg crown-box ${dejaVote ? 'crown-active' : ''}">👑</div>
-                                <p class="vote-count">${nbVotes}</p>
-                            </div>
-                            <div class="action-btn" onclick="partagerWhatsApp()">
-                                <div class="icon-bg">📤</div><p>Partager</p>
-                            </div>
-                            <div class="action-btn" onclick="epinglerVideo(${index})">
-                                <div class="icon-bg" id="pin-${index}">📌</div><p>Épingler</p>
-                            </div>
-                        </div>
-                        <div class="video-info">
-                            <div class="user-name">@${vid.auteur} 🎬</div>
-                            <div class="description">${vid.titre || ''}</div>
-                        </div>
-                    `;
-                    // ✅ Insérer AVANT la vidéo démo
-                    container.insertBefore(carte, container.firstChild);
-                });
-            }
+<!-- NAV -->
+<nav class="nav-bas">
+    <a href="chats.html" class="nav-link">🏠<div class="nav-dot"></div></a>
+    <a href="recherche.html" class="nav-link">🔍<div class="nav-dot"></div></a>
+    <a href="videos.html" class="nav-link active">▶️<div class="nav-dot"></div></a>
+    <a href="notifications.html" class="nav-link">🔔<div class="nav-dot"></div></a>
+    <a href="profil.html" class="nav-link">👤<div class="nav-dot"></div></a>
+</nav>
 
-            // ✅ Vérifier si une vidéo est épinglée et défiler dessus
-            const videoEpinglee = localStorage.getItem('naihab_video_epinglee');
-            if (videoEpinglee !== null && !urlParams.get('gagnant')) {
-                setTimeout(() => {
-                    const container = document.getElementById('mainVideoContainer');
-                    const cards = container.querySelectorAll('.video-card');
-                    let indexCible = 0;
+<script>
+const monId = localStorage.getItem('naihab_user_id') || 'u_' + Date.now();
+localStorage.setItem('naihab_user_id', monId);
+const monNom = localStorage.getItem('user_name') || 'Moi';
 
-                    if (videoEpinglee === 'demo') {
-                        // La démo est toujours en dernier
-                        indexCible = cards.length - 1;
-                    } else {
-                        indexCible = parseInt(videoEpinglee);
-                    }
-                    container.scrollTo({ top: indexCible * window.innerHeight, behavior: 'smooth' });
+// ── INIT ──
+window.addEventListener('load', () => {
+    chargerVideosPubliees();
+    initialiserCartes();
+    observerDefilement();
+    restaurerEpinglee();
 
-                    // Mettre à jour l'icône pin
-                    const pinBtn = document.getElementById('pin-' + videoEpinglee);
-                    if (pinBtn) pinBtn.classList.add('pin-active');
-                    const pinDemo = document.getElementById('pin-demo');
-                    if (videoEpinglee === 'demo' && pinDemo) pinDemo.classList.add('pin-active');
-                }, 400);
-            }
-            const indexGagnant = urlParams.get('gagnant');
-            if (indexGagnant !== null) {
-                setTimeout(() => {
-                    const container = document.getElementById('mainVideoContainer');
-                    // Chaque vidéo = 100vh, donc on multiplie l'index par la hauteur de l'écran
-                    const position = parseInt(indexGagnant) * window.innerHeight;
-                    container.scrollTo({ top: position, behavior: 'smooth' });
-                }, 400);
-            }
+    // Swipe pour ouvrir tiroir
+    let startX = 0;
+    document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+    document.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (diff > 60 && startX > window.innerWidth * 0.5) ouvrirTiroir();
+        if (diff < -60) fermerTiroir();
+    });
+});
 
-            // ✅ Défiler automatiquement vers la vidéo gagnante si on vient de la bannière
-            const urlParams = new URLSearchParams(window.location.search);
-            const votesDemo = JSON.parse(localStorage.getItem('naihab_votes_demo')) || [];
-            const dejaVoteDemo = votesDemo.includes(monId);
-            const crownDemo = document.querySelector('.crown-box');
-            const countDemo = document.querySelector('.vote-count');
-            if (crownDemo && dejaVoteDemo) crownDemo.classList.add('crown-active');
-            if (countDemo) countDemo.innerText = votesDemo.length || 128;
-        };
+// ── CHARGER VIDÉOS ÉPINGLÉES DANS LE TIROIR ──
+function chargerVideosPubliees() {
+    const container = document.getElementById('mainVideoContainer');
+    const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+    const liste = document.getElementById('drawer-liste');
 
-        function gererLecture(video) {
-            if (video.paused) { video.play(); } else { video.pause(); }
-        }
+    // D'abord insérer les vidéos publiées dans la grille (sans les mettre dans le tiroir)
+    mesVideos.forEach((vid, index) => {
+        const carte = creerCarteVideo(vid, index);
+        container.insertBefore(carte, container.firstChild);
+    });
 
-        function toggleLike(btn) {
-            let icon = btn.querySelector('.heart-icon');
-            if (icon.innerText === "🤍") {
-                icon.innerText = "❤️";
-                icon.style.color = "#ff4757";
-            } else {
-                icon.innerText = "🤍";
-                icon.style.color = "white";
-            }
-        }
+    // Remplir le tiroir uniquement avec les vidéos épinglées
+    rafraichirTiroir();
+}
 
-        // ✅ Voter pour la couronne — 1 seul vote par personne par vidéo
-        function voter(btn, videoIndex) {
-            const box = btn.querySelector('.crown-box');
-            const countElement = btn.querySelector('.vote-count');
-            const cleVotes = 'naihab_votes_' + (videoIndex !== undefined ? videoIndex : 'demo');
-            let votes = JSON.parse(localStorage.getItem(cleVotes)) || [];
+// ── REMPLIR LE TIROIR AVEC LES ÉPINGLÉES ──
+function rafraichirTiroir() {
+    const liste = document.getElementById('drawer-liste');
+    const epinglees = JSON.parse(localStorage.getItem('naihab_epinglees')) || [];
 
-            if (!votes.includes(monId)) {
-                // Premier vote — on ajoute
-                votes.push(monId);
-                localStorage.setItem(cleVotes, JSON.stringify(votes));
-                box.classList.add('crown-active');
-                countElement.innerText = votes.length;
+    if (epinglees.length === 0) {
+        liste.innerHTML = `
+            <div class="drawer-empty">
+                📌 Aucune vidéo enregistrée.<br><br>
+                Appuie sur 📌 sur une vidéo pour l'enregistrer ici et la retrouver facilement !
+            </div>`;
+        return;
+    }
 
-                // ✅ Calculer et sauvegarder le gagnant actuel
-                calculerGagnant();
+    liste.innerHTML = '';
+    epinglees.forEach((ep, i) => {
+        const item = document.createElement('div');
+        item.className = 'drawer-video-item';
+        item.id = 'drawer-ep-' + ep.id;
+        item.innerHTML = `
+            <div class="drawer-thumb">${ep.emoji || '🎬'}</div>
+            <div class="drawer-video-info">
+                <div class="drawer-video-title">${ep.auteur || '@Naïfan'}</div>
+                <div class="drawer-video-meta">${ep.desc || ''}</div>
+            </div>
+            <span onclick="retirerEpinglee(event, '${ep.id}')" style="font-size:18px; opacity:0.5; padding:5px; cursor:pointer;">✕</span>
+        `;
+        item.querySelector('.drawer-video-info').addEventListener('click', () => {
+            allerVersVideoParId(ep.id);
+            fermerTiroir();
+        });
+        liste.appendChild(item);
+    });
+}
 
-                // Message feedback
-                afficherToast("Vote enregistré ! 👑");
-            } else {
-                // Déjà voté — on annule
-                votes = votes.filter(id => id !== monId);
-                localStorage.setItem(cleVotes, JSON.stringify(votes));
-                box.classList.remove('crown-active');
-                countElement.innerText = votes.length;
-                calculerGagnant();
-                afficherToast("Vote retiré");
-            }
-        }
+// ── RETIRER UNE ÉPINGLÉE DU TIROIR ──
+function retirerEpinglee(event, id) {
+    event.stopPropagation();
+    let epinglees = JSON.parse(localStorage.getItem('naihab_epinglees')) || [];
+    epinglees = epinglees.filter(ep => ep.id !== id);
+    localStorage.setItem('naihab_epinglees', JSON.stringify(epinglees));
 
-        // ✅ Trouver la vidéo avec le plus de votes et la sauvegarder
-        function calculerGagnant() {
-            const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
-            let maxVotes = 0;
-            let gagnant = null;
+    // Désactiver le bouton épingle sur la carte
+    const card = document.querySelector(`.video-card[data-id="${id}"]`);
+    if (card) {
+        const pinBox = card.querySelector('.pin-box');
+        const pinLabel = card.querySelector('[data-action="epingler"] span:last-child');
+        if (pinBox) pinBox.classList.remove('pin-active');
+        if (pinLabel) pinLabel.innerText = 'Épingler';
+    }
 
-            mesVideos.forEach((vid, index) => {
-                const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
-                if (votes.length > maxVotes) {
-                    maxVotes = votes.length;
-                    gagnant = { ...vid, nbVotes: votes.length, index };
-                }
+    rafraichirTiroir();
+    afficherToast('Retiré des enregistrements');
+}
+
+// ── CRÉER CARTE VIDÉO ──
+function creerCarteVideo(vid, index) {
+    const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
+    const liked = JSON.parse(localStorage.getItem('naihab_likes_' + index)) || false;
+    const epinglee = localStorage.getItem('naihab_video_epinglee') === index.toString();
+
+    const div = document.createElement('div');
+    div.className = 'video-card';
+    div.dataset.id = index;
+    div.dataset.auteur = vid.auteur || monNom;
+    div.dataset.desc = vid.titre || '';
+    div.dataset.likes = vid.likes || 0;
+    div.innerHTML = `
+        <video loop muted playsinline>
+            <source src="${vid.url}" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        <div class="pause-indicator">⏸</div>
+        <div class="progress-bar-container"><div class="progress-bar"></div></div>
+    `;
+    return div;
+}
+
+// ── INITIALISER TOUTES LES CARTES ──
+function initialiserCartes() {
+    document.querySelectorAll('.video-card').forEach(card => {
+        const id = card.dataset.id;
+        const liked = localStorage.getItem('naihab_like_' + id) === '1';
+        const votes = JSON.parse(localStorage.getItem('naihab_votes_' + id)) || [];
+        const voteActif = votes.includes(monId);
+        const epinglee = localStorage.getItem('naihab_video_epinglee') === id;
+        const likes = card.dataset.likes || 0;
+
+        // Infos vidéo
+        const info = document.createElement('div');
+        info.className = 'video-info';
+        info.innerHTML = `
+            <div class="user-name">${card.dataset.auteur || '@Naïfan'}</div>
+            <div class="description">${card.dataset.desc || ''}</div>
+        `;
+        card.appendChild(info);
+
+        // Boutons actions
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        actions.innerHTML = `
+            <div class="action-btn" data-action="like">
+                <div class="icon-bg ${liked ? 'like-active' : ''}">${liked ? '❤️' : '🤍'}</div>
+                <span class="likes-count">${formaterNombre(parseInt(likes))}</span>
+            </div>
+            <div class="action-btn" data-action="comment">
+                <div class="icon-bg">💬</div>
+                <span>${(JSON.parse(localStorage.getItem('naihab_commentaires_' + id)) || []).length}</span>
+            </div>
+            <div class="action-btn" data-action="vote">
+                <div class="icon-bg crown-box ${voteActif ? 'crown-active' : ''}">👑</div>
+                <span class="votes-count">${votes.length}</span>
+            </div>
+            <div class="action-btn" data-action="partager">
+                <div class="icon-bg">✈️</div>
+                <span>Partager</span>
+            </div>
+            <div class="action-btn" data-action="epingler">
+                <div class="icon-bg pin-box ${epinglee ? 'pin-active' : ''}">📌</div>
+                <span>${epinglee ? 'Épinglé' : 'Épingler'}</span>
+            </div>
+        `;
+        card.appendChild(actions);
+
+        // Clics boutons
+        actions.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                const action = btn.dataset.action;
+                if (action === 'like') toggleLike(btn, id);
+                else if (action === 'comment') allerCommentaires(id);
+                else if (action === 'vote') voter(btn, id);
+                else if (action === 'partager') partager();
+                else if (action === 'epingler') epinglerVideo(btn, id, card);
             });
+        });
 
-            if (gagnant) {
-                localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
-            }
-        }
-
-        // ✅ Petit message qui apparaît et disparaît
-        function afficherToast(message) {
-            const toast = document.createElement('div');
-            toast.innerText = message;
-            toast.style.cssText = `
-                position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-                background: rgba(255,204,0,0.9); color: #1a0b5a; padding: 10px 20px;
-                border-radius: 25px; font-weight: bold; font-size: 13px;
-                z-index: 9999; animation: fadeIn 0.3s ease;
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-        // ✅ Épingler / désépingler une vidéo
-        function epinglerVideo(index) {
-            const cleIndex = index.toString();
-            const dejaEpinglee = localStorage.getItem('naihab_video_epinglee');
-            const pinBtn = document.getElementById('pin-' + index);
-
-            if (dejaEpinglee === cleIndex) {
-                // ✅ Désépingler
-                localStorage.removeItem('naihab_video_epinglee');
-                if (pinBtn) pinBtn.classList.remove('pin-active');
-                afficherToast("Vidéo désépinglée 📌");
+        // Clic vidéo = pause/lecture
+        const video = card.querySelector('video');
+        const pauseIndicator = card.querySelector('.pause-indicator');
+        video.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                pauseIndicator.classList.remove('show');
             } else {
-                // ✅ Épingler cette vidéo
-                // Retirer l'ancien pin visuel
-                const ancienPin = document.querySelector('.pin-active');
-                if (ancienPin) ancienPin.classList.remove('pin-active');
-
-                localStorage.setItem('naihab_video_epinglee', cleIndex);
-                if (pinBtn) pinBtn.classList.add('pin-active');
-                afficherToast("Vidéo épinglée ! Elle apparaîtra en premier 📌");
+                video.pause();
+                pauseIndicator.classList.add('show');
+                setTimeout(() => pauseIndicator.classList.remove('show'), 800);
             }
-        }
+        });
 
-        // ✅ Partager sur WhatsApp
-        function partagerWhatsApp() {
-            const lien = window.location.href;
-            const message = encodeURIComponent("Regarde cette vidéo sur Naïhab ! 🎥👑\n" + lien);
-            window.open("https://wa.me/?text=" + message, "_blank");
+        // Barre de progression
+        video.addEventListener('timeupdate', () => {
+            const barre = card.querySelector('.progress-bar');
+            if (video.duration) barre.style.width = (video.currentTime / video.duration * 100) + '%';
+        });
+    });
+}
+
+// ── OBSERVER DÉFILEMENT (pause/lecture automatique) ──
+function observerDefilement() {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const video = entry.target.querySelector('video');
+            if (!video) return;
+            if (entry.isIntersecting) {
+                video.play().catch(() => {});
+            } else {
+                video.pause();
+            }
+        });
+    }, { threshold: 0.65 });
+    document.querySelectorAll('.video-card').forEach(c => observer.observe(c));
+}
+
+// ── LIKE ──
+function toggleLike(btn, id) {
+    const icon = btn.querySelector('.icon-bg');
+    const countEl = btn.querySelector('.likes-count');
+    const estLike = localStorage.getItem('naihab_like_' + id) === '1';
+    let nb = parseInt(countEl.innerText.replace('k','')) || 0;
+
+    if (!estLike) {
+        icon.innerText = '❤️'; icon.classList.add('like-active');
+        localStorage.setItem('naihab_like_' + id, '1');
+        nb++; afficherToast('Aimé ! ❤️');
+        icon.animate([{transform:'scale(1)'},{transform:'scale(1.4)'},{transform:'scale(1)'}],{duration:300});
+    } else {
+        icon.innerText = '🤍'; icon.classList.remove('like-active');
+        localStorage.setItem('naihab_like_' + id, '0');
+        nb = Math.max(0, nb - 1);
+    }
+    countEl.innerText = formaterNombre(nb);
+
+    // Sauvegarder dans naihab_videos si c'est une vraie vidéo
+    const index = parseInt(id);
+    if (!isNaN(index)) {
+        let mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+        if (mesVideos[index]) { mesVideos[index].likes = nb; localStorage.setItem('naihab_videos', JSON.stringify(mesVideos)); }
+    }
+}
+
+// ── VOTE COURONNE ──
+function voter(btn, id) {
+    const box = btn.querySelector('.crown-box');
+    const countEl = btn.querySelector('.votes-count');
+    const cleVotes = 'naihab_votes_' + id;
+    let votes = JSON.parse(localStorage.getItem(cleVotes)) || [];
+    let nb = parseInt(countEl.innerText) || 0;
+
+    if (!votes.includes(monId)) {
+        votes.push(monId); nb++;
+        box.classList.add('crown-active');
+        afficherToast('Vote 👑 enregistré !');
+    } else {
+        votes = votes.filter(v => v !== monId); nb = Math.max(0, nb - 1);
+        box.classList.remove('crown-active');
+        afficherToast('Vote retiré');
+    }
+    localStorage.setItem(cleVotes, JSON.stringify(votes));
+    countEl.innerText = nb;
+    calculerGagnant();
+    // Mettre à jour tiroir
+    const meta = document.querySelector(`#drawer-item-${id} .drawer-video-meta`);
+    if (meta) meta.innerHTML = `❤️ ${document.querySelector(`[data-id="${id}"] .likes-count`)?.innerText || 0} · 👑 ${nb} votes`;
+}
+
+// ── ÉPINGLER / ENREGISTRER ──
+function epinglerVideo(btn, id, card) {
+    const box = btn.querySelector('.pin-box');
+    const label = btn.querySelector('span:last-child');
+    let epinglees = JSON.parse(localStorage.getItem('naihab_epinglees')) || [];
+    const dejaEpinglee = epinglees.some(ep => ep.id === id);
+
+    if (dejaEpinglee) {
+        // Retirer des enregistrements
+        epinglees = epinglees.filter(ep => ep.id !== id);
+        localStorage.setItem('naihab_epinglees', JSON.stringify(epinglees));
+        box.classList.remove('pin-active');
+        if (label) label.innerText = 'Épingler';
+        afficherToast('Retiré des enregistrements 📌');
+    } else {
+        // Ajouter aux enregistrements
+        const auteur = card.dataset.auteur || '@Naïfan';
+        const desc = card.dataset.desc || '';
+        const emojis = ['🎬','🎵','🌅','😂','🔥','✨','👑','🎤'];
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        epinglees.push({ id, auteur, desc, emoji });
+        localStorage.setItem('naihab_epinglees', JSON.stringify(epinglees));
+        box.classList.add('pin-active');
+        if (label) label.innerText = 'Enregistré ✓';
+        afficherToast('Enregistré ! 📌');
+    }
+    rafraichirTiroir();
+}
+
+// ── RESTAURER ÉPINGLÉE AU CHARGEMENT ──
+function restaurerEpinglee() {
+    const ep = localStorage.getItem('naihab_video_epinglee');
+    if (!ep) return;
+    const container = document.getElementById('mainVideoContainer');
+    const cards = Array.from(container.querySelectorAll('.video-card'));
+    const index = cards.findIndex(c => c.dataset.id === ep);
+    if (index >= 0) {
+        setTimeout(() => {
+            container.scrollTo({ top: index * window.innerHeight, behavior: 'smooth' });
+        }, 500);
+    }
+}
+
+// ── COMMENTAIRES ──
+function allerCommentaires(id) {
+    window.location.href = 'commentaires.html?index=' + id;
+}
+
+// ── PARTAGER ──
+function partager() {
+    const lien = encodeURIComponent('Regarde Naïhab ! 🎥👑\nhttps://mohamad577.github.io/naihab/MY%20APP/index.html');
+    window.open('https://wa.me/?text=' + lien, '_blank');
+}
+
+// ── ALLER VERS VIDÉO PAR ID (depuis tiroir) ──
+function allerVersVideoParId(id) {
+    const container = document.getElementById('mainVideoContainer');
+    const cards = Array.from(container.querySelectorAll('.video-card'));
+    const index = cards.findIndex(c => c.dataset.id === id.toString());
+    if (index >= 0) {
+        container.scrollTo({ top: index * window.innerHeight, behavior: 'smooth' });
+    }
+}
+
+// ── RESTAURER ÉTAT ÉPINGLÉES AU CHARGEMENT ──
+function restaurerEpinglee() {
+    const epinglees = JSON.parse(localStorage.getItem('naihab_epinglees')) || [];
+    epinglees.forEach(ep => {
+        const card = document.querySelector(`.video-card[data-id="${ep.id}"]`);
+        if (card) {
+            const pinBox = card.querySelector('.pin-box');
+            const pinLabel = card.querySelector('[data-action="epingler"] span:last-child');
+            if (pinBox) pinBox.classList.add('pin-active');
+            if (pinLabel) pinLabel.innerText = 'Enregistré ✓';
         }
-    </script>
+    });
+}
+function calculerGagnant() {
+    const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+    let maxVotes = 0, gagnant = null;
+    mesVideos.forEach((vid, index) => {
+        const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
+        if (votes.length > maxVotes) { maxVotes = votes.length; gagnant = { ...vid, nbVotes: votes.length, index }; }
+    });
+    if (gagnant) localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
+}
+
+// ── TIROIR ──
+function ouvrirTiroir() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('drawer-arrow').style.display = 'none';
+}
+function fermerTiroir() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('drawer-arrow').style.display = 'flex';
+}
+
+// ── TOAST ──
+function afficherToast(msg) {
+    const t = document.getElementById('toast-global');
+    t.innerText = msg; t.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── FORMATER NOMBRE ──
+function formaterNombre(n) {
+    if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+    return n.toString();
+}
+</script>
 </body>
 </html>

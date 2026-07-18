@@ -214,12 +214,10 @@
                 });
                 try {
                     localStorage.setItem('naihab_videos', JSON.stringify(mesVideos));
-                    alert(`Ta vidéo est publiée ${userName} ! 🎬`);
-                    window.location.href = 'videos.html';
+                    // ✅ Rediriger vers la première position (ta vidéo est en index 0)
+                    window.location.href = 'videos.html?nouveau=1';
                 } catch(e) {
-                    // Si localStorage plein, publier quand même avec URL temporaire
-                    alert(`Ta vidéo est prête ! Elle sera visible jusqu'à la fermeture du navigateur.`);
-                    window.location.href = 'videos.html';
+                    window.location.href = 'videos.html?nouveau=1';
                 }
             } else {
                 // ✅ Photo : base64

@@ -231,12 +231,23 @@
     </div>
 
     <script>
-        // ✅ Redirection vers index.html après 5 secondes
+        // ✅ Redirection intelligente après 5 secondes (fin de l'animation)
         setTimeout(() => {
             document.body.style.transition = 'opacity 0.6s ease';
             document.body.style.opacity = '0';
+            
             setTimeout(() => {
-                window.location.href = 'index.html';
+                // On vérifie si l'utilisateur s'est déjà connecté auparavant
+                const userConnecte = localStorage.getItem("user_name");
+                
+                if (userConnecte) {
+                    // Si connecté, on l'envoie sur sa page choisie (ou chats.html par défaut)
+                    const pageChoisie = localStorage.getItem("naihab_page_accueil_choisie") || "chats.html";
+                    window.location.href = pageChoisie;
+                } else {
+                    // Si c'est la première fois, direction l'inscription
+                    window.location.href = 'index.html';
+                }
             }, 600);
         }, 5000);
     </script>

@@ -11,123 +11,103 @@
             --glass: rgba(255, 255, 255, 0.05);
             --msg-bg: rgba(255, 255, 255, 0.03);
         }
-
         body { 
-            margin: 0; 
-            background-color: var(--bg-deep); 
+            margin: 0; background-color: var(--bg-deep); 
             font-family: 'Segoe UI', sans-serif; 
-            color: white; 
-            padding-bottom: 90px; 
+            color: white; padding-bottom: 90px; 
         }
-        
-        /* Header */
         .header { 
-            padding: 20px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
+            padding: 20px; display: flex; align-items: center; gap: 15px; 
             background: rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(10px);
         }
-        
         .back-btn { 
-            font-size: 24px; 
-            cursor: pointer; 
-            color: var(--gold); 
-            text-decoration: none; 
-            font-weight: bold; 
+            font-size: 24px; cursor: pointer; color: var(--gold); 
+            text-decoration: none; font-weight: bold; 
         }
-
         .logo-cercle { 
-            width: 40px; 
-            height: 40px; 
+            width: 40px; height: 40px; 
             background: linear-gradient(45deg, var(--gold), #ff8c00); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: 900; 
-            color: var(--bg-deep); 
-            font-size: 14px; 
+            border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; font-weight: 900; 
+            color: var(--bg-deep); font-size: 14px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-
         .app-name { font-size: 20px; font-weight: 800; flex-grow: 1; letter-spacing: 0.5px; }
 
-        /* Suggestions (Histoires/Amis actifs) */
-        .favorites-label { 
-            padding: 0 20px; 
-            font-size: 12px; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
+        /* CORRECTION : bouton nouveau message ajouté dans le header */
+        .new-msg-btn {
+            background: rgba(255,204,0,0.15);
+            border: 1px solid rgba(255,204,0,0.3);
             color: var(--gold);
-            opacity: 0.8;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
         }
 
+        .favorites-label { 
+            padding: 15px 20px 5px;
+            font-size: 12px; font-weight: 800; text-transform: uppercase; 
+            letter-spacing: 1px; color: var(--gold); opacity: 0.8;
+        }
         .favorites { 
-            padding: 15px 20px; 
-            display: flex; 
-            gap: 18px; 
-            overflow-x: auto; 
-            scrollbar-width: none; 
+            padding: 10px 20px 15px; display: flex; gap: 18px; 
+            overflow-x: auto; scrollbar-width: none; 
         }
         .favorites::-webkit-scrollbar { display: none; }
-
         .fav-item { text-align: center; min-width: 65px; cursor: pointer; }
         .fav-avatar { 
-            width: 62px; 
-            height: 62px; 
-            border-radius: 50%; 
-            border: 2px solid var(--gold); 
-            padding: 2px;
-            margin-bottom: 6px; 
-            object-fit: cover; 
-            transition: 0.3s;
+            width: 62px; height: 62px; border-radius: 50%; 
+            border: 2px solid var(--gold); padding: 2px;
+            margin-bottom: 6px; object-fit: cover; transition: 0.3s;
         }
         .fav-item:active .fav-avatar { transform: scale(0.9); }
         .fav-name { font-size: 11px; font-weight: 500; opacity: 0.9; }
 
-        /* Liste des Messages */
         .messages-section { 
-            background: rgba(0,0,0,0.2); 
-            border-radius: 35px 35px 0 0; 
-            padding: 25px 20px; 
-            min-height: 500px;
+            background: rgba(0,0,0,0.2); border-radius: 35px 35px 0 0; 
+            padding: 25px 20px; min-height: 500px;
             border-top: 1px solid rgba(255,255,255,0.05);
         }
-
         .section-title { margin-bottom: 20px; font-weight: 800; font-size: 18px; }
-
         .msg-item { 
-            display: flex; 
-            align-items: center; 
-            background: var(--msg-bg); 
-            padding: 15px; 
-            border-radius: 20px; 
-            margin-bottom: 12px; 
-            cursor: pointer; 
-            transition: 0.2s; 
+            display: flex; align-items: center; background: var(--msg-bg); 
+            padding: 15px; border-radius: 20px; margin-bottom: 12px; 
+            cursor: pointer; transition: 0.2s; 
             border: 1px solid rgba(255,255,255,0.02);
         }
         .msg-item:active { transform: scale(0.97); background: rgba(255,255,255,0.08); }
-        
         .msg-avatar { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
-        
         .msg-content { flex-grow: 1; overflow: hidden; }
         .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .msg-name { font-weight: 700; font-size: 15px; }
         .msg-time { font-size: 11px; opacity: 0.5; }
         .msg-text { font-size: 13px; opacity: 0.6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .unread-dot { width: 10px; height: 10px; background: var(--gold); border-radius: 50%; margin-left: 5px; flex-shrink: 0; }
 
-        /* Badge de message non lu */
-        .unread-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; margin-left: 5px; }
+        /* CORRECTION : barre de recherche de conversations */
+        .search-conv {
+            margin: 0 20px 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 12px 18px;
+            color: white;
+            font-size: 14px;
+            width: calc(100% - 40px);
+            box-sizing: border-box;
+            outline: none;
+        }
+        .search-conv:focus { border-color: var(--gold); }
 
         .nav-bas { 
             position: fixed; bottom: 0; width: 100%; height: 75px; 
             background: #0d124a; 
             display: flex; justify-content: space-around; align-items: center; 
-            border-top: 1px solid rgba(255,255,255,0.05); 
-            z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.05); z-index: 100;
         }
         .nav-icon { font-size: 24px; opacity: 0.4; color: white; transition: 0.3s; text-decoration: none; }
     </style>
@@ -135,58 +115,59 @@
 <body>
 
     <div class="header">
-        <a href="#" onclick="window.history.back(); return false;" class="back-btn">←</a>
+        <a href="chats.html" class="back-btn">←</a>
         <div class="logo-cercle">ИН</div>
-        <div class="app-name">Naïhab</div>
+        <div class="app-name">Messages</div>
+        <!-- CORRECTION : bouton nouveau message -->
+        <button class="new-msg-btn" onclick="nouveauMessage()">✏️ Nouveau</button>
     </div>
 
     <div class="favorites-label">Suggestions</div>
     <div class="favorites">
         <div class="fav-item" onclick="ouvrirChat('Angela', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100')">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="fav-avatar">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" class="fav-avatar" alt="Angela">
             <div class="fav-name">Angela</div>
         </div>
         <div class="fav-item" onclick="ouvrirChat('David', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100')">
-            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" class="fav-avatar">
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" class="fav-avatar" alt="David">
             <div class="fav-name">David</div>
         </div>
         <div class="fav-item" onclick="ouvrirChat('Sara', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100')">
-            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" class="fav-avatar">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" class="fav-avatar" alt="Sara">
             <div class="fav-name">Sara</div>
         </div>
         <div class="fav-item" onclick="ouvrirChat('Cameron', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100')">
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="fav-avatar">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" class="fav-avatar" alt="Cameron">
             <div class="fav-name">Cameron</div>
         </div>
         <div class="fav-item" onclick="ouvrirChat('Jackson', 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100')">
-            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" class="fav-avatar">
+            <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" class="fav-avatar" alt="Jackson">
             <div class="fav-name">Jackson</div>
         </div>
     </div>
 
     <div class="messages-section">
         <div class="section-title">Messages</div>
+        <!-- CORRECTION : barre de recherche dans les conversations -->
+        <input type="text" class="search-conv" id="search-conv" placeholder="🔍 Rechercher une conversation..." oninput="filtrerConversations()">
         <div id="liste-conversations"></div>
     </div>
 
+    <div class="nav-bas">
+        <a href="chats.html" class="nav-icon">🏠</a>
+        <a href="recherche.html" class="nav-icon">🔍</a>
+        <a href="videos.html" class="nav-icon">▶️</a>
+        <a href="notifications.html" class="nav-icon">🔔</a>
+        <a href="profil.html" class="nav-icon">👤</a>
+    </div>
+
 <script>
-    // Conversations de démo par défaut
     const convoDemo = [
-        {
-            nom: "Angela",
-            avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
-            dernierMsg: "Tu as vu ma nouvelle photo ? 😍",
-            heure: "1 min",
-            nonLu: true
-        },
-        {
-            nom: "Sara",
-            avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100",
-            dernierMsg: "Tu m'as appelé ?",
-            heure: "11:20",
-            nonLu: false
-        }
+        { nom: "Angela", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100", dernierMsg: "Tu as vu ma nouvelle photo ? 😍", heure: "1 min", nonLu: true },
+        { nom: "Sara", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100", dernierMsg: "Tu m'as appelé ?", heure: "11:20", nonLu: false }
     ];
+
+    let toutesConvos = [];
 
     function ouvrirChat(nom, avatar) {
         localStorage.setItem('naihab_contact_actif', nom);
@@ -194,35 +175,32 @@
         window.location.href = 'message-prive.html';
     }
 
-    window.onload = function() {
-        const liste = document.getElementById('liste-conversations');
+    function nouveauMessage() {
+        const nom = prompt("Nom du contact à contacter :");
+        if (nom && nom.trim()) {
+            ouvrirChat(nom.trim(), '');
+        }
+    }
 
-        // ✅ Charger les vraies conversations depuis localStorage
-        const convos = JSON.parse(localStorage.getItem('naihab_conversations')) || [];
+    function afficherConversations(liste) {
+        const zone = document.getElementById('liste-conversations');
+        zone.innerHTML = '';
 
-        // ✅ Fusionner vraies convos + démo
-        const toutesConvos = [...convos, ...convoDemo];
-
-        if (toutesConvos.length === 0) {
-            liste.innerHTML = `
-                <div style="text-align:center; padding: 60px 20px; opacity: 0.4;">
+        if (liste.length === 0) {
+            zone.innerHTML = `
+                <div style="text-align:center; padding:60px 20px; opacity:0.4;">
                     <div style="font-size:45px; margin-bottom:15px;">💬</div>
                     <p style="font-size:13px;">Aucun message pour l'instant.<br>Envoie un message à un Naïfan !</p>
-                </div>
-            `;
+                </div>`;
             return;
         }
 
-        toutesConvos.forEach((convo, index) => {
+        liste.forEach(convo => {
             const div = document.createElement('div');
             div.className = 'msg-item';
-            div.onclick = () => {
-                localStorage.setItem('naihab_contact_actif', convo.nom);
-                localStorage.setItem('naihab_contact_avatar', convo.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
-                window.location.href = 'message-prive.html';
-            };
+            div.onclick = () => ouvrirChat(convo.nom, convo.avatar || '');
             div.innerHTML = `
-                <img src="${convo.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="msg-avatar">
+                <img src="${convo.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="msg-avatar" alt="${convo.nom}">
                 <div class="msg-content">
                     <div class="msg-header">
                         <span class="msg-name">${convo.nom}</span>
@@ -234,18 +212,27 @@
                     </div>
                 </div>
             `;
-            liste.appendChild(div);
+            zone.appendChild(div);
         });
+    }
+
+    // CORRECTION : fonction de recherche dans les conversations
+    function filtrerConversations() {
+        const terme = document.getElementById('search-conv').value.toLowerCase();
+        if (!terme) {
+            afficherConversations(toutesConvos);
+            return;
+        }
+        const filtrees = toutesConvos.filter(c => c.nom.toLowerCase().includes(terme) || (c.dernierMsg || '').toLowerCase().includes(terme));
+        afficherConversations(filtrees);
+    }
+
+    window.onload = function() {
+        const convos = JSON.parse(localStorage.getItem('naihab_conversations')) || [];
+        toutesConvos = [...convos, ...convoDemo];
+        afficherConversations(toutesConvos);
     };
 </script>
-
-    <div class="nav-bas">
-        <a href="chats.html" class="nav-icon">🏠</a>
-        <a href="recherche.html" class="nav-icon">🔍</a>
-        <a href="videos.html" class="nav-icon">▶️</a>
-        <a href="notifications.html" class="nav-icon">🔔</a>
-        <a href="profil.html" class="nav-icon">👤</a>
-    </div>
 
 </body>
 </html>

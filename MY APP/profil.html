@@ -238,10 +238,14 @@
                 const item = document.createElement('div');
                 item.className = "grid-item";
                 item.style.cursor = "pointer";
+                item.style.background = "linear-gradient(135deg, #1a0b5a, #0d0535)";
                 item.onclick = () => window.location.href = 'videos.html';
+                // ✅ Pas de blob URL — afficher une belle vignette avec le titre
                 item.innerHTML = `
-                    <video src="${vid.url}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" muted></video>
-                    <div style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,0.6);border-radius:8px;padding:2px 6px;font-size:12px;">🎬</div>
+                    <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">
+                        <div style="font-size:32px;">🎬</div>
+                        <div style="font-size:10px;color:#ffcc00;text-align:center;padding:0 5px;line-height:1.3;">${vid.titre || 'Vidéo'}</div>
+                    </div>
                     <button class="btn-suppr-post" onclick="supprimerVideo(event, ${index})">🗑️</button>
                 `;
                 gridPosts.appendChild(item);

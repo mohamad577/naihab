@@ -5,259 +5,368 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Bienvenue</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap');
+
+        :root { --gold: #ffcc00; --gold2: #ff9900; --deep: #0d0535; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(ellipse at top, #2a1570 0%, #1a0b5a 50%, #0d0535 100%);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between; /* Aligne le haut et le bas proprement */
-            color: white;
-            overflow: hidden;
-            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: #000; height: 100vh; width: 100%;
+            overflow: hidden; color: white;
         }
 
-        /* Conteneur global du globe pour garantir la symétrie centripète */
-        .globe-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 50vh; /* Prend la moitié supérieure de l'écran */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1;
-            pointer-events: none; /* Laisse passer les clics au cas où */
+        /* ════════ SPLASH ════════ */
+        #screen-splash {
+            position: fixed; inset: 0; background: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 100; transition: opacity 0.8s ease;
+        }
+        #screen-splash.cacher { opacity: 0; pointer-events: none; }
+
+        .eye-container { position: relative; width: 240px; height: 120px; margin-bottom: 35px; }
+        .eye { position: relative; width: 240px; height: 120px; }
+        .eyelid-top {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+            background: #000; z-index: 10;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+            transform-origin: bottom center;
+            animation: ouvrirHaut 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.6s;
+        }
+        .eyelid-bottom {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%;
+            background: #000; z-index: 10;
+            border-radius: 0 0 50% 50% / 0 0 100% 100%;
+            transform-origin: top center;
+            animation: ouvrirBas 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.6s;
+        }
+        @keyframes ouvrirHaut { from{transform:scaleY(1)} to{transform:scaleY(0)} }
+        @keyframes ouvrirBas  { from{transform:scaleY(1)} to{transform:scaleY(0)} }
+
+        .eye-inner {
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse, #1a0b5a 0%, #0a0530 100%);
+            border-radius: 50% / 40%; overflow: hidden;
+            border: 2px solid rgba(255,204,0,0.3);
+        }
+        .iris {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 85px; height: 85px; border-radius: 50%;
+            background: radial-gradient(circle, #ffcc00 0%, #ff9900 40%, #1a0b5a 70%);
+            box-shadow: 0 0 30px rgba(255,204,0,0.7);
+            animation: pulserIris 2s ease-in-out infinite 2.2s;
+        }
+        @keyframes pulserIris {
+            0%,100%{transform:translate(-50%,-50%) scale(1);}
+            50%{transform:translate(-50%,-50%) scale(1.07); box-shadow:0 0 55px rgba(255,204,0,1);}
+        }
+        .pupille {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 32px; height: 32px; border-radius: 50%; background: #000;
+        }
+        .reflet { position: absolute; top: 18%; right: 22%; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.85); }
+
+        .splash-logo { text-align: center; opacity: 0; animation: apparaitre 0.8s ease forwards 2.3s; }
+        .splash-logo-text {
+            font-size: 52px; font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #ffcc00 60%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .splash-slogan { color: rgba(255,255,255,0.45); font-size: 13px; margin-top: 8px; letter-spacing: 1.5px; }
+
+        .loader-wrap { position: absolute; bottom: 70px; width: 160px; opacity: 0; animation: apparaitre 0.5s ease forwards 2.6s; }
+        .loader-bar { width: 100%; height: 3px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .loader-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ffcc00, #ff9900); border-radius: 10px; animation: charger 1.6s ease forwards 2.8s; box-shadow: 0 0 10px rgba(255,204,0,0.5); }
+        .loader-text { text-align: center; font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 8px; letter-spacing: 2px; text-transform: uppercase; }
+        @keyframes charger { from{width:0%} to{width:100%} }
+        @keyframes apparaitre { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+        /* ════════ INDEX ════════ */
+        #screen-index {
+            position: fixed; inset: 0; opacity: 0; pointer-events: none;
+            transition: opacity 0.8s ease;
+            display: flex; flex-direction: column; align-items: center;
+            background: radial-gradient(ellipse at 50% 10%, #2a1570 0%, #1a0b5a 45%, #0d0535 100%);
+        }
+        #screen-index.afficher { opacity: 1; pointer-events: all; }
+        #screen-index::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 15% 85%, rgba(102,51,204,0.18) 0%, transparent 45%),
+                        radial-gradient(circle at 85% 15%, rgba(255,204,0,0.08) 0%, transparent 40%);
+            pointer-events: none;
         }
 
-        #globe-canvas {
-            display: block;
-            max-width: 100%;
-        }
-
-        /* Halo violet parfaitement centré sous le globe */
-        .globe-halo {
-            position: absolute;
-            top: 220px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 85%;
-            max-width: 350px;
-            height: 80px;
-            background: radial-gradient(ellipse, rgba(100,60,255,0.35) 0%, transparent 70%);
-            z-index: 0;
-            filter: blur(15px);
-        }
+        .stars { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--d) ease-in-out infinite var(--delay); opacity: 0; }
+        @keyframes twinkle { 0%,100%{opacity:0;transform:scale(0.5)} 50%{opacity:var(--o);transform:scale(1)} }
 
         .top-bar {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            display: flex;
-            justify-content: flex-end;
-            box-sizing: border-box;
-            z-index: 10;
+            position: relative; z-index: 10; width: 100%; padding: 14px 20px;
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+        }
+        .app-version { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 2px; text-transform: uppercase; }
+        .flag-img { width: 32px; height: 21px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); object-fit: cover; }
+
+        /* Globe */
+        .globe-zone {
+            position: relative; z-index: 5;
+            display: flex; justify-content: center; align-items: center;
+            flex: 1; width: 100%; min-height: 0;
+        }
+        .globe-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+
+        /* Anneaux fixes autour du globe */
+        .ring   { position: absolute; border-radius: 50%; border: 1.5px solid rgba(255,204,0,0.22); animation: ringPulse 3.5s ease-in-out infinite; pointer-events: none; }
+        .ring-2 { position: absolute; border-radius: 50%; border: 1px solid rgba(255,204,0,0.08);  animation: ringPulse 3.5s ease-in-out infinite 1.2s; pointer-events: none; }
+        @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.04);opacity:1} }
+
+        .globe-halo {
+            position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+            width: 85%; height: 50px;
+            background: radial-gradient(ellipse, rgba(102,51,204,0.5) 0%, transparent 70%);
+            filter: blur(20px); pointer-events: none;
         }
 
-        .flag-img {
-            width: 38px;
-            border-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        /* Canvas globe */
+        #globe-canvas {
+            border-radius: 50%;
+            display: block;
+            box-shadow:
+                0 0 0 2px rgba(150,120,255,0.3),
+                0 0 40px rgba(80,40,200,0.6),
+                0 0 80px rgba(80,40,200,0.25),
+                0 0 120px rgba(255,204,0,0.08);
         }
 
-        /* Contenu principal — aligné de manière stable en bas */
+        /* Contenu bas */
         .main-content {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            z-index: 10;
-            padding: 40px 25px 35px;
-            box-sizing: border-box;
-            background: linear-gradient(to top, #1a0b5a 75%, transparent 100%);
-            margin-top: auto; /* Pousse le bloc vers le bas de l'écran */
+            position: relative; z-index: 10; width: 100%;
+            padding: 10px 22px 28px; text-align: center;
+            background: linear-gradient(to top, #0d0535 55%, transparent 100%);
+            flex-shrink: 0;
         }
-
-        h1 {
-            font-size: 64px;
-            margin: 0 0 8px 0;
-            font-weight: 900;
-            letter-spacing: -2px;
-            background: linear-gradient(180deg, #fff 0%, #ffcc00 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: none;
-            filter: drop-shadow(0 0 20px rgba(255,204,0,0.3));
+        .crown-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255,204,0,0.1); border: 1px solid rgba(255,204,0,0.3);
+            border-radius: 20px; padding: 4px 12px;
+            font-size: 10px; font-weight: 600; color: var(--gold);
+            letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;
         }
-
-        .slogan {
-            font-size: 16px;
-            margin: 0 0 30px 0;
-            opacity: 0.75;
-            font-weight: 300;
-            letter-spacing: 0.5px;
+        .app-name {
+            font-size: clamp(42px, 12vw, 60px); font-weight: 900;
+            letter-spacing: -2px; line-height: 1; margin-bottom: 5px;
+            background: linear-gradient(170deg, #fff 0%, #ffcc00 55%, #ff9900 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
+        .slogan { font-size: 13px; font-weight: 300; opacity: 0.6; margin-bottom: 20px; line-height: 1.5; }
+        .slogan b { color: var(--gold); font-weight: 700; opacity: 1; }
 
-        .btn-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-        }
-
+        .btn-container { display: flex; flex-direction: column; gap: 10px; }
         .btn {
-            width: 100%;
-            padding: 18px;
-            border-radius: 30px;
-            font-size: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: none;
-            transition: 0.3s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 1px;
-            box-sizing: border-box;
+            width: 100%; padding: 15px; border-radius: 30px;
+            font-size: 14px; font-weight: 700; text-transform: uppercase;
+            cursor: pointer; border: none; transition: transform 0.2s;
+            text-decoration: none; display: flex; align-items: center;
+            justify-content: center; letter-spacing: 1.5px;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
         }
+        .btn:active { transform: scale(0.96); }
+        .btn-create { background: linear-gradient(135deg, #ffcc00 0%, #ff9900 100%); color: #0d0535; box-shadow: 0 6px 25px rgba(255,204,0,0.4); }
+        .btn-login  { background: rgba(255,255,255,0.07); color: white; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); }
 
-        .btn-create {
-            background: linear-gradient(135deg, #ffcc00, #ff9900);
-            color: #1a0b5a;
-            box-shadow: 0 6px 25px rgba(255, 204, 0, 0.4);
-        }
-
-        .btn-login {
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn:active { transform: scale(0.97); }
-
-        .footer {
-            font-size: 11px;
-            text-align: center;
-            opacity: 0.35;
-            z-index: 10;
-            width: 100%;
-            padding-bottom: 10px;
-        }
+        .footer { position: relative; z-index: 10; text-align: center; font-size: 10px; opacity: 0.25; padding-bottom: 8px; flex-shrink: 0; }
+        .footer a { color: white; text-decoration: none; margin: 0 6px; }
     </style>
 </head>
 <body>
 
+<!-- ══ SPLASH ══ -->
+<div id="screen-splash">
+    <div class="eye-container">
+        <div class="eye">
+            <div class="eye-inner">
+                <div class="iris"><div class="pupille"><div class="reflet"></div></div></div>
+            </div>
+            <div class="eyelid-top"></div>
+            <div class="eyelid-bottom"></div>
+        </div>
+    </div>
+    <div class="splash-logo">
+        <div class="splash-logo-text">Naïhab</div>
+        <p class="splash-slogan">TA ZONE · TON STYLE · TA LIBERTÉ</p>
+    </div>
+    <div class="loader-wrap">
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+        <div class="loader-text">Chargement...</div>
+    </div>
+</div>
+
+<!-- ══ INDEX ══ -->
+<div id="screen-index">
+    <div class="stars" id="stars"></div>
     <div class="top-bar">
-        <img id="flag" class="flag-img" src="https://flagcdn.com/w80/fr.png" alt="Drapeau">
+        <span class="app-version">v3.0</span>
+        <img id="flag" class="flag-img" src="https://flagcdn.com/w80/fr.png" alt="FR">
     </div>
 
-    <div class="globe-wrapper">
-        <canvas id="globe-canvas"></canvas>
+    <div class="globe-zone">
+        <div class="globe-wrap" id="globe-wrap">
+            <div class="ring"   id="ring1"></div>
+            <div class="ring-2" id="ring2"></div>
+            <canvas id="globe-canvas"></canvas>
+            <div class="globe-halo"></div>
+        </div>
     </div>
-    <div class="globe-halo"></div>
 
     <div class="main-content">
-        <h1>Naïhab</h1>
-        <p class="slogan">Ta zone, ton style, ta liberté !</p>
-
+        <div class="crown-badge">👑 Rejoins la communauté</div>
+        <div class="app-name">Naïhab</div>
+        <p class="slogan">Ta zone, ton style, ta liberté.<br><b>Partage. Vote. Règne.</b></p>
         <div class="btn-container">
-            <a href="inscription.html" class="btn btn-create">Créer un compte</a>
-            <a href="connexion.html" class="btn btn-login">Se connecter</a>
+            <a href="inscription.html" class="btn btn-create">✨ Créer un compte</a>
+            <a href="connexion.html"   class="btn btn-login">Se connecter</a>
         </div>
     </div>
 
     <div class="footer">
-        Conditions • Politique • Aide
+        <a href="legal.html">Conditions</a> •
+        <a href="legal.html">Politique</a> •
+        <a href="aide.html">Aide</a>
     </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // 1️⃣ Redirections automatiques
-        if (!sessionStorage.getItem('splash_done')) {
-            sessionStorage.setItem('splash_done', 'oui');
-            window.location.href = 'splash.html';
-        }
+<script>
+// ── REDIRECTION INSTANTANÉE (Si déjà connecté) ──
+// On ajoute '?splash=1' à la fin de l'URL pour dire à la page d'accueil d'afficher l'animation !
+if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
+    const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+    window.location.href = pageAccueil + "?splash=1"; 
+}
 
-        if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte') === 'oui') {
-            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
-            window.location.href = pageAccueil;
-        }
+// ── ÉTOILES ──
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 55; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+2).toFixed(1)}s;--o:${(Math.random()*0.7+0.2).toFixed(2)};--delay:-${(Math.random()*4).toFixed(1)}s;`;
+    starsEl.appendChild(s);
+}
 
-        // 2️⃣ Initialisation du Globe 3D avec redimensionnement symétrique
-        const canvas = document.getElementById('globe-canvas');
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        
-        // Calcul d'une taille parfaite pour rester au centre sans déborder
-        const size = Math.min(window.innerWidth * 0.95, 380);
-        renderer.setSize(size, size);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+// ── TRANSITION SPLASH → INDEX ──
+setTimeout(() => {
+    document.getElementById('screen-splash').classList.add('cacher');
+    const idx = document.getElementById('screen-index');
+    idx.classList.add('afficher');
+    setTimeout(dessinerGlobe, 300);
+}, 4500);
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-        camera.position.z = 2.4;
+// ── DRAPEAU ──
+fetch('https://ipapi.co/json/')
+    .then(r => r.json())
+    .then(d => { document.getElementById('flag').src = `https://flagcdn.com/w80/${d.country_code.toLowerCase()}.png`; })
+    .catch(() => {});
 
-        // Texture de la Terre
-        const loader = new THREE.TextureLoader();
-        const earthTexture = loader.load(
-            'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg',
-            undefined, undefined,
-            () => { globeMesh.material.color.set(0x1a4a8a); }
-        );
+// ══════════════════════════════════════════
+// GLOBE CANVAS
+// ══════════════════════════════════════════
+function dessinerGlobe() {
+    const canvas = document.getElementById('globe-canvas');
+    const SIZE   = Math.min(window.innerWidth * 0.76, 290);
+    const R      = SIZE / 2;
+    canvas.width  = SIZE;
+    canvas.height = SIZE;
+    canvas.style.width  = SIZE + 'px';
+    canvas.style.height = SIZE + 'px';
 
-        const geometry = new THREE.SphereGeometry(1, 64, 64);
-        const material = new THREE.MeshPhongMaterial({
-            map: earthTexture,
-            shininess: 15,
+    document.getElementById('ring1').style.cssText += `width:${SIZE+22}px;height:${SIZE+22}px;`;
+    document.getElementById('ring2').style.cssText += `width:${SIZE+50}px;height:${SIZE+50}px;`;
+
+    const ctx = canvas.getContext('2d');
+
+    const CONTINENTS = {
+        amerNord: [[-168,71],[-140,70],[-110,75],[-85,73],[-65,68],[-52,47],[-55,45],[-65,44],[-70,42],[-75,38],[-80,25],[-85,15],[-90,16],[-95,18],[-105,20],[-115,30],[-120,35],[-125,48],[-130,54],[-140,60],[-145,62],[-155,60],[-165,65],[-168,71]],
+        amerSud: [[-80,10],[-75,12],[-65,10],[-60,5],[-50,0],[-35,-5],[-35,-10],[-38,-15],[-40,-22],[-45,-23],[-48,-28],[-52,-33],[-58,-38],[-62,-42],[-65,-55],[-68,-55],[-70,-50],[-72,-42],[-70,-35],[-68,-28],[-70,-20],[-75,-15],[-78,-8],[-80,0],[-80,10]],
+        europe: [[-10,36],[-8,38],[-10,44],[-5,48],[0,51],[5,54],[10,56],[15,58],[20,60],[25,65],[30,70],[28,72],[20,72],[10,70],[0,62],[-5,58],[-10,50],[-8,44],[-10,36]],
+        afrique: [[-18,15],[-15,10],[-10,5],[-5,5],[0,5],[5,5],[10,5],[15,5],[20,0],[25,-5],[30,-10],[35,-15],[38,-20],[40,-25],[38,-30],[35,-35],[28,-35],[20,-35],[15,-30],[10,-25],[5,-5],[0,5],[-5,0],[-10,0],[-15,10],[-18,15]],
+        asie: [[30,70],[40,72],[60,73],[80,73],[100,72],[120,72],[140,70],[150,60],[145,50],[135,45],[130,35],[125,25],[120,20],[110,15],[100,5],[95,10],[85,20],[75,25],[65,25],[55,25],[45,15],[38,15],[35,30],[30,35],[28,42],[30,50],[30,70]],
+        australie: [[115,-22],[120,-18],[125,-15],[130,-12],[135,-12],[140,-15],[145,-18],[150,-22],[152,-26],[150,-30],[145,-38],[140,-38],[135,-35],[130,-32],[125,-28],[120,-25],[115,-22]],
+        antarctique: [[-180,-70],[0,-70],[180,-70],[180,-90],[-180,-90],[-180,-70]]
+    };
+
+    const VILLES = [[2,48],[3,6],[28,-26],[37,-1],[39,22],[55,25],[72,19],[104,1],[116,40],[139,35],[151,-34],[-43,-23],[-74,4],[-99,19],[-87,41],[-73,40],[-118,34],[-46,-23]];
+    let angle = 0;
+
+    function latlonTo3D(lon, lat, rotY) {
+        const phi   = (90 - lat) * Math.PI / 180;
+        const theta = (lon + rotY) * Math.PI / 180;
+        return { x: Math.sin(phi) * Math.cos(theta), y: Math.cos(phi), z: Math.sin(phi) * Math.sin(theta) };
+    }
+
+    function project(p) { return { x: R + p.x * R * 0.97, y: R - p.y * R * 0.97, vis: p.z > 0 }; }
+
+    function draw() {
+        ctx.clearRect(0, 0, SIZE, SIZE);
+        const ocean = ctx.createRadialGradient(R*0.6, R*0.5, 0, R, R, R);
+        ocean.addColorStop(0, '#2a5fa8'); ocean.addColorStop(0.5, '#1a3a7a'); ocean.addColorStop(0.8, '#0d1a5a'); ocean.addColorStop(1, '#060d30');
+        ctx.beginPath(); ctx.arc(R, R, R-1, 0, Math.PI*2); ctx.fillStyle = ocean; ctx.fill();
+
+        ctx.strokeStyle = 'rgba(100,160,255,0.12)'; ctx.lineWidth = 0.7;
+        [-60,-30,0,30,60].forEach(lat => {
+            ctx.beginPath(); let first = true;
+            for (let lon = -180; lon <= 180; lon += 3) {
+                const p3 = latlonTo3D(lon, lat, angle * 180/Math.PI); const pt = project(p3);
+                if (pt.vis) { first ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); first = false; } else { first = true; }
+            }
+            ctx.stroke();
         });
-        const globeMesh = new THREE.Mesh(geometry, material);
-        scene.add(globeMesh);
 
-        // Atmosphère brillante
-        const atmosGeo = new THREE.SphereGeometry(1.04, 64, 64);
-        const atmosMat = new THREE.MeshPhongMaterial({
-            color: 0x6644cc,
-            transparent: true,
-            opacity: 0.15,
-            side: THREE.FrontSide,
-        });
-        scene.add(new THREE.Mesh(atmosGeo, atmosMat));
-
-        // Lumières
-        scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        sunLight.position.set(5, 3, 5);
-        scene.add(sunLight);
-
-        const purpleLight = new THREE.PointLight(0x6633cc, 0.8, 10);
-        purpleLight.position.set(-3, -2, 2);
-        scene.add(purpleLight);
-
-        // Animation de rotation
-        function animate() {
-            requestAnimationFrame(animate);
-            globeMesh.rotation.y += 0.002;
-            renderer.render(scene, camera);
+        for (let lon = -180; lon < 180; lon += 30) {
+            ctx.beginPath(); let first = true;
+            for (let lat = -90; lat <= 90; lat += 3) {
+                const p3 = latlonTo3D(lon, lat, angle * 180/Math.PI); const pt = project(p3);
+                if (pt.vis) { first ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); first = false; } else { first = true; }
+            }
+            ctx.stroke();
         }
-        animate();
 
-        // 3️⃣ Détection dynamique de l'IP pour le drapeau
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if(data && data.country_code) {
-                    const code = data.country_code.toLowerCase();
-                    document.getElementById('flag').src = `https://flagcdn.com/w80/${code}.png`;
-                }
-            })
-            .catch(() => {});
-    </script>
+        const deg = angle * 180 / Math.PI;
+        Object.values(CONTINENTS).forEach(coords => {
+            ctx.beginPath(); let started = false;
+            coords.forEach(([lon, lat]) => {
+                const p3 = latlonTo3D(lon, lat, deg); const pt = project(p3);
+                if (pt.vis) { started ? ctx.lineTo(pt.x, pt.y) : ctx.moveTo(pt.x, pt.y); started = true; }
+            });
+            ctx.closePath(); ctx.fillStyle = 'rgba(34,110,50,0.75)'; ctx.strokeStyle = 'rgba(80,180,80,0.4)'; ctx.lineWidth = 0.8; ctx.fill(); ctx.stroke();
+        });
+
+        VILLES.forEach(([lon, lat]) => {
+            const p3 = latlonTo3D(lon, lat, deg); const pt = project(p3);
+            if (pt.vis) {
+                const grad = ctx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 7);
+                grad.addColorStop(0, 'rgba(255,204,0,0.5)'); grad.addColorStop(1, 'rgba(255,204,0,0)');
+                ctx.beginPath(); ctx.arc(pt.x, pt.y, 7, 0, Math.PI*2); ctx.fillStyle = grad; ctx.fill();
+                ctx.beginPath(); ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI*2); ctx.fillStyle = '#ffcc00'; ctx.fill();
+            }
+        });
+
+        const lueurG = ctx.createRadialGradient(R*0.2, R, 0, R*0.2, R, R*0.9); lueurG.addColorStop(0, 'rgba(102,51,204,0.22)'); lueurG.addColorStop(1, 'rgba(102,51,204,0)');
+        ctx.beginPath(); ctx.arc(R, R, R-1, 0, Math.PI*2); ctx.fillStyle = lueurG; ctx.fill();
+
+        const shine = ctx.createRadialGradient(R*0.55, R*0.45, 0, R*0.55, R*0.45, R*0.55); shine.addColorStop(0, 'rgba(255,255,255,0.18)'); shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.beginPath(); ctx.arc(R, R, R-1, 0, Math.PI*2); ctx.fillStyle = shine; ctx.fill();
+
+        ctx.beginPath(); ctx.arc(R, R, R-1.5, 0, Math.PI*2); ctx.strokeStyle = 'rgba(150,120,255,0.4)'; ctx.lineWidth = 2.5; ctx.stroke();
+
+        angle += 0.007;
+        requestAnimationFrame(draw);
+    }
+    draw();
+}
+</script>
 </body>
 </html>
