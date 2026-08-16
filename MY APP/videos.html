@@ -737,7 +737,22 @@ function calculerGagnant() {
             };
         }
     });
-    if (gagnant) localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
+    if (gagnant) {
+        localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
+
+        // CORRECTION : incrémenter le compteur de couronnes affiché sur profil.html
+        // quand c'est TOI l'auteur de la vidéo en tête — une seule fois par vidéo
+        // gagnante (pas à chaque recalcul après un vote), grâce à un repère de
+        // la dernière vidéo déjà comptée.
+        if (gagnant.auteur === monNom) {
+            const derniereComptee = localStorage.getItem('naihab_derniere_couronne_comptee');
+            if (derniereComptee !== gagnant.id) {
+                const nbActuel = parseInt(localStorage.getItem('naihab_nb_couronnes') || '0');
+                localStorage.setItem('naihab_nb_couronnes', nbActuel + 1);
+                localStorage.setItem('naihab_derniere_couronne_comptee', gagnant.id);
+            }
+        }
+    }
 }
 
 // ── TIROIR ──
