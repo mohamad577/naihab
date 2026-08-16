@@ -165,6 +165,15 @@
             if (!pseudo) { alert("Entre ton pseudo ou numéro !"); return; }
             if (!mdp) { alert("Entre ton mot de passe !"); return; }
 
+            // CORRECTION IMPORTANTE : le mot de passe n'était jamais vérifié —
+            // n'importe quel mot de passe non vide était accepté. On compare
+            // maintenant avec celui enregistré lors de l'inscription.
+            const mdpEnregistre = localStorage.getItem('user_mdp');
+            if (mdpEnregistre && mdp !== mdpEnregistre) {
+                alert("Mot de passe incorrect !");
+                return;
+            }
+
             // ✅ Animation chargement
             btn.classList.add('loading');
 

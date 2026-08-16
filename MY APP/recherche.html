@@ -2,6 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Anti-flash : cacher la page tant que l'animation de démarrage n'est pas prête
+        if (new URLSearchParams(location.search).get('splash') === '1') {
+            document.documentElement.style.visibility = 'hidden';
+            setTimeout(function(){ document.documentElement.style.visibility = 'visible'; }, 6000);
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Explorer</title>
     <style>
@@ -183,5 +190,6 @@
             }
         }
     </script>
+<script src="splash.js"></script>
 </body>
 </html>

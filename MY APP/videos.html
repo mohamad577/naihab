@@ -2,6 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Anti-flash : cacher la page tant que l'animation de démarrage n'est pas prête
+        if (new URLSearchParams(location.search).get('splash') === '1') {
+            document.documentElement.style.visibility = 'hidden';
+            setTimeout(function(){ document.documentElement.style.visibility = 'visible'; }, 6000);
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Vidéos</title>
     <style>
@@ -461,6 +468,7 @@ function initialiserCartes() {
         const voteActif = votes.includes(monId);
         const epinglee = localStorage.getItem('naihab_video_epinglee') === id;
         const likes = card.dataset.likes || 0;
+        card.dataset.rawLikes = likes; // nombre exact utilisé pour le calcul, indépendant de l'affichage "k"
 
         // Infos vidéo
         const info = document.createElement('div');
@@ -475,6 +483,9 @@ function initialiserCartes() {
         const actions = document.createElement('div');
         actions.className = 'actions';
         actions.innerHTML = `
+            <div class="action-btn" data-action="son">
+                <div class="icon-bg">🔇</div>
+            </div>
             <div class="action-btn" data-action="like">
                 <div class="icon-bg ${liked ? 'like-active' : ''}">${liked ? '❤️' : '🤍'}</div>
                 <span class="likes-count">${formaterNombre(parseInt(likes))}</span>
@@ -503,7 +514,8 @@ function initialiserCartes() {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
                 const action = btn.dataset.action;
-                if (action === 'like') toggleLike(btn, id);
+                if (action === 'son') toggleSon(btn, card);
+                else if (action === 'like') toggleLike(btn, id);
                 else if (action === 'comment') allerCommentaires(id);
                 else if (action === 'vote') voter(btn, id);
                 else if (action === 'partager') partager();
@@ -549,12 +561,34 @@ function observerDefilement() {
     document.querySelectorAll('.video-card').forEach(c => observer.observe(c));
 }
 
+// ── SON ──
+function toggleSon(btn, card) {
+    const video = card.querySelector('video');
+    const icon = btn.querySelector('.icon-bg');
+    if (!video) return;
+
+    if (video.muted) {
+        // On coupe d'abord le son de toutes les autres vidéos (une seule à la fois)
+        document.querySelectorAll('.video-card video').forEach(v => { v.muted = true; });
+        document.querySelectorAll('.action-btn[data-action="son"] .icon-bg').forEach(i => { i.innerText = '🔇'; });
+
+        video.muted = false;
+        icon.innerText = '🔊';
+    } else {
+        video.muted = true;
+        icon.innerText = '🔇';
+    }
+}
+
 // ── LIKE ──
 function toggleLike(btn, id) {
     const icon = btn.querySelector('.icon-bg');
     const countEl = btn.querySelector('.likes-count');
+    const card = btn.closest('.video-card');
     const estLike = localStorage.getItem('naihab_like_' + id) === '1';
-    let nb = parseInt(countEl.innerText.replace('k','')) || 0;
+    // On lit le nombre RÉEL stocké sur la carte (jamais le texte affiché,
+    // qui peut être arrondi en "1.2k" — c'était la cause du bug de comptage)
+    let nb = parseInt(card.dataset.rawLikes) || 0;
 
     if (!estLike) {
         icon.innerText = '❤️'; icon.classList.add('like-active');
@@ -566,6 +600,7 @@ function toggleLike(btn, id) {
         localStorage.setItem('naihab_like_' + id, '0');
         nb = Math.max(0, nb - 1);
     }
+    card.dataset.rawLikes = nb;
     countEl.innerText = formaterNombre(nb);
 
     // Sauvegarder dans naihab_videos si c'est une vraie vidéo
@@ -615,6 +650,10 @@ function epinglerVideo(btn, id, card) {
         box.classList.remove('pin-active');
         if (label) label.innerText = 'Épingler';
         afficherToast('Retiré des enregistrements 📌');
+        // Si c'était la vidéo "active" épinglée, on efface la mémorisation
+        if (localStorage.getItem('naihab_video_epinglee') === id) {
+            localStorage.removeItem('naihab_video_epinglee');
+        }
     } else {
         // Ajouter aux enregistrements
         const auteur = card.dataset.auteur || '@Naïfan';
@@ -626,22 +665,10 @@ function epinglerVideo(btn, id, card) {
         box.classList.add('pin-active');
         if (label) label.innerText = 'Enregistré ✓';
         afficherToast('Enregistré ! 📌');
+        // On mémorise que c'est la dernière vidéo épinglée, pour y revenir au prochain chargement
+        localStorage.setItem('naihab_video_epinglee', id);
     }
     rafraichirTiroir();
-}
-
-// ── RESTAURER ÉPINGLÉE AU CHARGEMENT ──
-function restaurerEpinglee() {
-    const ep = localStorage.getItem('naihab_video_epinglee');
-    if (!ep) return;
-    const container = document.getElementById('mainVideoContainer');
-    const cards = Array.from(container.querySelectorAll('.video-card'));
-    const index = cards.findIndex(c => c.dataset.id === ep);
-    if (index >= 0) {
-        setTimeout(() => {
-            container.scrollTo({ top: index * window.innerHeight, behavior: 'smooth' });
-        }, 500);
-    }
 }
 
 // ── COMMENTAIRES ──
@@ -667,6 +694,7 @@ function allerVersVideoParId(id) {
 
 // ── RESTAURER ÉTAT ÉPINGLÉES AU CHARGEMENT ──
 function restaurerEpinglee() {
+    // Réactiver l'icône 📌 sur toutes les vidéos enregistrées
     const epinglees = JSON.parse(localStorage.getItem('naihab_epinglees')) || [];
     epinglees.forEach(ep => {
         const card = document.querySelector(`.video-card[data-id="${ep.id}"]`);
@@ -677,13 +705,37 @@ function restaurerEpinglee() {
             if (pinLabel) pinLabel.innerText = 'Enregistré ✓';
         }
     });
+
+    // Revenir automatiquement sur la dernière vidéo épinglée
+    const derniereEpinglee = localStorage.getItem('naihab_video_epinglee');
+    if (derniereEpinglee) {
+        const container = document.getElementById('mainVideoContainer');
+        const cards = Array.from(container.querySelectorAll('.video-card'));
+        const index = cards.findIndex(c => c.dataset.id === derniereEpinglee);
+        if (index >= 0) {
+            setTimeout(() => {
+                container.scrollTo({ top: index * window.innerHeight, behavior: 'smooth' });
+            }, 500);
+        }
+    }
 }
 function calculerGagnant() {
-    const mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
+    // On regarde TOUTES les cartes vidéo affichées (démo + vidéos publiées),
+    // pas seulement naihab_videos — sinon les votes sur les vidéos de démo
+    // n'étaient jamais comptés pour désigner le gagnant.
     let maxVotes = 0, gagnant = null;
-    mesVideos.forEach((vid, index) => {
-        const votes = JSON.parse(localStorage.getItem('naihab_votes_' + index)) || [];
-        if (votes.length > maxVotes) { maxVotes = votes.length; gagnant = { ...vid, nbVotes: votes.length, index }; }
+    document.querySelectorAll('.video-card').forEach(card => {
+        const id = card.dataset.id;
+        const votes = JSON.parse(localStorage.getItem('naihab_votes_' + id)) || [];
+        if (votes.length > maxVotes) {
+            maxVotes = votes.length;
+            gagnant = {
+                id,
+                auteur: card.dataset.auteur || monNom,
+                desc: card.dataset.desc || '',
+                nbVotes: votes.length
+            };
+        }
     });
     if (gagnant) localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
 }
@@ -714,5 +766,6 @@ function formaterNombre(n) {
     return n.toString();
 }
 </script>
+<script src="splash.js"></script>
 </body>
 </html>

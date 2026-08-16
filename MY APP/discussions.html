@@ -2,6 +2,13 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Anti-flash : cacher la page tant que l'animation de démarrage n'est pas prête
+        if (new URLSearchParams(location.search).get('splash') === '1') {
+            document.documentElement.style.visibility = 'hidden';
+            setTimeout(function(){ document.documentElement.style.visibility = 'visible'; }, 6000);
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Messages</title>
     <style>
@@ -118,8 +125,19 @@
         <a href="chats.html" class="back-btn">←</a>
         <div class="logo-cercle">ИН</div>
         <div class="app-name">Messages</div>
-        <!-- CORRECTION : bouton nouveau message -->
-        <button class="new-msg-btn" onclick="nouveauMessage()">✏️ Nouveau</button>
+        <!-- CORRECTION : bouton nouveau message → recherche de compte -->
+        <button class="new-msg-btn" onclick="ouvrirRechercheCompte()">✏️ Nouveau</button>
+    </div>
+
+    <!-- CORRECTION : recherche de compte (remplace le prompt "nouveau contact") -->
+    <div id="modal-recherche" style="display:none; position:fixed; inset:0; background:var(--bg-deep); z-index:1000; flex-direction:column;">
+        <div class="header" style="position:static;">
+            <span onclick="fermerRechercheCompte()" class="back-btn">←</span>
+            <input type="text" id="recherche-compte-input" placeholder="Rechercher un compte..."
+                   oninput="filtrerComptes()"
+                   style="flex-grow:1; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:20px; padding:10px 16px; color:white; font-size:14px; outline:none;">
+        </div>
+        <div id="liste-comptes" style="padding:10px 20px; overflow-y:auto;"></div>
     </div>
 
     <div class="favorites-label">Suggestions</div>
@@ -182,6 +200,64 @@
         }
     }
 
+    // CORRECTION : recherche de compte à la place du prompt "nouveau contact"
+    // (l'application fonctionne avec des comptes, pas des contacts à ajouter).
+    // Cherche parmi les comptes suggérés + tout compte réel enregistré plus tard
+    // dans naihab_comptes (prêt pour quand il y aura de vrais comptes).
+    const comptesSuggeres = [
+        { nom: "Angela", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" },
+        { nom: "David", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100" },
+        { nom: "Sara", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100" },
+        { nom: "Cameron", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100" },
+        { nom: "Jackson", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100" }
+    ];
+
+    function tousLesComptes() {
+        const comptesReels = JSON.parse(localStorage.getItem('naihab_comptes')) || [];
+        const noms = new Set();
+        const fusion = [];
+        [...comptesReels, ...comptesSuggeres].forEach(c => {
+            if (!noms.has(c.nom.toLowerCase())) { noms.add(c.nom.toLowerCase()); fusion.push(c); }
+        });
+        return fusion;
+    }
+
+    function ouvrirRechercheCompte() {
+        document.getElementById('modal-recherche').style.display = 'flex';
+        document.getElementById('recherche-compte-input').value = '';
+        document.getElementById('recherche-compte-input').focus();
+        afficherComptes(tousLesComptes());
+    }
+
+    function fermerRechercheCompte() {
+        document.getElementById('modal-recherche').style.display = 'none';
+    }
+
+    function afficherComptes(liste) {
+        const zone = document.getElementById('liste-comptes');
+        zone.innerHTML = '';
+        if (liste.length === 0) {
+            zone.innerHTML = `<div style="text-align:center; padding:40px 20px; opacity:0.4; font-size:13px;">Aucun compte trouvé.</div>`;
+            return;
+        }
+        liste.forEach(compte => {
+            const div = document.createElement('div');
+            div.className = 'msg-item';
+            div.onclick = () => { fermerRechercheCompte(); ouvrirChat(compte.nom, compte.avatar || ''); };
+            div.innerHTML = `
+                <img src="${compte.avatar || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="msg-avatar" alt="${compte.nom}">
+                <div class="msg-content"><span class="msg-name">${compte.nom}</span></div>
+            `;
+            zone.appendChild(div);
+        });
+    }
+
+    function filtrerComptes() {
+        const terme = document.getElementById('recherche-compte-input').value.toLowerCase();
+        const resultats = tousLesComptes().filter(c => c.nom.toLowerCase().includes(terme));
+        afficherComptes(resultats);
+    }
+
     function afficherConversations(liste) {
         const zone = document.getElementById('liste-conversations');
         zone.innerHTML = '';
@@ -228,11 +304,17 @@
     }
 
     window.onload = function() {
-        const convos = JSON.parse(localStorage.getItem('naihab_conversations')) || [];
-        toutesConvos = [...convos, ...convoDemo];
+        const convosReelles = JSON.parse(localStorage.getItem('naihab_conversations')) || [];
+        // Les vraies conversations passent en priorité (déjà triées de la plus récente
+        // à la plus ancienne). On ne garde les profils de démo que s'il n'y a pas déjà
+        // une vraie discussion avec la même personne.
+        const nomsReels = convosReelles.map(c => c.nom.toLowerCase());
+        const demoRestantes = convoDemo.filter(c => !nomsReels.includes(c.nom.toLowerCase()));
+        toutesConvos = [...convosReelles, ...demoRestantes];
         afficherConversations(toutesConvos);
     };
 </script>
 
+<script src="splash.js"></script>
 </body>
 </html>

@@ -107,6 +107,16 @@
         const nomRecu = urlParams.get('name');
         const imgRecue = urlParams.get('img');
 
+        // CORRECTION : si le compte demandé est en fait le compte connecté (soi-même,
+        // par exemple après avoir gagné la couronne), on redirige vers le vrai profil
+        // (profil.html) au lieu d'afficher ce faux profil de démonstration qui affiche
+        // le bon nom mais du contenu générique qui n'a rien à voir.
+        const monNom = localStorage.getItem('user_name');
+        if (nomRecu && monNom && nomRecu.toLowerCase() === monNom.toLowerCase()) {
+            window.location.href = 'profil.html';
+            return;
+        }
+
         if (nomRecu) {
             // CORRECTION : replace() sans flag global ne remplace que le premier underscore
             // Utiliser une regex /g pour remplacer TOUS les underscores
