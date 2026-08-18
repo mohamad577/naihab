@@ -50,10 +50,16 @@
     
     // Vérification du mode démo
     const isDemo = urlParams.get('demo') === '1';
+    const demoId = urlParams.get('id') || '';
     const postIndex = urlParams.get('index') || '0';
     
-    // Définition de la clé unique pour séparer les commentaires démo et persos
-    const cleCommentaires = isDemo ? 'naihab_commentaires_demo' : 'naihab_commentaires_' + postIndex;
+    // Définition de la clé unique pour séparer les commentaires démo et persos.
+    // CORRECTION : chaque publication de démo (Julie, ou celles de la grille
+    // recherche.html) a maintenant sa propre clé, pour ne pas mélanger leurs
+    // commentaires entre elles.
+    const cleCommentaires = isDemo
+        ? ('naihab_commentaires_demo' + (demoId ? '_' + demoId : ''))
+        : 'naihab_commentaires_' + postIndex;
 
     function obtenirHeure() {
         const d = new Date();
@@ -64,8 +70,9 @@
         const zone = document.getElementById('zone-commentaires');
         const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires));
 
-        // Si aucun commentaire n'est encore enregistré pour le post démo, on met les deux de base
-        if (isDemo && !commentairesSauvegardes) {
+        // Les 2 commentaires de base ne concernent que le post de démo original
+        // (Julie, sans id) — les publications de la grille recherche.html démarrent vides
+        if (isDemo && !demoId && !commentairesSauvegardes) {
             const demaBase = [
                 { nom: "Jackson", texte: "Superbe application ! J'adore le design bleu nuit. 🔥", heure: "Il y a 2h" },
                 { nom: "Naïfan_99", texte: "Est-ce qu'on pourra bientôt envoyer des vidéos ? 🌍", heure: "Il y a 1h" }

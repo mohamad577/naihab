@@ -288,6 +288,8 @@
                 localStorage.removeItem('user_mdp');
                 localStorage.removeItem('user_email');
                 localStorage.removeItem('user_tel');
+                // CORRECTION : naihab_connecte était oublié lors de la déconnexion
+                localStorage.removeItem('naihab_connecte');
                 window.location.href = 'index.html'; 
             }
         }

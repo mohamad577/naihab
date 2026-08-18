@@ -112,34 +112,6 @@
 
         .nav-link { text-decoration: none; font-size: 24px; opacity: 0.5; transition: 0.3s; color: white; }
         .nav-link.active { opacity: 1; color: var(--gold); transform: translateY(-3px); }
-
-        /* 👁️ DESIGN DU SPLASH INJECTÉ DYNAMIQUEMENT */
-        #dynamic-splash {
-            position: fixed; inset: 0; background: #000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 100000; transition: opacity 0.8s ease;
-        }
-        .dynamic-eye-container { position: relative; width: 240px; height: 120px; }
-        .dynamic-eyelid-top {
-            position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: #000; z-index: 10;
-            border-radius: 50% 50% 0 0 / 100% 100% 0 0; transform-origin: bottom center;
-            animation: ouvrirHaut 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.4s;
-        }
-        .dynamic-eyelid-bottom {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #000; z-index: 10;
-            border-radius: 0 0 50% 50% / 0 0 100% 100%; transform-origin: top center;
-            animation: ouvrirBas 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.4s;
-        }
-        .dynamic-eye-inner {
-            position: absolute; inset: 0; background: radial-gradient(ellipse, #1a0b5a 0%, #0a0530 100%);
-            border-radius: 50% / 40%; overflow: hidden; border: 2px solid rgba(255,204,0,0.3);
-        }
-        .dynamic-iris {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 85px; height: 85px; border-radius: 50%;
-            background: radial-gradient(circle, #ffcc00 0%, #ff9900 40%, #1a0b5a 70%); box-shadow: 0 0 30px rgba(255,204,0,0.7);
-        }
-        .dynamic-pupille { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 32px; height: 32px; border-radius: 50%; background: #000; }
-        .dynamic-reflet { position: absolute; top: 18%; right: 22%; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.85); }
     </style>
 </head>
 <body>
@@ -200,46 +172,9 @@
         <a href="profil.html" class="nav-link">👤</a>
     </nav>
 
+    <script src="splash.js"></script>
+
     <script>
-        // ── GESTION DYNAMIQUE DU SPLASH SCREEN SUR L'ACCUEIL ──
-        // Se déclenche dès que possible (pas besoin d'attendre le chargement complet
-        // des images comme avec window.onload) pour éviter tout flash de la vraie page.
-        (function() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get('splash') !== '1') return;
-
-                const splashDiv = document.createElement('div');
-                splashDiv.id = 'dynamic-splash';
-                splashDiv.innerHTML = `
-                    <div class="dynamic-eye-container">
-                        <div class="dynamic-eye-inner">
-                            <div class="dynamic-iris"><div class="dynamic-pupille"><div class="dynamic-reflet"></div></div></div>
-                        </div>
-                        <div class="dynamic-eyelid-top"></div>
-                        <div class="dynamic-eyelid-bottom"></div>
-                    </div>
-                `;
-                document.body.appendChild(splashDiv);
-
-                // Retirer proprement le splash après l'animation (2.5 secondes suffisent pour un utilisateur déjà connecté)
-                setTimeout(() => {
-                    splashDiv.style.opacity = '0';
-                    setTimeout(() => { splashDiv.remove(); }, 800);
-                    // On nettoie l'URL pour enlever le ?splash=1 — dans un try/catch car
-                    // cette opération est bloquée par Chrome en test local (file://),
-                    // ce qui ne doit pas empêcher le reste de l'animation de se terminer
-                    try {
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    } catch (e) { /* ignoré : normal en local file:// */ }
-                }, 2500);
-            } finally {
-                // Quoi qu'il arrive (même en cas d'erreur imprévue ci-dessus),
-                // on révèle la page — jamais bloquée en noir indéfiniment
-                document.documentElement.style.visibility = 'visible';
-            }
-        })();
-
         window.onload = function() {
             // Le reste de tes fonctions d'origine
             const photoSauve = localStorage.getItem("user_photo");
@@ -255,18 +190,19 @@
             document.getElementById('nb-comm-demo').innerText = commsDemo.length;
 
             // ── Initialiser les données de la publication démo (Julie) ──
-            // Nécessaire pour que publication.html puisse afficher l'image/texte en mode ?demo=1
-            if (!localStorage.getItem('naihab_publication_demo')) {
-                const demo = {
-                    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
-                    texte: "Superbe journée à explorer Naïhab ! ✨",
-                    date: "2h",
-                    likes: 124,
-                    auteur: "Julie",
-                    auteurPhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100"
-                };
-                localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
-            }
+            // Nécessaire pour que publication.html puisse afficher l'image/texte en mode ?demo=1.
+            // CORRECTION : on la met à jour à CHAQUE chargement (plus de "if not exists"),
+            // sinon une ancienne version testée précédemment restait bloquée en mémoire
+            // et ne correspondait plus à ce qui est affiché sur cette page.
+            const demo = {
+                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
+                texte: "Superbe journée à explorer Naïhab ! ✨",
+                date: "2h",
+                likes: parseInt(localStorage.getItem('naihab_publication_demo_likes')) || 124,
+                auteur: "Julie",
+                auteurPhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100"
+            };
+            localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
 
             // ── Afficher la bannière du gagnant de la couronne (si applicable) ──
             const gagnantRaw = localStorage.getItem('naihab_gagnant_couronne');
@@ -276,6 +212,7 @@
                     const gagnant = JSON.parse(gagnantRaw);
                     document.getElementById('winner-nom').innerText = '👑 ' + (gagnant.auteur || 'Naïfan');
                     document.getElementById('winner-votes').innerText = (gagnant.nbVotes || 0) + ' votes';
+                    document.getElementById('winner-img').src = gagnant.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
                     document.getElementById('banner-winner').style.display = 'flex';
                 } catch (e) {
                     // Ancien format (texte simple) éventuellement laissé par un test manuel
@@ -298,7 +235,6 @@
             const heart = element.querySelector('.heart');
             const compteur = element.querySelector('small');
             let nb = parseInt(compteur.innerText) || 0;
-            let demo = JSON.parse(localStorage.getItem('naihab_publication_demo')) || {};
 
             if (heart.innerText === '🤍') {
                 heart.innerText = '❤️';
@@ -308,6 +244,12 @@
                 nb = Math.max(0, nb - 1);
             }
             compteur.innerText = nb;
+
+            // On sauvegarde le nombre séparément (naihab_publication_demo est
+            // réécrit à chaque chargement de page, donc ce compteur à part
+            // garantit que le like n'est jamais perdu)
+            localStorage.setItem('naihab_publication_demo_likes', nb);
+            let demo = JSON.parse(localStorage.getItem('naihab_publication_demo')) || {};
             demo.likes = nb;
             localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
         }
