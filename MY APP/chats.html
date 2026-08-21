@@ -2,13 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <script>
-        // Anti-flash : cacher la page tant que l'animation de démarrage n'est pas prête
-        if (new URLSearchParams(location.search).get('splash') === '1') {
-            document.documentElement.style.visibility = 'hidden';
-            setTimeout(function(){ document.documentElement.style.visibility = 'visible'; }, 6000);
-        }
-    </script>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="icon-180.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Accueil</title>
     <style>
@@ -112,6 +108,34 @@
 
         .nav-link { text-decoration: none; font-size: 24px; opacity: 0.5; transition: 0.3s; color: white; }
         .nav-link.active { opacity: 1; color: var(--gold); transform: translateY(-3px); }
+
+        /* 👁️ DESIGN DU SPLASH INJECTÉ DYNAMIQUEMENT */
+        #dynamic-splash {
+            position: fixed; inset: 0; background: #000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100000; transition: opacity 0.8s ease;
+        }
+        .dynamic-eye-container { position: relative; width: 240px; height: 120px; }
+        .dynamic-eyelid-top {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: #000; z-index: 10;
+            border-radius: 50% 50% 0 0 / 100% 100% 0 0; transform-origin: bottom center;
+            animation: ouvrirHaut 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.4s;
+        }
+        .dynamic-eyelid-bottom {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #000; z-index: 10;
+            border-radius: 0 0 50% 50% / 0 0 100% 100%; transform-origin: top center;
+            animation: ouvrirBas 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.4s;
+        }
+        .dynamic-eye-inner {
+            position: absolute; inset: 0; background: radial-gradient(ellipse, #1a0b5a 0%, #0a0530 100%);
+            border-radius: 50% / 40%; overflow: hidden; border: 2px solid rgba(255,204,0,0.3);
+        }
+        .dynamic-iris {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 85px; height: 85px; border-radius: 50%;
+            background: radial-gradient(circle, #ffcc00 0%, #ff9900 40%, #1a0b5a 70%); box-shadow: 0 0 30px rgba(255,204,0,0.7);
+        }
+        .dynamic-pupille { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 32px; height: 32px; border-radius: 50%; background: #000; }
+        .dynamic-reflet { position: absolute; top: 18%; right: 22%; width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.85); }
     </style>
 </head>
 <body>
@@ -141,7 +165,7 @@
         </div>
     </div>
 
-    <!-- Les nouveaux posts s'affichent ici (générés en JS) -->
+    <!-- Les nouveaux posts s'affichent ici -->
     <div id="flux-posts"></div>
 
     <!-- Post Démo (Julie) -->
@@ -172,10 +196,34 @@
         <a href="profil.html" class="nav-link">👤</a>
     </nav>
 
-    <script src="splash.js"></script>
-
     <script>
         window.onload = function() {
+            // ── GESTION DYNAMIQUE DU SPLASH SCREEN SUR L'ACCUEIL ──
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('splash') === '1') {
+                // Créer l'overlay noir et l'œil en JavaScript pur
+                const splashDiv = document.createElement('div');
+                splashDiv.id = 'dynamic-splash';
+                splashDiv.innerHTML = `
+                    <div class="dynamic-eye-container">
+                        <div class="dynamic-eye-inner">
+                            <div class="dynamic-iris"><div class="dynamic-pupille"><div class="dynamic-reflet"></div></div></div>
+                        </div>
+                        <div class="dynamic-eyelid-top"></div>
+                        <div class="dynamic-eyelid-bottom"></div>
+                    </div>
+                `;
+                document.body.appendChild(splashDiv);
+
+                // Retirer proprement le splash après l'animation (2.5 secondes suffisent pour un utilisateur déjà connecté)
+                setTimeout(() => {
+                    splashDiv.style.opacity = '0';
+                    setTimeout(() => { splashDiv.remove(); }, 800);
+                    // On nettoie l'URL pour enlever le ?splash=1
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }, 2500);
+            }
+
             // Le reste de tes fonctions d'origine
             const photoSauve = localStorage.getItem("user_photo");
             const nomSauve = localStorage.getItem("user_name") || "Moi";
@@ -188,175 +236,7 @@
                 { nom: "Naïfan_99", texte: "Est-ce qu'on pourra bientôt envoyer des vidéos ? 🌍", heure: "Il y a 1h" }
             ];
             document.getElementById('nb-comm-demo').innerText = commsDemo.length;
-
-            // ── Initialiser les données de la publication démo (Julie) ──
-            // Nécessaire pour que publication.html puisse afficher l'image/texte en mode ?demo=1.
-            // CORRECTION : on la met à jour à CHAQUE chargement (plus de "if not exists"),
-            // sinon une ancienne version testée précédemment restait bloquée en mémoire
-            // et ne correspondait plus à ce qui est affiché sur cette page.
-            const demo = {
-                image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
-                texte: "Superbe journée à explorer Naïhab ! ✨",
-                date: "2h",
-                likes: parseInt(localStorage.getItem('naihab_publication_demo_likes')) || 124,
-                auteur: "Julie",
-                auteurPhoto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100"
-            };
-            localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
-
-            // ── Afficher la bannière du gagnant de la couronne (si applicable) ──
-            const gagnantRaw = localStorage.getItem('naihab_gagnant_couronne');
-            const bannerFermee = localStorage.getItem('naihab_banniere_fermee');
-            if (gagnantRaw && !bannerFermee) {
-                try {
-                    const gagnant = JSON.parse(gagnantRaw);
-                    document.getElementById('winner-nom').innerText = '👑 ' + (gagnant.auteur || 'Naïfan');
-                    document.getElementById('winner-votes').innerText = (gagnant.nbVotes || 0) + ' votes';
-                    document.getElementById('winner-img').src = gagnant.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
-                    document.getElementById('banner-winner').style.display = 'flex';
-                } catch (e) {
-                    // Ancien format (texte simple) éventuellement laissé par un test manuel
-                    document.getElementById('winner-nom').innerText = '👑 ' + gagnantRaw;
-                    document.getElementById('banner-winner').style.display = 'flex';
-                }
-            }
-
-            // ── Afficher les publications personnelles (créées via creer-post.html) ──
-            afficherMesPosts();
         };
-
-        // Ouvre la publication démo (Julie) vers la bonne page, en mode ?demo=1
-        function ouvrirPostDemo(page) {
-            window.location.href = page + '?demo=1';
-        }
-
-        // Like / unlike sur la publication démo (dans le flux chats.html)
-        function toggleLike(element) {
-            const heart = element.querySelector('.heart');
-            const compteur = element.querySelector('small');
-            let nb = parseInt(compteur.innerText) || 0;
-
-            if (heart.innerText === '🤍') {
-                heart.innerText = '❤️';
-                nb++;
-            } else {
-                heart.innerText = '🤍';
-                nb = Math.max(0, nb - 1);
-            }
-            compteur.innerText = nb;
-
-            // On sauvegarde le nombre séparément (naihab_publication_demo est
-            // réécrit à chaque chargement de page, donc ce compteur à part
-            // garantit que le like n'est jamais perdu)
-            localStorage.setItem('naihab_publication_demo_likes', nb);
-            let demo = JSON.parse(localStorage.getItem('naihab_publication_demo')) || {};
-            demo.likes = nb;
-            localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
-        }
-
-        // Partager (démo + posts persos, bouton avion)
-        function partager() {
-            const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
-            const message = "Regarde cette publication sur Naïhab ! ✨ " + lien;
-            window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
-        }
-
-        // Fermer la bannière du gagnant de la couronne
-        function fermerBanniere(event) {
-            event.stopPropagation();
-            document.getElementById('banner-winner').style.display = 'none';
-            localStorage.setItem('naihab_banniere_fermee', '1');
-        }
-
-        // Aller voir le profil du gagnant de la couronne
-        function allerVersGagnant() {
-            const gagnantRaw = localStorage.getItem('naihab_gagnant_couronne');
-            if (gagnantRaw) {
-                try {
-                    const gagnant = JSON.parse(gagnantRaw);
-                    window.location.href = 'profil-public.html?name=' + encodeURIComponent(gagnant.auteur || '');
-                } catch (e) {
-                    window.location.href = 'profil-public.html?name=' + encodeURIComponent(gagnantRaw);
-                }
-            }
-        }
-
-        // Construit et affiche les publications personnelles de l'utilisateur dans #flux-posts
-        function afficherMesPosts() {
-            const zone = document.getElementById('flux-posts');
-            const posts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-            const nomSauve = localStorage.getItem('user_name') || 'Moi';
-            const photoSauve = localStorage.getItem('user_photo') || 'logo_naihab.svg';
-
-            zone.innerHTML = '';
-
-            posts.forEach((post, index) => {
-                const coeur = post.liked ? '❤️' : '🤍';
-                const nbLikes = post.likes || 0;
-                const nbComm = post.commentaires || 0;
-
-                const article = document.createElement('article');
-                article.className = 'post';
-                article.innerHTML = `
-                    <div class="post-header">
-                        <img src="${photoSauve}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="User">
-                        <b style="font-size: 14px;">${nomSauve} <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• maintenant</span></b>
-                    </div>
-                    <img src="${post.image}" class="post-img" data-index="${index}" alt="Post">
-                    <div class="post-actions">
-                        <div class="action-btn like-btn" data-index="${index}">
-                            <span class="heart">${coeur}</span> <small>${nbLikes}</small>
-                        </div>
-                        <div class="action-btn comment-btn" data-index="${index}">
-                            <span>💬</span> <small>${nbComm}</small>
-                        </div>
-                        <div class="action-btn" onclick="partager()">
-                            <span>✈️</span>
-                        </div>
-                    </div>
-                `;
-                zone.appendChild(article);
-            });
-
-            // Clic sur l'image → ouvrir la publication
-            zone.querySelectorAll('.post-img').forEach(img => {
-                img.addEventListener('click', () => {
-                    window.location.href = 'publication.html?index=' + img.dataset.index;
-                });
-            });
-
-            // Clic sur like
-            zone.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', () => toggleLikeReal(btn, parseInt(btn.dataset.index)));
-            });
-
-            // Clic sur commentaires
-            zone.querySelectorAll('.comment-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    window.location.href = 'commentaires.html?index=' + btn.dataset.index;
-                });
-            });
-        }
-
-        // Like / unlike sur une publication personnelle (met à jour naihab_posts avec le bon index)
-        function toggleLikeReal(element, index) {
-            const heart = element.querySelector('.heart');
-            const compteur = element.querySelector('small');
-            let nb = parseInt(compteur.innerText) || 0;
-            let posts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-
-            if (heart.innerText === '🤍') {
-                heart.innerText = '❤️';
-                nb++;
-                if (posts[index]) { posts[index].likes = nb; posts[index].liked = true; }
-            } else {
-                heart.innerText = '🤍';
-                nb = Math.max(0, nb - 1);
-                if (posts[index]) { posts[index].likes = nb; posts[index].liked = false; }
-            }
-            compteur.innerText = nb;
-            localStorage.setItem('naihab_posts', JSON.stringify(posts));
-        }
     </script>
 </body>
 </html>

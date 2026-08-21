@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="icon-180.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Discussion</title>
     <style>
@@ -157,25 +160,7 @@
             const messagesSauvegardes = JSON.parse(localStorage.getItem(cleConversation)) || [];
             messagesSauvegardes.push(msg);
             localStorage.setItem(cleConversation, JSON.stringify(messagesSauvegardes));
-            mettreAJourListeConversations(msg);
         }
-    }
-
-    // CORRECTION : faire apparaître/mettre à jour cette discussion dans la liste
-    // de discussions.html à chaque message, et la faire remonter en haut (comme
-    // sur les grandes applications de messagerie)
-    function mettreAJourListeConversations(msg) {
-        let conversations = JSON.parse(localStorage.getItem('naihab_conversations')) || [];
-        const apercu = msg.typeContenu === 'image' ? '📷 Photo' : msg.contenu;
-        conversations = conversations.filter(c => c.nom.toLowerCase() !== nomActuel.toLowerCase());
-        conversations.unshift({
-            nom: nomActuel,
-            avatar: photoActuelle,
-            dernierMsg: apercu,
-            heure: msg.heure,
-            nonLu: false
-        });
-        localStorage.setItem('naihab_conversations', JSON.stringify(conversations));
     }
 
     function envoyer() {
@@ -233,10 +218,6 @@
             document.getElementById('chatBox').innerHTML = '';
             fermerMenuChat();
             chargerMessages();
-            // On retire aussi la conversation de la liste dans discussions.html
-            let conversations = JSON.parse(localStorage.getItem('naihab_conversations')) || [];
-            conversations = conversations.filter(c => c.nom.toLowerCase() !== nomActuel.toLowerCase());
-            localStorage.setItem('naihab_conversations', JSON.stringify(conversations));
         }
     }
 

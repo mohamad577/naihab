@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="icon-180.png">
     <script>
         // Anti-flash : cacher la page tant que l'animation de démarrage n'est pas prête
         if (new URLSearchParams(location.search).get('splash') === '1') {
@@ -483,9 +486,6 @@ function initialiserCartes() {
         const actions = document.createElement('div');
         actions.className = 'actions';
         actions.innerHTML = `
-            <div class="action-btn" data-action="son">
-                <div class="icon-bg">🔇</div>
-            </div>
             <div class="action-btn" data-action="like">
                 <div class="icon-bg ${liked ? 'like-active' : ''}">${liked ? '❤️' : '🤍'}</div>
                 <span class="likes-count">${formaterNombre(parseInt(likes))}</span>
@@ -514,8 +514,7 @@ function initialiserCartes() {
             btn.addEventListener('click', e => {
                 e.stopPropagation();
                 const action = btn.dataset.action;
-                if (action === 'son') toggleSon(btn, card);
-                else if (action === 'like') toggleLike(btn, id);
+                if (action === 'like') toggleLike(btn, id);
                 else if (action === 'comment') allerCommentaires(id);
                 else if (action === 'vote') voter(btn, id);
                 else if (action === 'partager') partager();
@@ -559,25 +558,6 @@ function observerDefilement() {
         });
     }, { threshold: 0.65 });
     document.querySelectorAll('.video-card').forEach(c => observer.observe(c));
-}
-
-// ── SON ──
-function toggleSon(btn, card) {
-    const video = card.querySelector('video');
-    const icon = btn.querySelector('.icon-bg');
-    if (!video) return;
-
-    if (video.muted) {
-        // On coupe d'abord le son de toutes les autres vidéos (une seule à la fois)
-        document.querySelectorAll('.video-card video').forEach(v => { v.muted = true; });
-        document.querySelectorAll('.action-btn[data-action="son"] .icon-bg').forEach(i => { i.innerText = '🔇'; });
-
-        video.muted = false;
-        icon.innerText = '🔊';
-    } else {
-        video.muted = true;
-        icon.innerText = '🔇';
-    }
 }
 
 // ── LIKE ──
@@ -737,25 +717,7 @@ function calculerGagnant() {
             };
         }
     });
-    if (gagnant) {
-        // On ajoute la photo : la tienne si c'est toi le gagnant (seule photo
-        // fiable qu'on a actuellement pour un auteur, faute de vrais comptes)
-        gagnant.photo = (gagnant.auteur === monNom) ? (localStorage.getItem('user_photo') || '') : '';
-        localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
-
-        // CORRECTION : incrémenter le compteur de couronnes affiché sur profil.html
-        // quand c'est TOI l'auteur de la vidéo en tête — une seule fois par vidéo
-        // gagnante (pas à chaque recalcul après un vote), grâce à un repère de
-        // la dernière vidéo déjà comptée.
-        if (gagnant.auteur === monNom) {
-            const derniereComptee = localStorage.getItem('naihab_derniere_couronne_comptee');
-            if (derniereComptee !== gagnant.id) {
-                const nbActuel = parseInt(localStorage.getItem('naihab_nb_couronnes') || '0');
-                localStorage.setItem('naihab_nb_couronnes', nbActuel + 1);
-                localStorage.setItem('naihab_derniere_couronne_comptee', gagnant.id);
-            }
-        }
-    }
+    if (gagnant) localStorage.setItem('naihab_gagnant_couronne', JSON.stringify(gagnant));
 }
 
 // ── TIROIR ──

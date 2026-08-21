@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="icon-180.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Paramètres</title>
     <style>
@@ -288,8 +291,6 @@
                 localStorage.removeItem('user_mdp');
                 localStorage.removeItem('user_email');
                 localStorage.removeItem('user_tel');
-                // CORRECTION : naihab_connecte était oublié lors de la déconnexion
-                localStorage.removeItem('naihab_connecte');
                 window.location.href = 'index.html'; 
             }
         }

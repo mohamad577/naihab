@@ -1,0 +1,29 @@
+{
+  "name": "Naïhab",
+  "short_name": "Naïhab",
+  "description": "Ta zone, ton style, ta liberté. Partage. Vote. Règne.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1a0b5a",
+  "theme_color": "#1a0b5a",
+  "icons": [
+    {
+      "src": "logo_naihab.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
