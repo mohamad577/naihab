@@ -112,12 +112,12 @@
     </div>
 
     <div class="search-grid" id="searchGrid">
-        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400', '💻 Nouvelle journée de code !', 45)" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400"></div>
-        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400', '🌅 Vue magnifique', 120)" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400"></div>
-        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400', '🎯 Focus total', 67)" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400"></div>
-        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1551434678-e076c223a692?w=400', '🤝 Bonne réunion aujourd\'hui', 89)" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=400"></div>
-        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400', '😊 Bonne ambiance !', 34)" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400"></div>
-        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1523240715639-9a67a0e71d0b?w=400', '📚 Toujours apprendre', 56)" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1523240715639-9a67a0e71d0b?w=400"></div>
+        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400', '💻 Nouvelle journée de code !', 45, 'grid1')" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400"></div>
+        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400', '🌅 Vue magnifique', 120, 'grid2')" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400"></div>
+        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400', '🎯 Focus total', 67, 'grid3')" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400"></div>
+        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1551434678-e076c223a692?w=400', '🤝 Bonne réunion aujourd\'hui', 89, 'grid4')" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=400"></div>
+        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400', '😊 Bonne ambiance !', 34, 'grid5')" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400"></div>
+        <div class="grid-item" onclick="ouvrirPost('https://images.unsplash.com/photo-1523240715639-9a67a0e71d0b?w=400', '📚 Toujours apprendre', 56, 'grid6')" style="cursor:pointer;"><img src="https://images.unsplash.com/photo-1523240715639-9a67a0e71d0b?w=400"></div>
     </div>
 
     <nav class="nav-bas">
@@ -153,13 +153,13 @@
             }
         };
 
-        function ouvrirPost(image, texte, likes) {
-            localStorage.setItem('naihab_publication_demo', JSON.stringify({
+        function ouvrirPost(image, texte, likes, idPost) {
+            localStorage.setItem('naihab_publication_demo_' + idPost, JSON.stringify({
                 image, texte, likes, commentaires: 0,
                 auteur: 'Naïfan', auteurPhoto: '',
                 date: 'aujourd\'hui'
             }));
-            window.location.href = 'publication.html?demo=1';
+            window.location.href = 'publication.html?demo=1&id=' + idPost;
         }
 
         function filtrerTout() {

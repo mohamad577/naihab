@@ -5,6 +5,13 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" href="icon-180.png">
+    <script>
+        // Anti-flash : cacher la page tant que l'animation de démarrage n'est pas prête
+        if (new URLSearchParams(location.search).get('splash') === '1') {
+            document.documentElement.style.visibility = 'hidden';
+            setTimeout(function(){ document.documentElement.style.visibility = 'visible'; }, 6000);
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Naïhab - Mon Profil</title>
     <style>
@@ -303,5 +310,6 @@
         }
     }
 </script>
+<script src="splash.js"></script>
 </body>
 </html>

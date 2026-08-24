@@ -162,16 +162,22 @@
                 fichierBlob = fichier;
 
                 if (type === 'video') {
-                    // ✅ Pour les vidéos : utiliser URL.createObjectURL (pas base64)
-                    const blobUrl = URL.createObjectURL(fichier);
-                    container.style.display = 'block';
-                    video.src = blobUrl;
-                    video.style.display = 'block';
-                    img.style.display = 'none';
-                    fichierData = blobUrl;
-                    typeFichier = 'video';
-                    mediaSelectionne = true;
-                    verifierContenu();
+                    // Vidéo convertie en base64 (comme les photos) pour que le fichier
+                    // survive à la navigation vers videos.html — un lien blob: ne
+                    // fonctionne que dans la page qui l'a créé et devient invalide
+                    // dès qu'on change de page, ce qui empêchait la vidéo de s'afficher.
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        container.style.display = 'block';
+                        fichierData = e.target.result;
+                        typeFichier = 'video';
+                        video.src = fichierData;
+                        video.style.display = 'block';
+                        img.style.display = 'none';
+                        mediaSelectionne = true;
+                        verifierContenu();
+                    };
+                    reader.readAsDataURL(fichier);
                 } else {
                     // Pour les images : base64 ok car plus léger
                     const reader = new FileReader();
@@ -206,7 +212,7 @@
             const userName = localStorage.getItem("user_name") || "Naïfan";
 
             if (typeFichier === 'video') {
-                // ✅ Vidéo : sauvegarder l'URL blob + infos
+                // Vidéo en base64 : sauvegarder avec ses infos
                 let mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
                 mesVideos.unshift({
                     id: Date.now(),
@@ -217,10 +223,10 @@
                 });
                 try {
                     localStorage.setItem('naihab_videos', JSON.stringify(mesVideos));
-                    // ✅ Rediriger vers la première position (ta vidéo est en index 0)
                     window.location.href = 'videos.html?nouveau=1';
-                } catch(e) {
-                    window.location.href = 'videos.html?nouveau=1';
+                } catch (e) {
+                    // Le stockage local est plein (souvent le cas avec une vidéo trop longue/lourde)
+                    alert("La vidéo est trop lourde pour être enregistrée sur cet appareil. Essaie une vidéo plus courte ou de moins bonne qualité.");
                 }
             } else {
                 // ✅ Photo : base64

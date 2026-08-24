@@ -83,14 +83,20 @@
 <script>
     let postIndex = 0;
     let isDemo = false;
+    let demoId = '';
 
     window.onload = function() {
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Mode Démo (Julie)
+        // Mode Démo (Julie, ou une des publications de la grille recherche.html)
         if (urlParams.get('demo') === '1') {
             isDemo = true;
-            const demo = JSON.parse(localStorage.getItem('naihab_publication_demo'));
+            // CORRECTION : chaque publication de démo a son propre identifiant
+            // (naihab_publication_demo_grid1, _grid2...) pour ne pas mélanger
+            // leurs commentaires entre elles. Sans id = post de Julie (chats.html).
+            demoId = urlParams.get('id') || '';
+            const cleDemo = demoId ? ('naihab_publication_demo_' + demoId) : 'naihab_publication_demo';
+            const demo = JSON.parse(localStorage.getItem(cleDemo));
             if (demo) {
                 document.getElementById('main-img').src = demo.image;
                 document.getElementById('caption-texte').innerText = demo.texte || '';
@@ -101,7 +107,8 @@
                 if (demo.auteurPhoto) document.getElementById('author-img').src = demo.auteurPhoto;
                 
                 // Coordination exacte du compteur pour la démo
-                const commsDemo = JSON.parse(localStorage.getItem('naihab_commentaires_demo')) || [];
+                const cleComms = demoId ? ('naihab_commentaires_demo_' + demoId) : 'naihab_commentaires_demo';
+                const commsDemo = JSON.parse(localStorage.getItem(cleComms)) || [];
                 document.getElementById('nb-commentaires').innerText = commsDemo.length;
                 return;
             }
@@ -166,7 +173,7 @@
 
     function allerCommentaires() {
         if (isDemo) {
-            window.location.href = 'commentaires.html?demo=1';
+            window.location.href = 'commentaires.html?demo=1' + (demoId ? '&id=' + demoId : '');
         } else {
             window.location.href = 'commentaires.html?index=' + postIndex;
         }
