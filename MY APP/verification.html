@@ -155,6 +155,8 @@
 
                 localStorage.removeItem('naihab_verification_id');
                 localStorage.removeItem('naihab_phone_pending');
+                // ✅ Le téléphone est vérifié : on marque l'utilisateur comme connecté ici seulement
+                localStorage.setItem('naihab_connecte', 'oui');
 
                 const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
                 window.location.href = pageAccueil;

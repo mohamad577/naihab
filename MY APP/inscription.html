@@ -39,6 +39,11 @@
             color: white; font-size: 16px; box-sizing: border-box; outline: none;
         }
 
+        input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         /* Style spécifique pour le groupe Téléphone */
         .phone-container { display: flex; gap: 10px; }
         .country-select { width: 100px; font-size: 14px; cursor: pointer; }
@@ -71,112 +76,162 @@
         @keyframes tourner {
             to { transform: rotate(360deg); }
         }
+
+        /* Bouton Google */
+        .btn-google {
+            width: 100%; max-width: 350px; padding: 16px;
+            background: white; color: #333; border: none; border-radius: 30px;
+            font-weight: bold; font-size: 15px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .separateur {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; max-width: 350px; margin: 10px 0 20px 0;
+            color: rgba(255,255,255,0.4); font-size: 13px;
+        }
+        .separateur::before, .separateur::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.15);
+        }
+
+        .google-confirme {
+            width: 100%; max-width: 350px; padding: 14px 18px;
+            background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.4);
+            border-radius: 15px; margin-bottom: 20px; font-size: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .suite-formulaire { display: none; width: 100%; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
 
     <h2 style="font-weight: 900;">Rejoindre Naïhab</h2>
 
-    <div class="profile-pic-container" onclick="document.getElementById('file-input').click()">
-        <div class="profile-pic" id="profile-display">
-            <img id="preview-img" src="" alt="Aperçu">
-            <svg id="default-icon" width="50" height="50" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
+    <!-- Étape 1 : vérification d'identité via Google -->
+    <div id="etape-google" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <p style="opacity:0.8; font-size:14px; max-width:320px; text-align:center; margin-bottom:20px;">
+            Pour protéger les comptes contre toute usurpation, on vérifie d'abord ton identité avec Google.
+        </p>
+        <button class="btn-google" onclick="seConnecterGoogle()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.8 2.73v2.27h2.92c1.7-1.57 2.68-3.88 2.68-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.92-2.27c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V4.94H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.06l3.01-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+            Continuer avec Google
+        </button>
+    </div>
+
+    <div id="google-confirme" class="google-confirme" style="display:none;">
+        <span>✅</span>
+        <span>Identité vérifiée : <b id="email-google-affiche"></b></span>
+    </div>
+
+    <!-- Étape 2 : reste du formulaire, révélé après vérification Google -->
+    <div class="suite-formulaire" id="suite-formulaire">
+
+        <div class="profile-pic-container" onclick="document.getElementById('file-input').click()">
+            <div class="profile-pic" id="profile-display">
+                <img id="preview-img" src="" alt="Aperçu">
+                <svg id="default-icon" width="50" height="50" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </div>
+            <div class="camera-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#1a0b5a"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+            </div>
+            <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="loadPhoto(event)">
         </div>
-        <div class="camera-icon">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="#1a0b5a"><path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+
+        <div class="form-group">
+            <label>Nom complet</label>
+            <input type="text" id="champ-nom" placeholder="Ex: Jackson Junior">
         </div>
-        <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="loadPhoto(event)">
-    </div>
 
-    <div class="form-group">
-        <label>Nom complet</label>
-        <input type="text" placeholder="Ex: Jackson Junior">
-    </div>
-
-    <div class="form-group">
-        <label>Numéro de téléphone</label>
-        <div class="phone-container">
-            <select class="country-select">
-                <option value="+237" selected>🇨🇲 +237</option>
-                <option value="+33">🇫🇷 +33</option>
-                <option value="+225">🇨🇮 +225</option>
-                <option value="+221">🇸🇳 +221</option>
-                <option value="+1">🇺🇸/🇨🇦 +1</option>
-                <option value="+213">🇩🇿 +213</option>
-                <option value="+244">🇦🇴 +244</option>
-                <option value="+54">🇦🇷 +54</option>
-                <option value="+61">🇦🇺 +61</option>
-                <option value="+32">🇧🇪 +32</option>
-                <option value="+229">🇧🇯 +229</option>
-                <option value="+55">🇧🇷 +55</option>
-                <option value="+226">🇧🇫 +226</option>
-                <option value="+257">🇧🇮 +257</option>
-                <option value="+235">🇹🇩 +235</option>
-                <option value="+56">🇨🇱 +56</option>
-                <option value="+86">🇨🇳 +86</option>
-                <option value="+57">🇨🇴 +57</option>
-                <option value="+242">🇨🇬 +242</option>
-                <option value="+243">🇨🇩 +243</option>
-                <option value="+20">🇪🇬 +20</option>
-                <option value="+34">🇪🇸 +34</option>
-                <option value="+49">🇩🇪 +49</option>
-                <option value="+233">🇬🇭 +233</option>
-                <option value="+224">🇬🇳 +224</option>
-                <option value="+91">🇮🇳 +91</option>
-                <option value="+62">🇮🇩 +62</option>
-                <option value="+39">🇮🇹 +39</option>
-                <option value="+81">🇯🇵 +81</option>
-                <option value="+254">🇰🇪 +254</option>
-                <option value="+212">🇲🇦 +212</option>
-                <option value="+223">🇲🇱 +223</option>
-                <option value="+222">🇲🇷 +222</option>
-                <option value="+230">🇲🇺 +230</option>
-                <option value="+52">🇲🇽 +52</option>
-                <option value="+227">🇳🇪 +227</option>
-                <option value="+234">🇳🇬 +234</option>
-                <option value="+31">🇳🇱 +31</option>
-                <option value="+351">🇵🇹 +351</option>
-                <option value="+974">🇶🇦 +974</option>
-                <option value="+44">🇬🇧 +44</option>
-                <option value="+7">🇷🇺 +7</option>
-                <option value="+250">🇷🇼 +250</option>
-                <option value="+966">🇸🇦 +966</option>
-                <option value="+65">🇸🇬 +65</option>
-                <option value="+27">🇿🇦 +27</option>
-                <option value="+82">🇰🇷 +82</option>
-                <option value="+41">🇨🇭 +41</option>
-                <option value="+228">🇹🇬 +228</option>
-                <option value="+216">🇹🇳 +216</option>
-                <option value="+90">🇹🇷 +90</option>
-                <option value="+256">🇺🇬 +256</option>
-                <option value="+971">🇦🇪 +971</option>
-                <option value="+260">🇿🇲 +260</option>
-                <option value="+263">🇿🇼 +263</option>
-            </select>
-            <input type="tel" placeholder="6..." style="flex: 1;">
+        <div class="form-group">
+            <label>Numéro de téléphone</label>
+            <div class="phone-container">
+                <select class="country-select">
+                    <option value="+237" selected>🇨🇲 +237</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+225">🇨🇮 +225</option>
+                    <option value="+221">🇸🇳 +221</option>
+                    <option value="+1">🇺🇸/🇨🇦 +1</option>
+                    <option value="+213">🇩🇿 +213</option>
+                    <option value="+244">🇦🇴 +244</option>
+                    <option value="+54">🇦🇷 +54</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+32">🇧🇪 +32</option>
+                    <option value="+229">🇧🇯 +229</option>
+                    <option value="+55">🇧🇷 +55</option>
+                    <option value="+226">🇧🇫 +226</option>
+                    <option value="+257">🇧🇮 +257</option>
+                    <option value="+235">🇹🇩 +235</option>
+                    <option value="+56">🇨🇱 +56</option>
+                    <option value="+86">🇨🇳 +86</option>
+                    <option value="+57">🇨🇴 +57</option>
+                    <option value="+242">🇨🇬 +242</option>
+                    <option value="+243">🇨🇩 +243</option>
+                    <option value="+20">🇪🇬 +20</option>
+                    <option value="+34">🇪🇸 +34</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+233">🇬🇭 +233</option>
+                    <option value="+224">🇬🇳 +224</option>
+                    <option value="+91">🇮🇳 +91</option>
+                    <option value="+62">🇮🇩 +62</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+81">🇯🇵 +81</option>
+                    <option value="+254">🇰🇪 +254</option>
+                    <option value="+212">🇲🇦 +212</option>
+                    <option value="+223">🇲🇱 +223</option>
+                    <option value="+222">🇲🇷 +222</option>
+                    <option value="+230">🇲🇺 +230</option>
+                    <option value="+52">🇲🇽 +52</option>
+                    <option value="+227">🇳🇪 +227</option>
+                    <option value="+234">🇳🇬 +234</option>
+                    <option value="+31">🇳🇱 +31</option>
+                    <option value="+351">🇵🇹 +351</option>
+                    <option value="+974">🇶🇦 +974</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+7">🇷🇺 +7</option>
+                    <option value="+250">🇷🇼 +250</option>
+                    <option value="+966">🇸🇦 +966</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+27">🇿🇦 +27</option>
+                    <option value="+82">🇰🇷 +82</option>
+                    <option value="+41">🇨🇭 +41</option>
+                    <option value="+228">🇹🇬 +228</option>
+                    <option value="+216">🇹🇳 +216</option>
+                    <option value="+90">🇹🇷 +90</option>
+                    <option value="+256">🇺🇬 +256</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+260">🇿🇲 +260</option>
+                    <option value="+263">🇿🇼 +263</option>
+                </select>
+                <input type="tel" placeholder="6..." style="flex: 1;">
+            </div>
         </div>
-    </div>
 
-    <div class="form-group">
-        <label>Email</label>
-        <input type="email" placeholder="email@exemple.com">
-    </div>
+        <div class="form-group">
+            <label>Email (vérifié via Google)</label>
+            <input type="email" id="champ-email" disabled>
+        </div>
 
-    <div class="form-group">
-        <label>Mot de passe</label>
-        <input type="password" placeholder="6 caractères minimum">
-    </div>
+        <div class="form-group">
+            <label>Mot de passe du compte Naïhab</label>
+            <input type="password" id="champ-mdp" placeholder="6 caractères minimum">
+        </div>
 
-    <button class="btn-register" onclick="sInscrire()">S'INSCRIRE</button>
+        <button class="btn-register" onclick="sInscrire()">S'INSCRIRE</button>
+    </div>
 
     <!-- Nécessaire pour le reCAPTCHA invisible de Firebase Phone Auth -->
     <div id="recaptcha-container"></div>
 
     <script type="module">
         import {
-            createUserWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup,
+            EmailAuthProvider,
+            linkWithCredential,
             updateProfile,
             RecaptchaVerifier,
             signInWithPhoneNumber
@@ -205,10 +260,12 @@
         // Messages d'erreur Firebase traduits en français
         function traduireErreur(code) {
             switch (code) {
+                case 'auth/account-exists-with-different-credential':
+                    return "Un compte existe déjà avec cet email via une autre méthode.";
+                case 'auth/popup-closed-by-user':
+                    return "Fenêtre Google fermée avant la fin. Réessaie.";
                 case 'auth/email-already-in-use':
-                    return "Cet email est déjà utilisé par un autre compte.";
-                case 'auth/invalid-email':
-                    return "L'adresse email n'est pas valide.";
+                    return "Cet email est déjà utilisé par un autre compte Naïhab.";
                 case 'auth/weak-password':
                     return "Le mot de passe doit contenir au moins 6 caractères.";
                 case 'auth/invalid-phone-number':
@@ -217,33 +274,71 @@
                     return "Trop de tentatives. Réessaie plus tard.";
                 case 'auth/network-request-failed':
                     return "Problème de connexion internet. Réessaie.";
+                case 'auth/credential-already-in-use':
+                    return "Ce numéro est déjà utilisé par un autre compte.";
                 default:
                     return "Une erreur est survenue. Réessaie.";
             }
         }
 
+        // Étape 1 : vérification d'identité via Google
+        window.seConnecterGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // On révèle la suite du formulaire, pré-rempli avec les infos Google
+                document.getElementById('etape-google').style.display = 'none';
+                document.getElementById('google-confirme').style.display = 'flex';
+                document.getElementById('email-google-affiche').innerText = user.email;
+                document.getElementById('suite-formulaire').style.display = 'flex';
+
+                document.getElementById('champ-nom').value = user.displayName || '';
+                document.getElementById('champ-email').value = user.email;
+
+                if (user.photoURL) {
+                    const output = document.getElementById('preview-img');
+                    const defaultIcon = document.getElementById('default-icon');
+                    output.src = user.photoURL;
+                    output.style.display = 'block';
+                    defaultIcon.style.display = 'none';
+                }
+            } catch (err) {
+                alert(traduireErreur(err.code));
+            }
+        };
+
         window.sInscrire = async function() {
-            const nom = document.querySelector('input[type="text"]').value.trim();
+            if (!auth.currentUser) {
+                alert("Vérifie d'abord ton identité avec Google !");
+                return;
+            }
+
+            const nom = document.getElementById('champ-nom').value.trim();
             const indicatif = document.querySelector('.country-select').value;
             const tel = document.querySelector('input[type="tel"]').value.trim();
-            const email = document.querySelector('input[type="email"]').value.trim();
-            const mdp = document.querySelector('input[type="password"]').value;
+            const email = document.getElementById('champ-email').value.trim();
+            const mdp = document.getElementById('champ-mdp').value;
             const btn = document.querySelector('.btn-register');
 
             if (nom === "") { alert("Entre ton nom complet !"); return; }
             if (tel === "") { alert("Entre ton numéro de téléphone !"); return; }
-            if (email === "") { alert("Entre ton adresse email !"); return; }
             if (mdp.length < 6) { alert("Le mot de passe doit contenir au moins 6 caractères !"); return; }
 
             const numeroComplet = indicatif + tel;
             btn.classList.add('loading');
 
             try {
-                // Étape 1 : créer le compte avec email + mot de passe
-                const cred = await createUserWithEmailAndPassword(auth, email, mdp);
-                await updateProfile(cred.user, { displayName: nom });
+                // On rattache un mot de passe Naïhab au compte déjà identifié par Google
+                const emailCredential = EmailAuthProvider.credential(email, mdp);
+                await linkWithCredential(auth.currentUser, emailCredential);
 
-                // Étape 2 : envoyer le vrai SMS de vérification pour ce numéro
+                if (nom !== auth.currentUser.displayName) {
+                    await updateProfile(auth.currentUser, { displayName: nom });
+                }
+
+                // Envoi du vrai SMS de vérification pour ce numéro
                 const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                     size: 'invisible'
                 });
@@ -255,10 +350,10 @@
                 localStorage.setItem("user_tel", numeroComplet);
                 localStorage.setItem("user_email", email);
                 localStorage.setItem('naihab_nouveau_compte', 'oui');
-                localStorage.setItem('naihab_connecte', 'oui');
-                localStorage.setItem('naihab_uid', cred.user.uid);
+                localStorage.setItem('naihab_uid', auth.currentUser.uid);
+                // ⚠️ 'naihab_connecte' n'est PAS mis à 'oui' ici : il ne sera défini
+                // qu'après vérification réussie du SMS, dans verification.html
 
-                // ID nécessaire pour vérifier le code sur la page suivante
                 localStorage.setItem('naihab_verification_id', confirmationResult.verificationId);
                 localStorage.setItem('naihab_phone_pending', numeroComplet);
 
