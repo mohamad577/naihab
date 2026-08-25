@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script type="module" src="firebase-config.js"></script>
     <meta charset="UTF-8">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -23,16 +24,14 @@
             line-height: 100px; border-radius: 50%;
         }
         h2 { margin-bottom: 10px; font-size: 28px; font-weight: 800; }
-        p { opacity: 0.8; font-size: 15px; margin-bottom: 30px; max-width: 280px; line-height: 1.5; }
-        .code-inputs { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; }
+        p { opacity: 0.8; font-size: 15px; margin-bottom: 30px; max-width: 300px; line-height: 1.5; }
+        .code-inputs { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; }
         .code-inputs input {
-            width: 55px; height: 70px; text-align: center;
-            font-size: 28px; font-weight: bold; border-radius: 15px;
+            width: 45px; height: 60px; text-align: center;
+            font-size: 24px; font-weight: bold; border-radius: 15px;
             border: 2px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.05);
             color: #ffcc00; outline: none; transition: 0.3s;
-            /* CORRECTION : type="text" + inputmode="numeric" au lieu de type="number"
-               Le type number affiche des flèches inutiles et ne respecte pas maxlength */
         }
         .code-inputs input:focus {
             border-color: #ffcc00; background: rgba(255,255,255,0.1);
@@ -43,8 +42,28 @@
             background: #ffcc00; color: #1a0b5a; border: none;
             border-radius: 30px; font-weight: bold; font-size: 16px;
             cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3); transition: 0.3s;
+            position: relative; overflow: hidden;
         }
         .btn-verify:active { transform: scale(0.95); }
+        .btn-verify.loading {
+            background: rgba(255,204,0,0.3);
+            color: transparent;
+            pointer-events: none;
+        }
+        .btn-verify.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 24px; height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid rgba(255,204,0,0.3);
+            border-top-color: #ffcc00;
+            border-radius: 50%;
+            animation: tourner 0.7s linear infinite;
+        }
+        @keyframes tourner {
+            to { transform: rotate(360deg); }
+        }
         .resend { margin-top: 25px; font-size: 13px; color: rgba(255,255,255,0.5); }
         .resend b { color: #ffcc00; cursor: pointer; }
     </style>
@@ -53,10 +72,11 @@
 
     <div class="icon-box">📩</div>
     <h2>Vérification</h2>
-    <p>Entre le code de sécurité envoyé sur ton contact pour protéger ton compte <b>Naïhab</b>.</p>
+    <p>Entre le code de sécurité envoyé par SMS au <b id="numero-affiche"></b> pour protéger ton compte <b>Naïhab</b>.</p>
 
     <div class="code-inputs" id="otp-inputs">
-        <!-- CORRECTION : type="text" + inputmode="numeric" + maxlength="1" fonctionnent correctement ensemble -->
+        <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
+        <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
         <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
         <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
         <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]">
@@ -67,22 +87,35 @@
 
     <p class="resend">Vous n'avez rien reçu ? <b id="resend-btn">Renvoyer (<span id="timer">00:59</span>)</b></p>
 
-    <script>
-        let codeAttendu = localStorage.getItem('naihab_otp') || '1234';
+    <!-- Nécessaire pour le reCAPTCHA invisible en cas de renvoi de code -->
+    <div id="recaptcha-container"></div>
 
-        // CORRECTION : gestion du déplacement au champ suivant via événement 'input'
-        // géré proprement sur tous les champs en une seule boucle
+    <script type="module">
+        import {
+            PhoneAuthProvider,
+            linkWithCredential,
+            RecaptchaVerifier,
+            signInWithPhoneNumber
+        } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { auth } from './firebase-config.js';
+
+        const numeroAttendu = localStorage.getItem('naihab_phone_pending') || '';
+        let verificationId = localStorage.getItem('naihab_verification_id');
+        document.getElementById('numero-affiche').innerText = numeroAttendu;
+
+        if (!verificationId) {
+            // Aucune vérification en attente : on renvoie vers l'inscription
+            window.location.href = 'inscription.html';
+        }
+
         const inputs = document.querySelectorAll('#otp-inputs input');
         inputs.forEach((input, index) => {
             input.addEventListener('input', () => {
-                // Ne garder que le dernier caractère tapé
                 input.value = input.value.replace(/[^0-9]/g, '').slice(-1);
                 if (input.value && index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
             });
-
-            // CORRECTION : permettre d'effacer et revenir au champ précédent avec Backspace
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !input.value && index > 0) {
                     inputs[index - 1].focus();
@@ -90,22 +123,48 @@
             });
         });
 
-        function verifierCode() {
+        function traduireErreur(code) {
+            switch (code) {
+                case 'auth/invalid-verification-code':
+                    return "Code incorrect ! Réessaie.";
+                case 'auth/code-expired':
+                    return "Ce code a expiré. Demande-en un nouveau.";
+                case 'auth/network-request-failed':
+                    return "Problème de connexion internet. Réessaie.";
+                default:
+                    return "Une erreur est survenue. Réessaie.";
+            }
+        }
+
+        window.verifierCode = async function() {
             let codeSaisi = '';
             inputs.forEach(i => codeSaisi += i.value);
 
-            if (codeSaisi.length < 4) {
-                alert("Entre les 4 chiffres du code !");
+            if (codeSaisi.length < 6) {
+                alert("Entre les 6 chiffres du code !");
                 return;
             }
-            if (codeSaisi === codeAttendu) {
-                window.location.href = 'motdepasse.html';
-            } else {
-                alert("Code incorrect ! Réessaie.");
+
+            const btn = document.querySelector('.btn-verify');
+            btn.classList.add('loading');
+
+            try {
+                const credential = PhoneAuthProvider.credential(verificationId, codeSaisi);
+                // On lie le numéro vérifié au compte déjà créé (email + mot de passe)
+                await linkWithCredential(auth.currentUser, credential);
+
+                localStorage.removeItem('naihab_verification_id');
+                localStorage.removeItem('naihab_phone_pending');
+
+                const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+                window.location.href = pageAccueil;
+            } catch (err) {
+                btn.classList.remove('loading');
+                alert(traduireErreur(err.code));
                 inputs.forEach(i => i.value = '');
                 inputs[0].focus();
             }
-        }
+        };
 
         // Minuteur 59 secondes
         let secondes = 59;
@@ -120,12 +179,19 @@
             }
         }, 1000);
 
-        resendBtn.addEventListener('click', renvoyerCode);
-
-        function renvoyerCode() {
-            localStorage.setItem('naihab_otp', '1234');
-            alert("Code renvoyé ! (Code de test : 1234)");
-        }
+        window.renvoyerCode = async function() {
+            try {
+                const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    size: 'invisible'
+                });
+                const confirmationResult = await signInWithPhoneNumber(auth, numeroAttendu, recaptchaVerifier);
+                verificationId = confirmationResult.verificationId;
+                localStorage.setItem('naihab_verification_id', verificationId);
+                alert("Nouveau code envoyé par SMS !");
+            } catch (err) {
+                alert(traduireErreur(err.code));
+            }
+        };
     </script>
 
 </body>

@@ -171,10 +171,15 @@
 
     <button class="btn-register" onclick="sInscrire()">S'INSCRIRE</button>
 
+    <!-- Nécessaire pour le reCAPTCHA invisible de Firebase Phone Auth -->
+    <div id="recaptcha-container"></div>
+
     <script type="module">
         import {
             createUserWithEmailAndPassword,
-            updateProfile
+            updateProfile,
+            RecaptchaVerifier,
+            signInWithPhoneNumber
         } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { auth } from './firebase-config.js';
 
@@ -206,6 +211,10 @@
                     return "L'adresse email n'est pas valide.";
                 case 'auth/weak-password':
                     return "Le mot de passe doit contenir au moins 6 caractères.";
+                case 'auth/invalid-phone-number':
+                    return "Le numéro de téléphone n'est pas valide.";
+                case 'auth/too-many-requests':
+                    return "Trop de tentatives. Réessaie plus tard.";
                 case 'auth/network-request-failed':
                     return "Problème de connexion internet. Réessaie.";
                 default:
@@ -226,22 +235,32 @@
             if (email === "") { alert("Entre ton adresse email !"); return; }
             if (mdp.length < 6) { alert("Le mot de passe doit contenir au moins 6 caractères !"); return; }
 
+            const numeroComplet = indicatif + tel;
             btn.classList.add('loading');
 
             try {
+                // Étape 1 : créer le compte avec email + mot de passe
                 const cred = await createUserWithEmailAndPassword(auth, email, mdp);
-
-                // On enregistre le nom directement sur le compte Firebase
                 await updateProfile(cred.user, { displayName: nom });
+
+                // Étape 2 : envoyer le vrai SMS de vérification pour ce numéro
+                const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    size: 'invisible'
+                });
+                const confirmationResult = await signInWithPhoneNumber(auth, numeroComplet, recaptchaVerifier);
 
                 // On garde ces infos en local pour que le reste de l'app
                 // (qui lit encore le localStorage) continue de fonctionner
                 localStorage.setItem("user_name", nom);
-                localStorage.setItem("user_tel", indicatif + tel);
+                localStorage.setItem("user_tel", numeroComplet);
                 localStorage.setItem("user_email", email);
                 localStorage.setItem('naihab_nouveau_compte', 'oui');
                 localStorage.setItem('naihab_connecte', 'oui');
                 localStorage.setItem('naihab_uid', cred.user.uid);
+
+                // ID nécessaire pour vérifier le code sur la page suivante
+                localStorage.setItem('naihab_verification_id', confirmationResult.verificationId);
+                localStorage.setItem('naihab_phone_pending', numeroComplet);
 
                 window.location.href = 'verification.html';
             } catch (err) {
