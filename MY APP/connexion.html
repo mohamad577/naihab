@@ -140,9 +140,9 @@
 
     <div class="input-group">
         <div class="field-box">
-            <input type="text" placeholder="Pseudo ou Numéro">
+            <input type="email" placeholder="Email">
         </div>
-        
+
         <div class="field-box">
             <input type="password" placeholder="Mot de passe">
         </div>
@@ -154,61 +154,68 @@
 
     <button class="btn-secondary" onclick="window.location.href='inscription.html'">Créer un compte</button>
 
-    <script>
+    <script type="module">
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { auth } from './firebase-config.js';
+
         // ✅ Si déjà connecté → rediriger directement
         if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
             const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
             window.location.href = pageAccueil;
         }
 
-        function seConnecter() {
-            const pseudo = document.querySelector('input[type="text"]').value.trim();
+        // Messages d'erreur Firebase traduits en français
+        function traduireErreur(code) {
+            switch (code) {
+                case 'auth/invalid-email':
+                    return "L'adresse email n'est pas valide.";
+                case 'auth/user-not-found':
+                case 'auth/invalid-credential':
+                    return "Aucun compte ne correspond à cet email et ce mot de passe.";
+                case 'auth/wrong-password':
+                    return "Mot de passe incorrect !";
+                case 'auth/too-many-requests':
+                    return "Trop de tentatives. Réessaie dans quelques minutes.";
+                case 'auth/network-request-failed':
+                    return "Problème de connexion internet. Réessaie.";
+                default:
+                    return "Une erreur est survenue. Réessaie.";
+            }
+        }
+
+        window.seConnecter = async function() {
+            const email = document.querySelector('input[type="email"]').value.trim();
             const mdp = document.querySelector('input[type="password"]').value.trim();
             const btn = document.querySelector('.btn-main');
 
-            if (!pseudo) { alert("Entre ton pseudo ou numéro !"); return; }
+            if (!email) { alert("Entre ton email !"); return; }
             if (!mdp) { alert("Entre ton mot de passe !"); return; }
 
-            // CORRECTION IMPORTANTE : le mot de passe n'était jamais vérifié —
-            // n'importe quel mot de passe non vide était accepté. On compare
-            // maintenant avec celui enregistré lors de l'inscription.
-            const mdpEnregistre = localStorage.getItem('user_mdp');
-            if (mdpEnregistre && mdp !== mdpEnregistre) {
-                alert("Mot de passe incorrect !");
-                return;
-            }
-
-            // CORRECTION IMPORTANTE : le pseudo tapé n'était lui non plus jamais
-            // vérifié — n'importe quel texte fonctionnait tant que le mot de passe
-            // était bon. On compare maintenant avec le pseudo enregistré.
-            const nomEnregistre = localStorage.getItem('user_name');
-            if (nomEnregistre && pseudo.toLowerCase() !== nomEnregistre.toLowerCase()) {
-                alert("Pseudo ou numéro introuvable !");
-                return;
-            }
-
-            // ✅ Animation chargement
             btn.classList.add('loading');
 
-            setTimeout(() => {
-                // ✅ Animation succès
+            try {
+                const cred = await signInWithEmailAndPassword(auth, email, mdp);
+
                 btn.classList.remove('loading');
                 btn.classList.add('success');
                 btn.innerText = "Connexion réussie ✓";
 
-                if (!localStorage.getItem('user_name')) {
-                    localStorage.setItem('user_name', pseudo);
-                }
-                // ✅ Marquer comme connecté
+                // On garde ces infos en local pour que le reste de l'app
+                // (qui lit encore le localStorage) continue de fonctionner
+                localStorage.setItem('user_name', cred.user.displayName || email);
+                localStorage.setItem('user_email', email);
                 localStorage.setItem('naihab_connecte', 'oui');
+                localStorage.setItem('naihab_uid', cred.user.uid);
 
                 setTimeout(() => {
-                    // ✅ Rediriger vers la page d'accueil choisie
                     const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
                     window.location.href = pageAccueil;
                 }, 800);
-            }, 1500);
-        }
+            } catch (err) {
+                btn.classList.remove('loading');
+                alert(traduireErreur(err.code));
+            }
+        };
     </script>
 
 </body>
