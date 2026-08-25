@@ -229,7 +229,8 @@
     <script type="module">
         import {
             GoogleAuthProvider,
-            signInWithPopup,
+            signInWithRedirect,
+            getRedirectResult,
             EmailAuthProvider,
             linkWithCredential,
             updateProfile,
@@ -281,33 +282,48 @@
             }
         }
 
-        // Étape 1 : vérification d'identité via Google
+        // Affiche la suite du formulaire pré-remplie avec les infos Google
+        function revelerSuiteFormulaire(user) {
+            document.getElementById('etape-google').style.display = 'none';
+            document.getElementById('google-confirme').style.display = 'flex';
+            document.getElementById('email-google-affiche').innerText = user.email;
+            document.getElementById('suite-formulaire').style.display = 'flex';
+
+            document.getElementById('champ-nom').value = user.displayName || '';
+            document.getElementById('champ-email').value = user.email;
+
+            if (user.photoURL) {
+                const output = document.getElementById('preview-img');
+                const defaultIcon = document.getElementById('default-icon');
+                output.src = user.photoURL;
+                output.style.display = 'block';
+                defaultIcon.style.display = 'none';
+            }
+        }
+
+        // Étape 1 : vérification d'identité via Google (redirection, plus fiable qu'une popup)
         window.seConnecterGoogle = async function() {
             const provider = new GoogleAuthProvider();
             try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-
-                // On révèle la suite du formulaire, pré-rempli avec les infos Google
-                document.getElementById('etape-google').style.display = 'none';
-                document.getElementById('google-confirme').style.display = 'flex';
-                document.getElementById('email-google-affiche').innerText = user.email;
-                document.getElementById('suite-formulaire').style.display = 'flex';
-
-                document.getElementById('champ-nom').value = user.displayName || '';
-                document.getElementById('champ-email').value = user.email;
-
-                if (user.photoURL) {
-                    const output = document.getElementById('preview-img');
-                    const defaultIcon = document.getElementById('default-icon');
-                    output.src = user.photoURL;
-                    output.style.display = 'block';
-                    defaultIcon.style.display = 'none';
-                }
+                await signInWithRedirect(auth, provider);
+                // La page va se recharger après la connexion Google : voir le bloc
+                // getRedirectResult plus bas, qui reprend la main au retour.
             } catch (err) {
                 alert(traduireErreur(err.code));
             }
         };
+
+        // Au retour de la redirection Google, on récupère le résultat
+        (async function() {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result && result.user) {
+                    revelerSuiteFormulaire(result.user);
+                }
+            } catch (err) {
+                if (err && err.code) alert(traduireErreur(err.code));
+            }
+        })();
 
         window.sInscrire = async function() {
             if (!auth.currentUser) {
@@ -360,7 +376,8 @@
                 window.location.href = 'verification.html';
             } catch (err) {
                 btn.classList.remove('loading');
-                alert(traduireErreur(err.code));
+                console.error('Erreur inscription Naïhab :', err);
+                alert(traduireErreur(err.code) + "\n\n(Code technique : " + err.code + ")");
             }
         };
     </script>
