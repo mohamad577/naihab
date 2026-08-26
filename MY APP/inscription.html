@@ -231,6 +231,7 @@
             GoogleAuthProvider,
             signInWithRedirect,
             getRedirectResult,
+            onAuthStateChanged,
             EmailAuthProvider,
             linkWithCredential,
             updateProfile,
@@ -313,17 +314,22 @@
             }
         };
 
-        // Au retour de la redirection Google, on récupère le résultat
-        (async function() {
-            try {
-                const result = await getRedirectResult(auth);
-                if (result && result.user) {
-                    revelerSuiteFormulaire(result.user);
-                }
-            } catch (err) {
-                if (err && err.code) alert(traduireErreur(err.code));
+        // Au retour de la redirection Google, on récupère l'éventuelle erreur
+        getRedirectResult(auth).catch((err) => {
+            if (err && err.code) alert(traduireErreur(err.code));
+        });
+
+        // onAuthStateChanged est plus fiable que getRedirectResult seul pour détecter
+        // l'utilisateur de retour de Google (certains navigateurs/partitionnement de
+        // stockage empêchent getRedirectResult de renvoyer un résultat, même quand la
+        // connexion a bien fonctionné).
+        let formulaireDejaAffiche = false;
+        onAuthStateChanged(auth, (user) => {
+            if (user && !formulaireDejaAffiche) {
+                formulaireDejaAffiche = true;
+                revelerSuiteFormulaire(user);
             }
-        })();
+        });
 
         window.sInscrire = async function() {
             if (!auth.currentUser) {
