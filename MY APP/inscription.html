@@ -229,9 +229,8 @@
     <script type="module">
         import {
             GoogleAuthProvider,
-            signInWithRedirect,
-            getRedirectResult,
-            onAuthStateChanged,
+            signInWithPopup,
+            signOut,
             EmailAuthProvider,
             linkWithCredential,
             updateProfile,
@@ -278,6 +277,8 @@
                     return "Problème de connexion internet. Réessaie.";
                 case 'auth/credential-already-in-use':
                     return "Ce numéro est déjà utilisé par un autre compte.";
+                case 'auth/provider-already-linked':
+                    return "Ce compte Google a déjà un mot de passe Naïhab. Essaie de te connecter au lieu de t'inscrire.";
                 default:
                     return "Une erreur est survenue. Réessaie.";
             }
@@ -302,34 +303,21 @@
             }
         }
 
-        // Étape 1 : vérification d'identité via Google (redirection, plus fiable qu'une popup)
+        // Étape 1 : vérification d'identité via Google
         window.seConnecterGoogle = async function() {
             const provider = new GoogleAuthProvider();
             try {
-                await signInWithRedirect(auth, provider);
-                // La page va se recharger après la connexion Google : voir le bloc
-                // getRedirectResult plus bas, qui reprend la main au retour.
+                // On se déconnecte d'abord de toute session Firebase mémorisée
+                // (ex. un ancien compte de test), pour repartir sur une base propre
+                // à chaque tentative d'inscription.
+                await signOut(auth);
+
+                const result = await signInWithPopup(auth, provider);
+                revelerSuiteFormulaire(result.user);
             } catch (err) {
                 alert(traduireErreur(err.code));
             }
         };
-
-        // Au retour de la redirection Google, on récupère l'éventuelle erreur
-        getRedirectResult(auth).catch((err) => {
-            if (err && err.code) alert(traduireErreur(err.code));
-        });
-
-        // onAuthStateChanged est plus fiable que getRedirectResult seul pour détecter
-        // l'utilisateur de retour de Google (certains navigateurs/partitionnement de
-        // stockage empêchent getRedirectResult de renvoyer un résultat, même quand la
-        // connexion a bien fonctionné).
-        let formulaireDejaAffiche = false;
-        onAuthStateChanged(auth, (user) => {
-            if (user && !formulaireDejaAffiche) {
-                formulaireDejaAffiche = true;
-                revelerSuiteFormulaire(user);
-            }
-        });
 
         window.sInscrire = async function() {
             if (!auth.currentUser) {
