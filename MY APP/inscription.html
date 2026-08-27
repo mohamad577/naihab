@@ -13,10 +13,14 @@
             margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif;
             background-color: #1a0b5a; color: white;
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            justify-content: center;
         }
 
+        h2 { font-weight: 900; margin-bottom: 10px; }
+        p.sous-titre { opacity: 0.75; font-size: 14px; text-align: center; max-width: 300px; margin-bottom: 35px; }
+
         /* Photo de profil cliquable */
-        .profile-pic-container { position: relative; margin: 20px 0 30px 0; cursor: pointer; }
+        .profile-pic-container { position: relative; margin-bottom: 25px; cursor: pointer; }
         .profile-pic {
             width: 110px; height: 110px; background-color: rgba(255, 255, 255, 0.1);
             border: 3px solid #ffcc00; border-radius: 50%;
@@ -33,25 +37,16 @@
         .form-group { width: 100%; max-width: 350px; margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 12px; color: #ffcc00; text-transform: uppercase; }
 
-        input, select {
+        input {
             width: 100%; padding: 15px; border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 15px; background-color: rgba(255, 255, 255, 0.05);
             color: white; font-size: 16px; box-sizing: border-box; outline: none;
         }
 
-        input:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Style spécifique pour le groupe Téléphone */
-        .phone-container { display: flex; gap: 10px; }
-        .country-select { width: 100px; font-size: 14px; cursor: pointer; }
-
         .btn-register {
             width: 100%; max-width: 350px; padding: 18px; background-color: #ffcc00;
             color: #1a0b5a; border: none; border-radius: 30px; font-weight: bold;
-            margin-top: 20px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            margin-top: 10px; cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             position: relative; overflow: hidden; transition: 0.3s;
         }
 
@@ -83,49 +78,33 @@
             background: white; color: #333; border: none; border-radius: 30px;
             font-weight: bold; font-size: 15px; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
-        .separateur {
-            display: flex; align-items: center; gap: 10px;
-            width: 100%; max-width: 350px; margin: 10px 0 20px 0;
-            color: rgba(255,255,255,0.4); font-size: 13px;
-        }
-        .separateur::before, .separateur::after {
-            content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.15);
-        }
+        .suite-formulaire { display: none; width: 100%; flex-direction: column; align-items: center; margin-top: 30px; }
 
-        .google-confirme {
-            width: 100%; max-width: 350px; padding: 14px 18px;
-            background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.4);
-            border-radius: 15px; margin-bottom: 20px; font-size: 14px;
-            display: flex; align-items: center; gap: 10px;
+        .link-text {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #ffcc00;
+            text-decoration: none;
+            cursor: pointer;
         }
-
-        .suite-formulaire { display: none; width: 100%; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
 
-    <h2 style="font-weight: 900;">Rejoindre Naïhab</h2>
+    <h2>Rejoindre Naïhab</h2>
+    <p class="sous-titre">Dans l'univers de Naïhab, tu es libre. Connecte-toi avec Google pour commencer, en toute sécurité.</p>
 
-    <!-- Étape 1 : vérification d'identité via Google -->
     <div id="etape-google" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-        <p style="opacity:0.8; font-size:14px; max-width:320px; text-align:center; margin-bottom:20px;">
-            Pour protéger les comptes contre toute usurpation, on vérifie d'abord ton identité avec Google.
-        </p>
         <button class="btn-google" onclick="seConnecterGoogle()">
             <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.8 2.73v2.27h2.92c1.7-1.57 2.68-3.88 2.68-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.92-2.27c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V4.94H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.06l3.01-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
             Continuer avec Google
         </button>
     </div>
 
-    <div id="google-confirme" class="google-confirme" style="display:none;">
-        <span>✅</span>
-        <span>Identité vérifiée : <b id="email-google-affiche"></b></span>
-    </div>
-
-    <!-- Étape 2 : reste du formulaire, révélé après vérification Google -->
+    <!-- Étape 2 : révélée après connexion Google -->
     <div class="suite-formulaire" id="suite-formulaire">
 
         <div class="profile-pic-container" onclick="document.getElementById('file-input').click()">
@@ -146,96 +125,17 @@
             <input type="text" id="champ-nom" placeholder="Ex: Jackson Junior">
         </div>
 
-        <div class="form-group">
-            <label>Numéro de téléphone</label>
-            <div class="phone-container">
-                <select class="country-select">
-                    <option value="+237" selected>🇨🇲 +237</option>
-                    <option value="+33">🇫🇷 +33</option>
-                    <option value="+225">🇨🇮 +225</option>
-                    <option value="+221">🇸🇳 +221</option>
-                    <option value="+1">🇺🇸/🇨🇦 +1</option>
-                    <option value="+213">🇩🇿 +213</option>
-                    <option value="+244">🇦🇴 +244</option>
-                    <option value="+54">🇦🇷 +54</option>
-                    <option value="+61">🇦🇺 +61</option>
-                    <option value="+32">🇧🇪 +32</option>
-                    <option value="+229">🇧🇯 +229</option>
-                    <option value="+55">🇧🇷 +55</option>
-                    <option value="+226">🇧🇫 +226</option>
-                    <option value="+257">🇧🇮 +257</option>
-                    <option value="+235">🇹🇩 +235</option>
-                    <option value="+56">🇨🇱 +56</option>
-                    <option value="+86">🇨🇳 +86</option>
-                    <option value="+57">🇨🇴 +57</option>
-                    <option value="+242">🇨🇬 +242</option>
-                    <option value="+243">🇨🇩 +243</option>
-                    <option value="+20">🇪🇬 +20</option>
-                    <option value="+34">🇪🇸 +34</option>
-                    <option value="+49">🇩🇪 +49</option>
-                    <option value="+233">🇬🇭 +233</option>
-                    <option value="+224">🇬🇳 +224</option>
-                    <option value="+91">🇮🇳 +91</option>
-                    <option value="+62">🇮🇩 +62</option>
-                    <option value="+39">🇮🇹 +39</option>
-                    <option value="+81">🇯🇵 +81</option>
-                    <option value="+254">🇰🇪 +254</option>
-                    <option value="+212">🇲🇦 +212</option>
-                    <option value="+223">🇲🇱 +223</option>
-                    <option value="+222">🇲🇷 +222</option>
-                    <option value="+230">🇲🇺 +230</option>
-                    <option value="+52">🇲🇽 +52</option>
-                    <option value="+227">🇳🇪 +227</option>
-                    <option value="+234">🇳🇬 +234</option>
-                    <option value="+31">🇳🇱 +31</option>
-                    <option value="+351">🇵🇹 +351</option>
-                    <option value="+974">🇶🇦 +974</option>
-                    <option value="+44">🇬🇧 +44</option>
-                    <option value="+7">🇷🇺 +7</option>
-                    <option value="+250">🇷🇼 +250</option>
-                    <option value="+966">🇸🇦 +966</option>
-                    <option value="+65">🇸🇬 +65</option>
-                    <option value="+27">🇿🇦 +27</option>
-                    <option value="+82">🇰🇷 +82</option>
-                    <option value="+41">🇨🇭 +41</option>
-                    <option value="+228">🇹🇬 +228</option>
-                    <option value="+216">🇹🇳 +216</option>
-                    <option value="+90">🇹🇷 +90</option>
-                    <option value="+256">🇺🇬 +256</option>
-                    <option value="+971">🇦🇪 +971</option>
-                    <option value="+260">🇿🇲 +260</option>
-                    <option value="+263">🇿🇼 +263</option>
-                </select>
-                <input type="tel" placeholder="6..." style="flex: 1;">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Email (vérifié via Google)</label>
-            <input type="email" id="champ-email" disabled>
-        </div>
-
-        <div class="form-group">
-            <label>Mot de passe du compte Naïhab</label>
-            <input type="password" id="champ-mdp" placeholder="6 caractères minimum">
-        </div>
-
-        <button class="btn-register" onclick="sInscrire()">S'INSCRIRE</button>
+        <button class="btn-register" onclick="terminerInscription()">TERMINER L'INSCRIPTION</button>
     </div>
 
-    <!-- Nécessaire pour le reCAPTCHA invisible de Firebase Phone Auth -->
-    <div id="recaptcha-container"></div>
+    <div class="link-text" onclick="window.location.href='connexion.html'">Déjà un compte ? Se connecter</div>
 
     <script type="module">
         import {
             GoogleAuthProvider,
             signInWithPopup,
             signOut,
-            EmailAuthProvider,
-            linkWithCredential,
-            updateProfile,
-            RecaptchaVerifier,
-            signInWithPhoneNumber
+            updateProfile
         } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { auth } from './firebase-config.js';
 
@@ -258,41 +158,21 @@
             reader.readAsDataURL(event.target.files[0]);
         };
 
-        // Messages d'erreur Firebase traduits en français
         function traduireErreur(code) {
             switch (code) {
-                case 'auth/account-exists-with-different-credential':
-                    return "Un compte existe déjà avec cet email via une autre méthode.";
                 case 'auth/popup-closed-by-user':
                     return "Fenêtre Google fermée avant la fin. Réessaie.";
-                case 'auth/email-already-in-use':
-                    return "Cet email est déjà utilisé par un autre compte Naïhab.";
-                case 'auth/weak-password':
-                    return "Le mot de passe doit contenir au moins 6 caractères.";
-                case 'auth/invalid-phone-number':
-                    return "Le numéro de téléphone n'est pas valide.";
-                case 'auth/too-many-requests':
-                    return "Trop de tentatives. Réessaie plus tard.";
                 case 'auth/network-request-failed':
                     return "Problème de connexion internet. Réessaie.";
-                case 'auth/credential-already-in-use':
-                    return "Ce numéro est déjà utilisé par un autre compte.";
-                case 'auth/provider-already-linked':
-                    return "Ce compte Google a déjà un mot de passe Naïhab. Essaie de te connecter au lieu de t'inscrire.";
                 default:
                     return "Une erreur est survenue. Réessaie.";
             }
         }
 
-        // Affiche la suite du formulaire pré-remplie avec les infos Google
         function revelerSuiteFormulaire(user) {
             document.getElementById('etape-google').style.display = 'none';
-            document.getElementById('google-confirme').style.display = 'flex';
-            document.getElementById('email-google-affiche').innerText = user.email;
             document.getElementById('suite-formulaire').style.display = 'flex';
-
             document.getElementById('champ-nom').value = user.displayName || '';
-            document.getElementById('champ-email').value = user.email;
 
             if (user.photoURL) {
                 const output = document.getElementById('preview-img');
@@ -303,15 +183,12 @@
             }
         }
 
-        // Étape 1 : vérification d'identité via Google
         window.seConnecterGoogle = async function() {
             const provider = new GoogleAuthProvider();
             try {
-                // On se déconnecte d'abord de toute session Firebase mémorisée
-                // (ex. un ancien compte de test), pour repartir sur une base propre
-                // à chaque tentative d'inscription.
+                // On repart toujours d'une session propre pour éviter toute confusion
+                // avec un compte précédemment utilisé sur cet appareil
                 await signOut(auth);
-
                 const result = await signInWithPopup(auth, provider);
                 revelerSuiteFormulaire(result.user);
             } catch (err) {
@@ -319,59 +196,35 @@
             }
         };
 
-        window.sInscrire = async function() {
+        window.terminerInscription = async function() {
             if (!auth.currentUser) {
-                alert("Vérifie d'abord ton identité avec Google !");
+                alert("Connecte-toi d'abord avec Google !");
                 return;
             }
 
             const nom = document.getElementById('champ-nom').value.trim();
-            const indicatif = document.querySelector('.country-select').value;
-            const tel = document.querySelector('input[type="tel"]').value.trim();
-            const email = document.getElementById('champ-email').value.trim();
-            const mdp = document.getElementById('champ-mdp').value;
             const btn = document.querySelector('.btn-register');
 
             if (nom === "") { alert("Entre ton nom complet !"); return; }
-            if (tel === "") { alert("Entre ton numéro de téléphone !"); return; }
-            if (mdp.length < 6) { alert("Le mot de passe doit contenir au moins 6 caractères !"); return; }
 
-            const numeroComplet = indicatif + tel;
             btn.classList.add('loading');
 
             try {
-                // On rattache un mot de passe Naïhab au compte déjà identifié par Google
-                const emailCredential = EmailAuthProvider.credential(email, mdp);
-                await linkWithCredential(auth.currentUser, emailCredential);
-
                 if (nom !== auth.currentUser.displayName) {
                     await updateProfile(auth.currentUser, { displayName: nom });
                 }
 
-                // Envoi du vrai SMS de vérification pour ce numéro
-                const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    size: 'invisible'
-                });
-                const confirmationResult = await signInWithPhoneNumber(auth, numeroComplet, recaptchaVerifier);
-
-                // On garde ces infos en local pour que le reste de l'app
-                // (qui lit encore le localStorage) continue de fonctionner
                 localStorage.setItem("user_name", nom);
-                localStorage.setItem("user_tel", numeroComplet);
-                localStorage.setItem("user_email", email);
+                localStorage.setItem("user_email", auth.currentUser.email);
                 localStorage.setItem('naihab_nouveau_compte', 'oui');
+                localStorage.setItem('naihab_connecte', 'oui');
                 localStorage.setItem('naihab_uid', auth.currentUser.uid);
-                // ⚠️ 'naihab_connecte' n'est PAS mis à 'oui' ici : il ne sera défini
-                // qu'après vérification réussie du SMS, dans verification.html
 
-                localStorage.setItem('naihab_verification_id', confirmationResult.verificationId);
-                localStorage.setItem('naihab_phone_pending', numeroComplet);
-
-                window.location.href = 'verification.html';
+                const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+                window.location.href = pageAccueil;
             } catch (err) {
                 btn.classList.remove('loading');
-                console.error('Erreur inscription Naïhab :', err);
-                alert(traduireErreur(err.code) + "\n\n(Code technique : " + err.code + ")");
+                alert(traduireErreur(err.code));
             }
         };
     </script>
