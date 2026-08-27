@@ -110,7 +110,8 @@
 
     <script type="module">
         import { GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { auth } from './firebase-config.js';
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
 
         // ✅ Si déjà connecté → rediriger directement
         if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
@@ -136,12 +137,35 @@
 
             try {
                 await signOut(auth);
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
+                const cred = await signInWithPopup(auth, provider);
+                const user = cred.user;
 
-                localStorage.setItem('user_name', user.displayName || user.email);
+                // On lit le profil existant dans Firestore (nom/photo peuvent avoir
+                // été modifiés depuis la version Google d'origine)
+                const profilRef = doc(db, 'utilisateurs', user.uid);
+                const profilSnap = await getDoc(profilRef);
+
+                let nom, photo;
+                if (profilSnap.exists()) {
+                    const data = profilSnap.data();
+                    nom = data.nom || user.displayName || user.email;
+                    photo = data.photo || user.photoURL || '';
+                } else {
+                    // Sécurité : si le profil n'existe pas encore (compte créé
+                    // avant cette mise à jour), on le crée maintenant
+                    nom = user.displayName || user.email;
+                    photo = user.photoURL || '';
+                    await setDoc(profilRef, {
+                        nom: nom,
+                        email: user.email,
+                        photo: photo,
+                        dateCreation: new Date().toISOString()
+                    });
+                }
+
+                localStorage.setItem('user_name', nom);
                 localStorage.setItem('user_email', user.email);
-                if (user.photoURL) localStorage.setItem('user_photo', user.photoURL);
+                if (photo) localStorage.setItem('user_photo', photo);
                 localStorage.setItem('naihab_connecte', 'oui');
                 localStorage.setItem('naihab_uid', user.uid);
 

@@ -137,7 +137,8 @@
             signOut,
             updateProfile
         } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { auth } from './firebase-config.js';
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
 
         // ✅ Si déjà connecté → rediriger directement
         if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
@@ -213,6 +214,16 @@
                 if (nom !== auth.currentUser.displayName) {
                     await updateProfile(auth.currentUser, { displayName: nom });
                 }
+
+                const photo = localStorage.getItem('user_photo') || auth.currentUser.photoURL || '';
+
+                // Création du profil dans Firestore, accessible depuis n'importe quel appareil
+                await setDoc(doc(db, 'utilisateurs', auth.currentUser.uid), {
+                    nom: nom,
+                    email: auth.currentUser.email,
+                    photo: photo,
+                    dateCreation: new Date().toISOString()
+                });
 
                 localStorage.setItem("user_name", nom);
                 localStorage.setItem("user_email", auth.currentUser.email);
