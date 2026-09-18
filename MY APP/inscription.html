@@ -188,9 +188,10 @@
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
             try {
-                // On repart toujours d'une session propre pour éviter toute confusion
-                // avec un compte précédemment utilisé sur cet appareil
-                await signOut(auth);
+                // Pas de signOut() avant l'ouverture de la popup : sur Safari/iOS,
+                // tout appel asynchrone entre le clic et signInWithPopup fait
+                // bloquer la popup silencieusement (elle ne s'ouvre jamais).
+                // Le sélecteur de compte force déjà le bon choix sans ça.
                 const result = await signInWithPopup(auth, provider);
                 revelerSuiteFormulaire(result.user);
             } catch (err) {

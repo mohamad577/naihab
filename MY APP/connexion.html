@@ -137,7 +137,9 @@
             btn.classList.add('loading');
 
             try {
-                await signOut(auth);
+                // Pas de signOut() avant l'ouverture de la popup : sur Safari/iOS,
+                // tout appel asynchrone entre le clic et signInWithPopup fait
+                // bloquer la popup silencieusement (elle ne s'ouvre jamais).
                 const cred = await signInWithPopup(auth, provider);
                 const user = cred.user;
 
