@@ -132,6 +132,7 @@
 
         window.seConnecter = async function() {
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
             const btn = document.querySelector('.btn-google');
             btn.classList.add('loading');
 

@@ -186,6 +186,7 @@
 
         window.seConnecterGoogle = async function() {
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
             try {
                 // On repart toujours d'une session propre pour éviter toute confusion
                 // avec un compte précédemment utilisé sur cet appareil
