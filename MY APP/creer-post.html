@@ -27,7 +27,6 @@
             box-sizing: border-box;
         }
 
-        /* Header avec bouton Annuler et Publier */
         .header { 
             display: flex; 
             justify-content: space-between; 
@@ -52,9 +51,11 @@
             cursor: pointer; 
             opacity: 0.3; 
             transition: 0.3s;
-            pointer-events: none; /* Désactivé par défaut */
+            pointer-events: none;
             text-transform: uppercase;
             font-size: 13px;
+            position: relative;
+            overflow: hidden;
         }
 
         .active-btn { 
@@ -63,7 +64,27 @@
             box-shadow: 0 5px 15px rgba(255, 204, 0, 0.3); 
         }
 
-        /* Zone de saisie */
+        .publier-btn.loading {
+            color: transparent;
+            pointer-events: none;
+        }
+
+        .publier-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 18px; height: 18px;
+            margin: -9px 0 0 -9px;
+            border: 3px solid rgba(26,11,90,0.2);
+            border-top-color: var(--bg-deep);
+            border-radius: 50%;
+            animation: tourner 0.7s linear infinite;
+        }
+
+        @keyframes tourner {
+            to { transform: rotate(360deg); }
+        }
+
         .post-input { 
             width: 100%; 
             background: transparent; 
@@ -77,7 +98,6 @@
             min-height: 100px;
         }
 
-        /* Zone d'aperçu du média sélectionné */
         #preview-container { 
             width: 100%; 
             margin: 20px 0; 
@@ -96,7 +116,6 @@
             display: block;
         }
 
-        /* Barre d'options en bas */
         .options { 
             border-top: 1px solid rgba(255,255,255,0.05); 
             padding: 20px 0; 
@@ -121,7 +140,6 @@
         
         .opt-item span { font-size: 18px; }
 
-        /* Masquage des inputs natifs */
         #input-photo, #input-video { display: none; }
     </style>
 </head>
@@ -147,26 +165,26 @@
         <input type="file" id="input-video" accept="video/*" onchange="aperçuMedia(this, 'video')">
     </div>
 
-    <script>
+    <script type="module">
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
         let mediaSelectionne = false;
         let fichierData = ""; 
         let typeFichier = "";
-        let fichierBlob = null;
 
-        function aperçuMedia(input, type) {
+        window.aperçuMedia = function(input, type) {
             const container = document.getElementById('preview-container');
             const img = document.getElementById('preview-img');
             const video = document.getElementById('preview-video');
             
             if (input.files && input.files[0]) {
                 const fichier = input.files[0];
-                fichierBlob = fichier;
 
                 if (type === 'video') {
-                    // Vidéo convertie en base64 (comme les photos) pour que le fichier
-                    // survive à la navigation vers videos.html — un lien blob: ne
-                    // fonctionne que dans la page qui l'a créé et devient invalide
-                    // dès qu'on change de page, ce qui empêchait la vidéo de s'afficher.
+                    // Vidéos : toujours en base64/localStorage pour l'instant.
+                    // Passage à Firebase Storage prévu plus tard (les vidéos
+                    // dépassent souvent la limite de 1 Mo par document Firestore).
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         container.style.display = 'block';
@@ -180,7 +198,6 @@
                     };
                     reader.readAsDataURL(fichier);
                 } else {
-                    // Pour les images : base64 ok car plus léger
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         container.style.display = 'block';
@@ -195,9 +212,9 @@
                     reader.readAsDataURL(fichier);
                 }
             }
-        }
+        };
 
-        function verifierContenu() {
+        window.verifierContenu = function() {
             const text = document.getElementById('postText').value.trim();
             const btn = document.getElementById('btnPublier');
             
@@ -206,14 +223,20 @@
             } else {
                 btn.classList.remove('active-btn');
             }
-        }
+        };
 
-        function publierMedia() {
+        window.publierMedia = async function() {
             const text = document.getElementById('postText').value.trim();
-            const userName = localStorage.getItem("user_name") || "Naïfan";
+            const btn = document.getElementById('btnPublier');
+
+            if (!auth.currentUser) {
+                alert("Tu dois être connecté pour publier !");
+                return;
+            }
 
             if (typeFichier === 'video') {
-                // Vidéo en base64 : sauvegarder avec ses infos
+                // Vidéo : comportement inchangé pour l'instant (localStorage)
+                const userName = localStorage.getItem("user_name") || "Naïfan";
                 let mesVideos = JSON.parse(localStorage.getItem('naihab_videos')) || [];
                 mesVideos.unshift({
                     id: Date.now(),
@@ -226,26 +249,33 @@
                     localStorage.setItem('naihab_videos', JSON.stringify(mesVideos));
                     window.location.href = 'videos.html?nouveau=1';
                 } catch (e) {
-                    // Le stockage local est plein (souvent le cas avec une vidéo trop longue/lourde)
                     alert("La vidéo est trop lourde pour être enregistrée sur cet appareil. Essaie une vidéo plus courte ou de moins bonne qualité.");
                 }
-            } else {
-                // ✅ Photo : base64
-                let mesPosts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-                mesPosts.unshift({
-                    id: Date.now(),
-                    image: fichierData,
+                return;
+            }
+
+            // Photo (ou texte seul) : publication réelle sur Firestore,
+            // visible par tous les comptes Naïhab
+            btn.classList.add('loading');
+            try {
+                await addDoc(collection(db, 'publications'), {
+                    uid: auth.currentUser.uid,
+                    nom: auth.currentUser.displayName || localStorage.getItem('user_name') || 'Naïfan',
+                    photoAuteur: localStorage.getItem('user_photo') || auth.currentUser.photoURL || '',
                     texte: text,
-                    date: new Date().toLocaleDateString(),
+                    image: fichierData || '',
+                    date: serverTimestamp(),
                     likes: 0,
-                    liked: false,
                     commentaires: 0
                 });
-                localStorage.setItem('naihab_posts', JSON.stringify(mesPosts));
-                alert(`Ton post est en ligne ${userName} ! 👑`);
+                alert(`Ton post est en ligne ! 👑`);
                 window.location.href = 'chats.html';
+            } catch (err) {
+                btn.classList.remove('loading');
+                console.error('Erreur publication Naïhab :', err);
+                alert("Une erreur est survenue lors de la publication. Réessaie.");
             }
-        }
+        };
     </script>
 </body>
 </html>

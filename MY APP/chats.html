@@ -31,7 +31,6 @@
             overflow-x: hidden;
         }
         
-        /* Header */
         .header { 
             padding: 15px 20px; 
             display: flex; 
@@ -54,7 +53,6 @@
 
         .header-icons { display: flex; gap: 18px; align-items: center; }
         
-        /* Status Box */
         .status-box { 
             padding: 12px 18px; 
             display: flex; 
@@ -74,7 +72,6 @@
             border: 2px solid var(--gold); 
         }
 
-        /* Winner Banner */
         .winner-box {
             background: linear-gradient(135deg, #ffcc00, #ff9900);
             margin: 0 15px 20px 15px;
@@ -94,7 +91,6 @@
 
         .winner-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; }
 
-        /* Post Structure */
         .post { 
             background: rgba(255,255,255,0.02); 
             margin-bottom: 25px; 
@@ -106,7 +102,6 @@
         .post-actions { padding: 15px; display: flex; gap: 25px; align-items: center; }
         .action-btn { cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; }
 
-        /* Navigation */
         .nav-bas { 
             position: fixed; bottom: 0; width: 100%; height: 70px; 
             background: #0d124a; 
@@ -145,7 +140,7 @@
         </div>
     </div>
 
-    <!-- Les nouveaux posts s'affichent ici (générés en JS) -->
+    <!-- Les publications de tous les Naïfans s'affichent ici, en direct depuis Firestore -->
     <div id="flux-posts"></div>
 
     <!-- Post Démo (Julie) -->
@@ -178,11 +173,12 @@
 
     <script src="splash.js"></script>
 
-    <script>
+    <script type="module">
+        import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { auth, db } from './firebase-config.js';
+
         window.onload = function() {
-            // Le reste de tes fonctions d'origine
             const photoSauve = localStorage.getItem("user_photo");
-            const nomSauve = localStorage.getItem("user_name") || "Moi";
             if (photoSauve) {
                 document.getElementById("ma-photo-accueil").src = photoSauve;
             }
@@ -193,11 +189,6 @@
             ];
             document.getElementById('nb-comm-demo').innerText = commsDemo.length;
 
-            // ── Initialiser les données de la publication démo (Julie) ──
-            // Nécessaire pour que publication.html puisse afficher l'image/texte en mode ?demo=1.
-            // CORRECTION : on la met à jour à CHAQUE chargement (plus de "if not exists"),
-            // sinon une ancienne version testée précédemment restait bloquée en mémoire
-            // et ne correspondait plus à ce qui est affiché sur cette page.
             const demo = {
                 image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
                 texte: "Superbe journée à explorer Naïhab ! ✨",
@@ -208,7 +199,6 @@
             };
             localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
 
-            // ── Afficher la bannière du gagnant de la couronne (si applicable) ──
             const gagnantRaw = localStorage.getItem('naihab_gagnant_couronne');
             const bannerFermee = localStorage.getItem('naihab_banniere_fermee');
             if (gagnantRaw && !bannerFermee) {
@@ -219,23 +209,19 @@
                     document.getElementById('winner-img').src = gagnant.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
                     document.getElementById('banner-winner').style.display = 'flex';
                 } catch (e) {
-                    // Ancien format (texte simple) éventuellement laissé par un test manuel
                     document.getElementById('winner-nom').innerText = '👑 ' + gagnantRaw;
                     document.getElementById('banner-winner').style.display = 'flex';
                 }
             }
 
-            // ── Afficher les publications personnelles (créées via creer-post.html) ──
-            afficherMesPosts();
+            ecouterFluxPublications();
         };
 
-        // Ouvre la publication démo (Julie) vers la bonne page, en mode ?demo=1
-        function ouvrirPostDemo(page) {
+        window.ouvrirPostDemo = function(page) {
             window.location.href = page + '?demo=1';
-        }
+        };
 
-        // Like / unlike sur la publication démo (dans le flux chats.html)
-        function toggleLike(element) {
+        window.toggleLike = function(element) {
             const heart = element.querySelector('.heart');
             const compteur = element.querySelector('small');
             let nb = parseInt(compteur.innerText) || 0;
@@ -249,31 +235,25 @@
             }
             compteur.innerText = nb;
 
-            // On sauvegarde le nombre séparément (naihab_publication_demo est
-            // réécrit à chaque chargement de page, donc ce compteur à part
-            // garantit que le like n'est jamais perdu)
             localStorage.setItem('naihab_publication_demo_likes', nb);
             let demo = JSON.parse(localStorage.getItem('naihab_publication_demo')) || {};
             demo.likes = nb;
             localStorage.setItem('naihab_publication_demo', JSON.stringify(demo));
-        }
+        };
 
-        // Partager (démo + posts persos, bouton avion)
-        function partager() {
+        window.partager = function() {
             const lien = "https://mohamad577.github.io/naihab/MY%20APP/index.html";
             const message = "Regarde cette publication sur Naïhab ! ✨ " + lien;
             window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
-        }
+        };
 
-        // Fermer la bannière du gagnant de la couronne
-        function fermerBanniere(event) {
+        window.fermerBanniere = function(event) {
             event.stopPropagation();
             document.getElementById('banner-winner').style.display = 'none';
             localStorage.setItem('naihab_banniere_fermee', '1');
-        }
+        };
 
-        // Aller voir le profil du gagnant de la couronne
-        function allerVersGagnant() {
+        window.allerVersGagnant = function() {
             const gagnantRaw = localStorage.getItem('naihab_gagnant_couronne');
             if (gagnantRaw) {
                 try {
@@ -283,83 +263,92 @@
                     window.location.href = 'profil-public.html?name=' + encodeURIComponent(gagnantRaw);
                 }
             }
+        };
+
+        // Publications likées par cet appareil, juste pour l'affichage du cœur
+        // (pas de vraie prévention des doublons pour l'instant — arrive avec
+        // le vrai système de likes en sous-collection, à l'étape suivante)
+        function mesLikesLocaux() {
+            return JSON.parse(localStorage.getItem('naihab_mes_likes')) || [];
         }
 
-        // Construit et affiche les publications personnelles de l'utilisateur dans #flux-posts
-        function afficherMesPosts() {
+        // Écoute en temps réel les publications de TOUS les Naïfans sur Firestore
+        function ecouterFluxPublications() {
             const zone = document.getElementById('flux-posts');
-            const posts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
-            const nomSauve = localStorage.getItem('user_name') || 'Moi';
-            const photoSauve = localStorage.getItem('user_photo') || 'logo_naihab.svg';
+            const q = query(collection(db, 'publications'), orderBy('date', 'desc'));
 
-            zone.innerHTML = '';
+            onSnapshot(q, (snapshot) => {
+                zone.innerHTML = '';
+                const mesLikes = mesLikesLocaux();
 
-            posts.forEach((post, index) => {
-                const coeur = post.liked ? '❤️' : '🤍';
-                const nbLikes = post.likes || 0;
-                const nbComm = post.commentaires || 0;
+                snapshot.forEach((docSnap) => {
+                    const post = docSnap.data();
+                    const postId = docSnap.id;
+                    const liked = mesLikes.includes(postId);
+                    const coeur = liked ? '❤️' : '🤍';
+                    const nomAffiche = post.nom || 'Naïfan';
+                    const photoAffichee = post.photoAuteur || 'logo_naihab.svg';
 
-                const article = document.createElement('article');
-                article.className = 'post';
-                article.innerHTML = `
-                    <div class="post-header">
-                        <img src="${photoSauve}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="User">
-                        <b style="font-size: 14px;">${nomSauve} <span style="color: var(--gold); font-size: 11px; margin-left: 5px;">• maintenant</span></b>
-                    </div>
-                    <img src="${post.image}" class="post-img" data-index="${index}" alt="Post">
-                    <div class="post-actions">
-                        <div class="action-btn like-btn" data-index="${index}">
-                            <span class="heart">${coeur}</span> <small>${nbLikes}</small>
+                    const article = document.createElement('article');
+                    article.className = 'post';
+                    article.innerHTML = `
+                        <div class="post-header">
+                            <img src="${photoAffichee}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="User">
+                            <b style="font-size: 14px;">${nomAffiche}</b>
                         </div>
-                        <div class="action-btn comment-btn" data-index="${index}">
-                            <span>💬</span> <small>${nbComm}</small>
+                        ${post.image ? `<img src="${post.image}" class="post-img" data-id="${postId}" alt="Post">` : `<p style="padding:0 15px 10px; font-size:15px;">${post.texte || ''}</p>`}
+                        <div class="post-actions">
+                            <div class="action-btn like-btn" data-id="${postId}">
+                                <span class="heart">${coeur}</span> <small>${post.likes || 0}</small>
+                            </div>
+                            <div class="action-btn comment-btn" data-id="${postId}">
+                                <span>💬</span> <small>${post.commentaires || 0}</small>
+                            </div>
+                            <div class="action-btn" onclick="partager()">
+                                <span>✈️</span>
+                            </div>
                         </div>
-                        <div class="action-btn" onclick="partager()">
-                            <span>✈️</span>
-                        </div>
-                    </div>
-                `;
-                zone.appendChild(article);
-            });
-
-            // Clic sur l'image → ouvrir la publication
-            zone.querySelectorAll('.post-img').forEach(img => {
-                img.addEventListener('click', () => {
-                    window.location.href = 'publication.html?index=' + img.dataset.index;
+                    `;
+                    zone.appendChild(article);
                 });
-            });
 
-            // Clic sur like
-            zone.querySelectorAll('.like-btn').forEach(btn => {
-                btn.addEventListener('click', () => toggleLikeReal(btn, parseInt(btn.dataset.index)));
-            });
+                zone.querySelectorAll('.post-img').forEach(img => {
+                    img.addEventListener('click', () => {
+                        window.location.href = 'publication.html?id=' + img.dataset.id;
+                    });
+                });
 
-            // Clic sur commentaires
-            zone.querySelectorAll('.comment-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    window.location.href = 'commentaires.html?index=' + btn.dataset.index;
+                zone.querySelectorAll('.like-btn').forEach(btn => {
+                    btn.addEventListener('click', () => toggleLikeReel(btn, btn.dataset.id));
+                });
+
+                zone.querySelectorAll('.comment-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        window.location.href = 'commentaires.html?id=' + btn.dataset.id;
+                    });
                 });
             });
         }
 
-        // Like / unlike sur une publication personnelle (met à jour naihab_posts avec le bon index)
-        function toggleLikeReal(element, index) {
+        // Like / unlike réel sur Firestore (compteur partagé par tous)
+        async function toggleLikeReel(element, postId) {
             const heart = element.querySelector('.heart');
             const compteur = element.querySelector('small');
-            let nb = parseInt(compteur.innerText) || 0;
-            let posts = JSON.parse(localStorage.getItem('naihab_posts')) || [];
+            let mesLikes = mesLikesLocaux();
+            const postRef = doc(db, 'publications', postId);
 
             if (heart.innerText === '🤍') {
                 heart.innerText = '❤️';
-                nb++;
-                if (posts[index]) { posts[index].likes = nb; posts[index].liked = true; }
+                compteur.innerText = (parseInt(compteur.innerText) || 0) + 1;
+                mesLikes.push(postId);
+                await updateDoc(postRef, { likes: increment(1) });
             } else {
                 heart.innerText = '🤍';
-                nb = Math.max(0, nb - 1);
-                if (posts[index]) { posts[index].likes = nb; posts[index].liked = false; }
+                compteur.innerText = Math.max(0, (parseInt(compteur.innerText) || 0) - 1);
+                mesLikes = mesLikes.filter(id => id !== postId);
+                await updateDoc(postRef, { likes: increment(-1) });
             }
-            compteur.innerText = nb;
-            localStorage.setItem('naihab_posts', JSON.stringify(posts));
+            localStorage.setItem('naihab_mes_likes', JSON.stringify(mesLikes));
         }
     </script>
 </body>
