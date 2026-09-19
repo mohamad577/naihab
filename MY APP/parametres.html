@@ -110,7 +110,6 @@
         }
         .logout-box:active { transform: scale(0.98); }
 
-        /* CORRECTION : classe footer-info manquait son sélecteur CSS — ajouté */
         .footer-info {
             text-align: center;
             color: var(--text-dim);
@@ -248,12 +247,14 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { auth } from './firebase-config.js';
+
         window.onload = function() {
             const pageChoisie = localStorage.getItem('naihab_page_accueil_label') || 'Chats';
             document.getElementById('label-accueil').innerText = pageChoisie + ' ▾';
 
-            // Marquer le choix actif dans le modal
             document.querySelectorAll('.choix-item').forEach(item => {
                 if (item.innerText.includes(pageChoisie)) {
                     item.classList.add('actif');
@@ -261,19 +262,17 @@
             });
         };
 
-        function ouvrirChoixAccueil() { document.getElementById('modal-accueil').style.display = 'block'; }
-        function fermerAccueil() { document.getElementById('modal-accueil').style.display = 'none'; }
-        function ouvrirCouronne() { document.getElementById('modal-couronne').style.display = 'block'; }
-        function fermerCouronne() { document.getElementById('modal-couronne').style.display = 'none'; }
+        window.ouvrirChoixAccueil = function() { document.getElementById('modal-accueil').style.display = 'block'; }
+        window.fermerAccueil = function() { document.getElementById('modal-accueil').style.display = 'none'; }
+        window.ouvrirCouronne = function() { document.getElementById('modal-couronne').style.display = 'block'; }
+        window.fermerCouronne = function() { document.getElementById('modal-couronne').style.display = 'none'; }
 
-        function choisirAccueil(page, label) {
+        window.choisirAccueil = function(page, label) {
             localStorage.setItem('naihab_page_accueil', page);
             localStorage.setItem('naihab_page_accueil_label', label);
             document.getElementById('label-accueil').innerText = label + ' ▾';
 
             document.querySelectorAll('.choix-item').forEach(item => item.classList.remove('actif'));
-            // CORRECTION : utiliser event.currentTarget au lieu de event.target
-            // pour cibler le bon élément même si on clique sur du texte imbriqué
             event.currentTarget.classList.add('actif');
 
             fermerAccueil();
@@ -284,17 +283,27 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        function deconnexion() {
+        window.deconnexion = async function() {
             if (confirm("Es-tu sûr de vouloir te déconnecter ?")) {
+                // ⚠️ CORRECTION IMPORTANTE : on déconnecte d'abord la vraie session
+                // Firebase — sans ça, auth-guard.js pensait encore que tu étais
+                // connecté même après avoir vidé le localStorage, et te laissait
+                // passer sur les pages protégées.
+                try {
+                    await signOut(auth);
+                } catch (err) {
+                    console.error('Erreur lors de la déconnexion Firebase :', err);
+                }
+
                 localStorage.removeItem('user_name');
                 localStorage.removeItem('user_photo');
                 localStorage.removeItem('user_bio');
                 localStorage.removeItem('user_mdp');
                 localStorage.removeItem('user_email');
                 localStorage.removeItem('user_tel');
-                // CORRECTION : naihab_connecte était oublié lors de la déconnexion
                 localStorage.removeItem('naihab_connecte');
-                window.location.href = 'index.html'; 
+                localStorage.removeItem('naihab_uid');
+                window.location.href = 'connexion.html';
             }
         }
     </script>
