@@ -5,7 +5,7 @@
 // Import des fonctions Firebase nécessaires (via CDN, syntaxe modules ES)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 // Config de ton projet Firebase (naihab-28)
 const firebaseConfig = {
@@ -24,6 +24,21 @@ const app = initializeApp(firebaseConfig);
 // Services qu'on va utiliser dans Naïhab
 const auth = getAuth(app);       // Pour l'authentification (email/mdp + téléphone plus tard)
 const db = getFirestore(app);    // Pour stocker les données (posts, comptes, etc.) plus tard
+
+// Garde une copie locale des données Firestore sur l'appareil (IndexedDB) :
+// au retour sur une page, le contenu s'affiche immédiatement depuis ce cache
+// pendant que Firestore vérifie en arrière-plan s'il y a du nouveau, au lieu
+// d'un écran vide le temps du rechargement complet depuis le serveur.
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code === 'failed-precondition') {
+    // Plusieurs onglets Naïhab ouverts en même temps : la persistance ne
+    // peut être active que dans un seul à la fois, ce n'est pas grave.
+    console.warn('Persistance Firestore désactivée (plusieurs onglets ouverts).');
+  } else if (err.code === 'unimplemented') {
+    // Navigateur qui ne supporte pas cette fonctionnalité (rare)
+    console.warn('Persistance Firestore non supportée par ce navigateur.');
+  }
+});
 
 // On exporte pour pouvoir les utiliser dans les autres fichiers JS
 export { app, auth, db };
