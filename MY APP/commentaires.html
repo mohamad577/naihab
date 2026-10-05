@@ -37,9 +37,7 @@
         <h3 style="margin:0; font-size:18px; font-weight:900;">Commentaires</h3>
     </div>
 
-    <div class="comments-list" id="zone-commentaires">
-        <!-- Les commentaires statiques ou sauvegardés chargeront ici -->
-    </div>
+    <div class="comments-list" id="zone-commentaires"></div>
 
     <div class="input-area">
         <input type="text" id="mon-commentaire" class="comment-input" placeholder="Ajouter un commentaire..."
@@ -47,20 +45,22 @@
         <button class="publish-btn" onclick="publier()">Publier</button>
     </div>
 
-<script>
+<script type="module">
+    import {
+        collection, addDoc, doc, deleteDoc, updateDoc, increment,
+        onSnapshot, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { auth, db } from './firebase-config.js';
+
     const monNom = localStorage.getItem("user_name") || "Moi";
     const maPhoto = localStorage.getItem("user_photo");
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // Vérification du mode démo
+
     const isDemo = urlParams.get('demo') === '1';
     const demoId = urlParams.get('id') || '';
+    const realId = !isDemo ? urlParams.get('id') : null; // vraie publication Firestore
     const postIndex = urlParams.get('index') || '0';
-    
-    // Définition de la clé unique pour séparer les commentaires démo et persos.
-    // CORRECTION : chaque publication de démo (Julie, ou celles de la grille
-    // recherche.html) a maintenant sa propre clé, pour ne pas mélanger leurs
-    // commentaires entre elles.
+
     const cleCommentaires = isDemo
         ? ('naihab_commentaires_demo' + (demoId ? '_' + demoId : ''))
         : 'naihab_commentaires_' + postIndex;
@@ -71,31 +71,91 @@
     }
 
     window.onload = function() {
+        if (realId) {
+            ecouterCommentairesReels(realId);
+            return;
+        }
+
         const zone = document.getElementById('zone-commentaires');
         const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires));
 
-        // Les 2 commentaires de base ne concernent que le post de démo original
-        // (Julie, sans id) — les publications de la grille recherche.html démarrent vides
         if (isDemo && !demoId && !commentairesSauvegardes) {
             const demaBase = [
                 { nom: "Jackson", texte: "Superbe application ! J'adore le design bleu nuit. 🔥", heure: "Il y a 2h" },
                 { nom: "Naïfan_99", texte: "Est-ce qu'on pourra bientôt envoyer des vidéos ? 🌍", heure: "Il y a 1h" }
             ];
             localStorage.setItem(cleCommentaires, JSON.stringify(demaBase));
-            demaBase.forEach((c, index) => afficherCommentaire(c, index, false));
-            mettreAJourCompteur(demaBase.length);
+            demaBase.forEach((c, index) => afficherCommentaireLocal(c, index, false));
+            mettreAJourCompteurLocal(demaBase.length);
         } else {
             const liste = commentairesSauvegardes || [];
             if (liste.length === 0) {
                 zone.innerHTML = `<div class="empty-msg">Aucun commentaire pour le moment. Soyez le premier ! ✨</div>`;
             } else {
-                liste.forEach((c, index) => afficherCommentaire(c, index, false));
+                liste.forEach((c, index) => afficherCommentaireLocal(c, index, false));
             }
-            mettreAJourCompteur(liste.length);
+            mettreAJourCompteurLocal(liste.length);
         }
     };
 
-    function mettreAJourCompteur(nb) {
+    // ---------- Vrais commentaires Firestore (publications créées via creer-post.html) ----------
+
+    function ecouterCommentairesReels(postId) {
+        const zone = document.getElementById('zone-commentaires');
+        const q = query(collection(db, 'publications', postId, 'commentaires'), orderBy('date', 'asc'));
+
+        onSnapshot(q, (snapshot) => {
+            zone.innerHTML = '';
+            if (snapshot.empty) {
+                zone.innerHTML = `<div class="empty-msg">Aucun commentaire pour le moment. Soyez le premier ! ✨</div>`;
+                return;
+            }
+            snapshot.forEach((docSnap) => {
+                const c = docSnap.data();
+                afficherCommentaireReel(c, docSnap.id, postId);
+            });
+            zone.scrollTo({ top: zone.scrollHeight, behavior: 'smooth' });
+        });
+    }
+
+    function afficherCommentaireReel(c, commentId, postId) {
+        const zone = document.getElementById('zone-commentaires');
+        const texteSecurise = (c.texte || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const estMoi = auth.currentUser && c.uid === auth.currentUser.uid;
+
+        let avatarHTML = c.photo
+            ? `<img src="${c.photo}" class="user-avatar" alt="${c.nom}">`
+            : `<div class="default-avatar" style="background:#ffcc00; color:#1a0b5a;">${(c.nom || '?').charAt(0).toUpperCase()}</div>`;
+
+        const div = document.createElement('div');
+        div.className = 'comment-item';
+        div.innerHTML = `
+            ${avatarHTML}
+            <div class="comment-bubble" style="flex:1;">
+                <b>${c.nom || 'Naïfan'}</b>
+                <p>${texteSecurise}</p>
+                <div class="comment-time">${c.heure || ''}</div>
+            </div>
+            ${estMoi ? `<span class="btn-suppr" data-comment-id="${commentId}" style="font-size:18px;opacity:0.4;cursor:pointer;padding:5px;align-self:center;">🗑️</span>` : ''}
+        `;
+        zone.appendChild(div);
+
+        const btnSuppr = div.querySelector('.btn-suppr');
+        if (btnSuppr) {
+            btnSuppr.addEventListener('click', () => supprimerCommentaireReel(commentId, postId));
+        }
+    }
+
+    async function supprimerCommentaireReel(commentId, postId) {
+        if (confirm("Supprimer ce commentaire ?")) {
+            await deleteDoc(doc(db, 'publications', postId, 'commentaires', commentId));
+            await updateDoc(doc(db, 'publications', postId), { commentaires: increment(-1) });
+        }
+    }
+
+    // ---------- Démo / ancien système (localStorage, inchangé) ----------
+
+    function mettreAJourCompteurLocal(nb) {
         if (isDemo) {
             let demoData = JSON.parse(localStorage.getItem('naihab_publication_demo')) || {};
             demoData.commentaires = nb;
@@ -109,10 +169,8 @@
         }
     }
 
-    function afficherCommentaire(c, index, sauvegarder = true) {
+    function afficherCommentaireLocal(c, index, sauvegarder = true) {
         const zone = document.getElementById('zone-commentaires');
-        
-        // Supprimer le message vide s'il existe
         const emptyMsg = zone.querySelector('.empty-msg');
         if (emptyMsg) emptyMsg.remove();
 
@@ -133,7 +191,7 @@
                 <p>${texteSecurise}</p>
                 <div class="comment-time">${c.heure || ''}</div>
             </div>
-            ${estMoi ? `<span onclick="supprimerCommentaire(${index})" style="font-size:18px;opacity:0.4;cursor:pointer;padding:5px;align-self:center;">🗑️</span>` : ''}
+            ${estMoi ? `<span onclick="supprimerCommentaireLocal(${index})" style="font-size:18px;opacity:0.4;cursor:pointer;padding:5px;align-self:center;">🗑️</span>` : ''}
         `;
 
         zone.appendChild(div);
@@ -143,30 +201,55 @@
             const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
             commentairesSauvegardes.push(c);
             localStorage.setItem(cleCommentaires, JSON.stringify(commentairesSauvegardes));
-            mettreAJourCompteur(commentairesSauvegardes.length);
+            mettreAJourCompteurLocal(commentairesSauvegardes.length);
         }
     }
 
-    function publier() {
-        const input = document.getElementById('mon-commentaire');
-        const texte = input.value.trim();
-        if (texte !== "") {
-            const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
-            const index = commentairesSauvegardes.length;
-            afficherCommentaire({ nom: monNom, photo: maPhoto, texte: texte, heure: obtenirHeure() }, index, true);
-            input.value = "";
-        }
-    }
-
-    function supprimerCommentaire(index) {
+    window.supprimerCommentaireLocal = function(index) {
         if (confirm("Supprimer ce commentaire ?")) {
             let commentaires = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
             commentaires.splice(index, 1);
             localStorage.setItem(cleCommentaires, JSON.stringify(commentaires));
-            mettreAJourCompteur(commentaires.length);
+            mettreAJourCompteurLocal(commentaires.length);
             location.reload();
         }
-    }
+    };
+
+    // ---------- Publier un commentaire (aiguille vers Firestore ou localStorage) ----------
+
+    window.publier = async function() {
+        const input = document.getElementById('mon-commentaire');
+        const texte = input.value.trim();
+        if (texte === "") return;
+
+        if (realId) {
+            if (!auth.currentUser) {
+                alert("Tu dois être connecté pour commenter !");
+                return;
+            }
+            try {
+                await addDoc(collection(db, 'publications', realId, 'commentaires'), {
+                    nom: auth.currentUser.displayName || monNom,
+                    photo: maPhoto || auth.currentUser.photoURL || '',
+                    texte: texte,
+                    uid: auth.currentUser.uid,
+                    heure: obtenirHeure(),
+                    date: serverTimestamp()
+                });
+                await updateDoc(doc(db, 'publications', realId), { commentaires: increment(1) });
+                input.value = "";
+            } catch (err) {
+                console.error('Erreur commentaire Naïhab :', err);
+                alert("Une erreur est survenue. Réessaie.");
+            }
+            return;
+        }
+
+        const commentairesSauvegardes = JSON.parse(localStorage.getItem(cleCommentaires)) || [];
+        const index = commentairesSauvegardes.length;
+        afficherCommentaireLocal({ nom: monNom, photo: maPhoto, texte: texte, heure: obtenirHeure() }, index, true);
+        input.value = "";
+    };
 </script>
 </body>
 </html>

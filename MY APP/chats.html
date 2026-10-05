@@ -174,7 +174,7 @@
     <script src="splash.js"></script>
 
     <script type="module">
-        import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { collection, query, orderBy, limit, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
         import { auth, db } from './firebase-config.js';
 
         window.onload = function() {
@@ -275,7 +275,7 @@
         // Écoute en temps réel les publications de TOUS les Naïfans sur Firestore
         function ecouterFluxPublications() {
             const zone = document.getElementById('flux-posts');
-            const q = query(collection(db, 'publications'), orderBy('date', 'desc'));
+            const q = query(collection(db, 'publications'), orderBy('date', 'desc'), limit(30));
 
             onSnapshot(q, (snapshot) => {
                 zone.innerHTML = '';
@@ -296,7 +296,7 @@
                             <img src="${photoAffichee}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" alt="User">
                             <b style="font-size: 14px;">${nomAffiche}</b>
                         </div>
-                        ${post.image ? `<img src="${post.image}" class="post-img" data-id="${postId}" alt="Post">` : `<p style="padding:0 15px 10px; font-size:15px;">${post.texte || ''}</p>`}
+                        ${post.image ? `<img src="${post.image}" class="post-img" data-id="${postId}" loading="lazy" alt="Post">` : `<p style="padding:0 15px 10px; font-size:15px;">${post.texte || ''}</p>`}
                         <div class="post-actions">
                             <div class="action-btn like-btn" data-id="${postId}">
                                 <span class="heart">${coeur}</span> <small>${post.likes || 0}</small>

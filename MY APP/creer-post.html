@@ -198,21 +198,51 @@
                     };
                     reader.readAsDataURL(fichier);
                 } else {
+                    // Photo : on la redimensionne et compresse avant de la garder,
+                    // pour que le fichier final soit léger (rapide à charger pour
+                    // tout le monde) même sans Firebase Storage pour l'instant.
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        container.style.display = 'block';
-                        fichierData = e.target.result;
-                        typeFichier = 'image';
-                        img.src = fichierData;
-                        img.style.display = 'block';
-                        video.style.display = 'none';
-                        mediaSelectionne = true;
-                        verifierContenu();
+                        compresserImage(e.target.result, function(imageCompressee) {
+                            container.style.display = 'block';
+                            fichierData = imageCompressee;
+                            typeFichier = 'image';
+                            img.src = fichierData;
+                            img.style.display = 'block';
+                            video.style.display = 'none';
+                            mediaSelectionne = true;
+                            verifierContenu();
+                        });
                     };
                     reader.readAsDataURL(fichier);
                 }
             }
         };
+
+        // Redimensionne l'image à une largeur raisonnable (1080px max) et la
+        // réexporte en JPEG compressé — réduit souvent le poids par 5 à 10.
+        function compresserImage(dataUrlOriginal, callback) {
+            const image = new Image();
+            image.onload = function() {
+                const largeurMax = 1080;
+                let { width, height } = image;
+
+                if (width > largeurMax) {
+                    height = Math.round(height * (largeurMax / width));
+                    width = largeurMax;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(image, 0, 0, width, height);
+
+                // Qualité 0.75 : bon compromis netteté / poids pour un flux de posts
+                callback(canvas.toDataURL('image/jpeg', 0.75));
+            };
+            image.src = dataUrlOriginal;
+        }
 
         window.verifierContenu = function() {
             const text = document.getElementById('postText').value.trim();
