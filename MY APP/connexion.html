@@ -109,7 +109,7 @@
     <button class="btn-secondary" onclick="window.location.href='inscription.html'">Créer un compte</button>
 
     <script type="module">
-        import { GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { GoogleAuthProvider, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
         import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
         import { auth, db } from './firebase-config.js';
 
@@ -121,13 +121,60 @@
 
         function traduireErreur(code) {
             switch (code) {
-                case 'auth/popup-closed-by-user':
-                    return "Fenêtre Google fermée avant la fin. Réessaie.";
                 case 'auth/network-request-failed':
                     return "Problème de connexion internet. Réessaie.";
                 default:
                     return "Une erreur est survenue. Réessaie.";
             }
+        }
+
+        async function finaliserConnexion(user) {
+            // On lit le profil existant dans Firestore (nom/photo peuvent avoir
+            // été modifiés depuis la version Google d'origine)
+            const profilRef = doc(db, 'utilisateurs', user.uid);
+            const profilSnap = await getDoc(profilRef);
+
+            let nom, photo;
+            if (profilSnap.exists()) {
+                const data = profilSnap.data();
+                nom = data.nom || user.displayName || user.email;
+                photo = data.photo || user.photoURL || '';
+            } else {
+                nom = user.displayName || user.email;
+                photo = user.photoURL || '';
+                await setDoc(profilRef, {
+                    nom: nom,
+                    email: user.email,
+                    photo: photo,
+                    dateCreation: new Date().toISOString()
+                });
+            }
+
+            localStorage.setItem('user_name', nom);
+            localStorage.setItem('user_email', user.email);
+            if (photo) localStorage.setItem('user_photo', photo);
+            localStorage.setItem('naihab_connecte', 'oui');
+            localStorage.setItem('naihab_uid', user.uid);
+
+            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+            window.location.href = pageAccueil;
+        }
+
+        // Si on revient tout juste d'une redirection Google (déclenchée par le
+        // bouton ci-dessous), on le détecte via ce marqueur posé juste avant de
+        // partir — ça évite de réagir à une vieille session déjà présente sur
+        // l'appareil, et de confondre un ancien compte avec celui qu'on vient
+        // de choisir.
+        if (sessionStorage.getItem('naihab_redirection_en_cours') === '1') {
+            sessionStorage.removeItem('naihab_redirection_en_cours');
+            const arreter = onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    arreter();
+                    finaliserConnexion(user).catch((err) => {
+                        alert(traduireErreur(err.code));
+                    });
+                }
+            });
         }
 
         window.seConnecter = async function() {
@@ -137,45 +184,16 @@
             btn.classList.add('loading');
 
             try {
-                // Pas de signOut() avant l'ouverture de la popup : sur Safari/iOS,
-                // tout appel asynchrone entre le clic et signInWithPopup fait
-                // bloquer la popup silencieusement (elle ne s'ouvre jamais).
-                const cred = await signInWithPopup(auth, provider);
-                const user = cred.user;
-
-                // On lit le profil existant dans Firestore (nom/photo peuvent avoir
-                // été modifiés depuis la version Google d'origine)
-                const profilRef = doc(db, 'utilisateurs', user.uid);
-                const profilSnap = await getDoc(profilRef);
-
-                let nom, photo;
-                if (profilSnap.exists()) {
-                    const data = profilSnap.data();
-                    nom = data.nom || user.displayName || user.email;
-                    photo = data.photo || user.photoURL || '';
-                } else {
-                    // Sécurité : si le profil n'existe pas encore (compte créé
-                    // avant cette mise à jour), on le crée maintenant
-                    nom = user.displayName || user.email;
-                    photo = user.photoURL || '';
-                    await setDoc(profilRef, {
-                        nom: nom,
-                        email: user.email,
-                        photo: photo,
-                        dateCreation: new Date().toISOString()
-                    });
-                }
-
-                localStorage.setItem('user_name', nom);
-                localStorage.setItem('user_email', user.email);
-                if (photo) localStorage.setItem('user_photo', photo);
-                localStorage.setItem('naihab_connecte', 'oui');
-                localStorage.setItem('naihab_uid', user.uid);
-
-                const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
-                window.location.href = pageAccueil;
+                // On repart d'une session propre, puis on redirige la page
+                // entière vers Google (plutôt qu'une popup) : ça fonctionne
+                // même quand Naïhab est ouvert depuis l'icône d'écran d'accueil
+                // sur iPhone, où iOS bloque complètement les popups.
+                sessionStorage.setItem('naihab_redirection_en_cours', '1');
+                await signOut(auth);
+                await signInWithRedirect(auth, provider);
             } catch (err) {
                 btn.classList.remove('loading');
+                sessionStorage.removeItem('naihab_redirection_en_cours');
                 alert(traduireErreur(err.code));
             }
         };
