@@ -54,6 +54,7 @@
                 <div style="width:40px; height:5px; background:rgba(255,255,255,0.2); border-radius:10px; margin:0 auto 20px auto;"></div>
                 <div onclick="partagerPublication()" style="padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">✈️ Partager cette publication</div>
                 <div onclick="copierLien()" style="padding:15px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">🔗 Copier le lien</div>
+                <div id="option-supprimer" onclick="supprimerPublication()" style="display:none; padding:15px; font-weight:bold; color:#ff5252; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer;">🗑️ Supprimer cette publication</div>
                 <button onclick="fermerMenu()" style="width:100%; margin-top:15px; padding:15px; border-radius:15px; border:none; background:rgba(255,255,255,0.1); color:white; font-weight:bold; cursor:pointer;">Annuler</button>
             </div>
         </div>
@@ -82,13 +83,14 @@
     </div>
 
 <script type="module">
-    import { doc, getDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+    import { doc, getDoc, updateDoc, deleteDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
     import { auth, db } from './firebase-config.js';
 
     let postIndex = 0;
     let isDemo = false;
     let demoId = '';
     let realId = null; // id Firestore si c'est une vraie publication
+    let auteurUid = null; // uid de l'auteur de la publication réelle en cours
 
     function mesLikesLocaux() {
         return JSON.parse(localStorage.getItem('naihab_mes_likes')) || [];
@@ -161,6 +163,7 @@
                 return;
             }
             const post = docSnap.data();
+            auteurUid = post.uid || null;
             document.getElementById('main-img').src = post.image || '';
             document.getElementById('caption-texte').innerText = post.texte || '';
             document.getElementById('caption-nom').innerText = post.nom || 'Naïfan';
@@ -169,6 +172,12 @@
             document.getElementById('nb-likes').innerText = post.likes || 0;
             document.getElementById('nb-commentaires').innerText = post.commentaires || 0;
             document.getElementById('date-post').innerText = "Naïhab";
+
+            if (auth.currentUser && auteurUid === auth.currentUser.uid) {
+                document.getElementById('option-supprimer').style.display = 'block';
+            } else {
+                document.getElementById('option-supprimer').style.display = 'none';
+            }
 
             const mesLikes = mesLikesLocaux();
             document.querySelector('.heart').innerText = mesLikes.includes(id) ? '❤️' : '🤍';
@@ -244,6 +253,20 @@
         const message = "Regarde cette publication sur Naïhab ! ✨ " + lien;
         window.open("https://wa.me/?text=" + encodeURIComponent(message), '_blank');
         fermerMenu();
+    };
+
+    window.supprimerPublication = async function() {
+        if (!realId || !auth.currentUser || auteurUid !== auth.currentUser.uid) return;
+        if (!confirm("Supprimer définitivement cette publication ?")) return;
+
+        try {
+            await deleteDoc(doc(db, 'publications', realId));
+            fermerMenu();
+            window.location.href = 'chats.html';
+        } catch (err) {
+            console.error('Erreur suppression Naïhab :', err);
+            alert("Une erreur est survenue. Réessaie.");
+        }
     };
 
     window.copierLien = function() {

@@ -133,11 +133,12 @@
     <script type="module">
         import {
             GoogleAuthProvider,
-            signInWithPopup,
+            signInWithRedirect,
             signOut,
+            onAuthStateChanged,
             updateProfile
         } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
         import { auth, db } from './firebase-config.js';
 
         // ✅ Si déjà connecté → rediriger directement
@@ -184,16 +185,51 @@
             }
         }
 
+        async function connecterDirectement(user) {
+            // Profil déjà existant : on connecte directement, pas besoin de
+            // repasser par le formulaire de création de compte
+            localStorage.setItem('user_name', user.displayName || user.email);
+            localStorage.setItem('user_email', user.email);
+            if (user.photoURL) localStorage.setItem('user_photo', user.photoURL);
+            localStorage.setItem('naihab_connecte', 'oui');
+            localStorage.setItem('naihab_uid', user.uid);
+
+            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
+            window.location.href = pageAccueil;
+        }
+
+        // Dès qu'une vraie session Firebase est détectée (après redirection
+        // Google, ou session déjà présente), on vérifie si un profil Naïhab
+        // existe déjà pour ce compte.
+        let dejaTraite = false;
+        onAuthStateChanged(auth, async (user) => {
+            if (!user || dejaTraite) return;
+            dejaTraite = true;
+
+            try {
+                const profilSnap = await getDoc(doc(db, 'utilisateurs', user.uid));
+                if (profilSnap.exists()) {
+                    // Un compte Naïhab existe déjà avec ce compte Google :
+                    // on connecte directement au lieu d'en recréer un autre
+                    await connecterDirectement(user);
+                } else {
+                    revelerSuiteFormulaire(user);
+                }
+            } catch (err) {
+                dejaTraite = false;
+                alert(traduireErreur(err.code));
+            }
+        });
+
         window.seConnecterGoogle = async function() {
             const provider = new GoogleAuthProvider();
             provider.setCustomParameters({ prompt: 'select_account' });
             try {
-                // Pas de signOut() avant l'ouverture de la popup : sur Safari/iOS,
-                // tout appel asynchrone entre le clic et signInWithPopup fait
-                // bloquer la popup silencieusement (elle ne s'ouvre jamais).
-                // Le sélecteur de compte force déjà le bon choix sans ça.
-                const result = await signInWithPopup(auth, provider);
-                revelerSuiteFormulaire(result.user);
+                // Redirection complète plutôt qu'une popup : fonctionne même
+                // en mode application autonome (icône écran d'accueil sur
+                // iPhone), où iOS bloque complètement les popups.
+                await signOut(auth);
+                await signInWithRedirect(auth, provider);
             } catch (err) {
                 alert(traduireErreur(err.code));
             }

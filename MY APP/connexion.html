@@ -160,22 +160,20 @@
             window.location.href = pageAccueil;
         }
 
-        // Si on revient tout juste d'une redirection Google (déclenchée par le
-        // bouton ci-dessous), on le détecte via ce marqueur posé juste avant de
-        // partir — ça évite de réagir à une vieille session déjà présente sur
-        // l'appareil, et de confondre un ancien compte avec celui qu'on vient
-        // de choisir.
-        if (sessionStorage.getItem('naihab_redirection_en_cours') === '1') {
-            sessionStorage.removeItem('naihab_redirection_en_cours');
-            const arreter = onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    arreter();
-                    finaliserConnexion(user).catch((err) => {
-                        alert(traduireErreur(err.code));
-                    });
-                }
-            });
-        }
+        // Dès que Firebase détecte une vraie session active — que ce soit en
+        // revenant d'une redirection Google, ou une session déjà existante sur
+        // l'appareil — on finalise la connexion. Plus fiable que de dépendre
+        // de sessionStorage, qui peut être perdu en mode application autonome.
+        let dejaTraite = false;
+        onAuthStateChanged(auth, (user) => {
+            if (user && !dejaTraite) {
+                dejaTraite = true;
+                finaliserConnexion(user).catch((err) => {
+                    dejaTraite = false;
+                    alert(traduireErreur(err.code));
+                });
+            }
+        });
 
         window.seConnecter = async function() {
             const provider = new GoogleAuthProvider();
@@ -188,12 +186,10 @@
                 // entière vers Google (plutôt qu'une popup) : ça fonctionne
                 // même quand Naïhab est ouvert depuis l'icône d'écran d'accueil
                 // sur iPhone, où iOS bloque complètement les popups.
-                sessionStorage.setItem('naihab_redirection_en_cours', '1');
                 await signOut(auth);
                 await signInWithRedirect(auth, provider);
             } catch (err) {
                 btn.classList.remove('loading');
-                sessionStorage.removeItem('naihab_redirection_en_cours');
                 alert(traduireErreur(err.code));
             }
         };
