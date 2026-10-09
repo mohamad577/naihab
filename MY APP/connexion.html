@@ -113,10 +113,9 @@
         import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
         import { auth, db } from './firebase-config.js';
 
-        // ✅ Si déjà connecté → rediriger directement
-        if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte')) {
-            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
-            window.location.href = pageAccueil;
+        // ✅ Si déjà connecté → rediriger directement sur chats.html
+        if (localStorage.getItem('user_name') && localStorage.getItem('naihab_connecte') === 'oui') {
+            window.location.href = 'chats.html';
         }
 
         function traduireErreur(code) {
@@ -129,8 +128,6 @@
         }
 
         async function finaliserConnexion(user) {
-            // On lit le profil existant dans Firestore (nom/photo peuvent avoir
-            // été modifiés depuis la version Google d'origine)
             const profilRef = doc(db, 'utilisateurs', user.uid);
             const profilSnap = await getDoc(profilRef);
 
@@ -156,20 +153,20 @@
             localStorage.setItem('naihab_connecte', 'oui');
             localStorage.setItem('naihab_uid', user.uid);
 
-            const pageAccueil = localStorage.getItem('naihab_page_accueil') || 'chats.html';
-            window.location.href = pageAccueil;
+            // Redirection directe vers chats.html
+            window.location.href = 'chats.html';
         }
 
-        // Dès que Firebase détecte une vraie session active — que ce soit en
-        // revenant d'une redirection Google, ou une session déjà existante sur
-        // l'appareil — on finalise la connexion. Plus fiable que de dépendre
-        // de sessionStorage, qui peut être perdu en mode application autonome.
         let dejaTraite = false;
         onAuthStateChanged(auth, (user) => {
             if (user && !dejaTraite) {
                 dejaTraite = true;
+                const btn = document.querySelector('.btn-google');
+                if (btn) btn.classList.add('loading');
+                
                 finaliserConnexion(user).catch((err) => {
                     dejaTraite = false;
+                    if (btn) btn.classList.remove('loading');
                     alert(traduireErreur(err.code));
                 });
             }
@@ -182,10 +179,6 @@
             btn.classList.add('loading');
 
             try {
-                // On repart d'une session propre, puis on redirige la page
-                // entière vers Google (plutôt qu'une popup) : ça fonctionne
-                // même quand Naïhab est ouvert depuis l'icône d'écran d'accueil
-                // sur iPhone, où iOS bloque complètement les popups.
                 await signOut(auth);
                 await signInWithRedirect(auth, provider);
             } catch (err) {
